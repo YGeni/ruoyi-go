@@ -7,8 +7,22 @@ import (
 
 	"github.com/YGeni/ruoyi-go/server-go/config"
 	"github.com/YGeni/ruoyi-go/server-go/internal/model/entity"
+	"github.com/YGeni/ruoyi-go/server-go/internal/model/query"
 	"github.com/YGeni/ruoyi-go/server-go/internal/repository"
+	"github.com/YGeni/ruoyi-go/server-go/pkg/page"
+
+	"github.com/gin-gonic/gin"
 )
+
+// SelectUserList 用户列表，等价于 SysUserServiceImpl.java:76 的
+//
+//	@DataScope(deptAlias = "d", userAlias = "u")
+//	public List<SysUser> selectUserList(SysUser user)
+//
+// 数据权限由 DataScope 以 GORM Scope 注入（Java 侧是 AOP 拼 ${params.dataScope}）。
+func SelectUserList(c *gin.Context, lu *entity.LoginUser, q *query.UserList, p *page.PageDomain) ([]entity.SysUser, int64, error) {
+	return repository.SelectUserList(q, p, DataScope(c, lu, "d", "u"))
+}
 
 // GetRolePermission 等价于 SysPermissionService.getRolePermission(L37-50)：
 // 管理员返回 {"admin"}，否则返回 roleKey 集合。
@@ -25,13 +39,22 @@ func GetRolePermission(user *entity.SysUser) ([]string, error) {
 //   - 无任何角色时按 userId 直接查菜单权限
 //
 // 每个角色的权限串可能形如 "a:b:c,d:e:f"，需按逗号拆分（SysMenuServiceImpl:100-108）。
+//
+// **关键副作用（1b 补齐）**：必须同时把每个角色的权限集回填到 role.Permissions
+// （SysPermissionService.java:77 的 role.setPermissions(rolePerms)）。
+// DataScopeAspect.java:69 的 containsAny(role.getPermissions(), permission) 依赖它：
+// 若缺失，任何带 permission 的 @DataScope 调用都会判定"所有角色都未持有该权限"
+// -> conditions 为空 -> 落到 "OR d.dept_id = 0" 兜底 -> 列表静默返回 0 行。
+// 该副作用经由 LoginUser.User 一并写进 Redis login_tokens:<uuid>，
+// 因此只需在登录（createToken）与 getInfo 时执行即可覆盖全部请求。
 func GetMenuPermission(user *entity.SysUser) ([]string, error) {
 	if user.IsAdmin() {
 		return []string{config.AllPermission}, nil
 	}
 	set := map[string]struct{}{}
 	if len(user.Roles) > 0 {
-		for _, role := range user.Roles {
+		for i := range user.Roles {
+			role := &user.Roles[i]
 			if role.Status != config.Normal || role.IsAdmin() {
 				continue
 			}
@@ -39,6 +62,8 @@ func GetMenuPermission(user *entity.SysUser) ([]string, error) {
 			if err != nil {
 				return nil, err
 			}
+			// 见函数注释：@DataScope 的角色级权限匹配依赖此字段，不可省略。
+			role.Permissions = perms
 			for _, p := range splitPerms(perms) {
 				set[p] = struct{}{}
 			}

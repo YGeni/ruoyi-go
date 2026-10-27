@@ -47,6 +47,10 @@ type SysUser struct {
 	// "表名_字段名" 生成 sys_user_user_id 这类列名。
 	Dept  *SysDept  `gorm:"foreignKey:DeptID;references:DeptID" json:"dept,omitempty"`
 	Roles []SysRole `gorm:"many2many:sys_user_role;foreignKey:UserID;joinForeignKey:UserID;references:RoleID;joinReferences:RoleID" json:"roles,omitempty"`
+
+	// RoleIds 非持久化字段，等价 SysUser.roleIds（SysUser.java:88）：
+	// 前端新增/修改用户时用 roleIds 数组提交角色，后端据此重写 sys_user_role。
+	RoleIds []int64 `gorm:"-" json:"roleIds,omitempty"`
 }
 
 // TableName 表名。

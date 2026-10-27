@@ -44,6 +44,29 @@ func SuccessData(data any) AjaxResult {
 	return r
 }
 
+// ToAjaxRows 等价于 BaseController.toAjax(int rows)（BaseController.java:90-96）：
+//
+//	return rows > 0 ? AjaxResult.success() : AjaxResult.error();
+//
+// 用于新增/修改/删除后按影响行数回包。
+func ToAjaxRows(rows int) AjaxResult {
+	if rows > 0 {
+		return Success()
+	}
+	return Error(config.MsgOperateFailed)
+}
+
+// ToAjax 等价于 Java controller 里"捕获 ServiceException 返回 error(msg)、
+// 否则返回 success()"的通用写法（如 SysUserController.add 的 toAjax(userService.insertUser(user))）。
+//
+// Go 侧 service 统一以 error 表达业务失败，因此这里只需判空。
+func ToAjax(err error) AjaxResult {
+	if err != nil {
+		return Error(err.Error())
+	}
+	return Success()
+}
+
 // Warn 等价于 AjaxResult.warn()：code=601（前端 request.js 走 warning 分支）。
 func Warn(msg string) AjaxResult {
 	return AjaxResult{keyCode: config.StatusWarn, keyMsg: msg}

@@ -285,3 +285,104 @@ done
 **1b 范围**（详见 `docs/go-migration/02b-phase1b-prompt.md`）：`pkg/page` + 用户 CRUD + `@DataScope` 五分支 GORM Scopes +
 表驱动 golden 测试 + role/dept/post/dict/config/notice + 文件上传下载 + profile。
 **实施顺序硬约束：先做 page → user → DataScope 并验证通过，再铺其余模块。**
+
+## DataScope 验收记录（1b 第 2 步，2026-10-28）
+
+- 五分支 golden 已与 SQL 直算一致；实现位于 `internal/service/datascope.go`
+  （**它是 GORM Scope 构造器，不是 Gin 中间件，禁止挂进 HTTP 中间件链**）
+- **GORM 坑（勿重犯）**：v1.25.12 的 `Statement.BuildCondition`（`statement.go:285-341`）
+  不处理 `func(*gorm.DB) *gorm.DB`，`tx.Where(func(d *gorm.DB) *gorm.DB{...})` 会被当作主键等值，
+  生成 `WHERE u.user_id = <func指针>`，导致所有非 admin 账号语义错。
+  OR 分组必须写成嵌套 `*gorm.DB`：`tx.Where(sub)`。
+- **Java 切面三个易漏语义**（`ruoyi-framework/.../aspectj/DataScopeAspect.java:86-140`），后续改动必须保持等价：
+  ① 多角色是**逐个 append `OR` 后整体拼接**，不是取其一；
+  ② 多个自定义角色走**单条 `role_id IN (...)`**（`scopeCustomIds.size() > 1` 分支），
+     不是多条 `role_id = ?` 的 OR；
+  ③ `DATA_SCOPE_ALL` 分支执行 `sqlString = new StringBuilder(); ... break`，
+     **ALL 会覆盖此前已拼接的条件**（含顺序敏感性）。
+- 测试数据不得常驻主库：golden 用例所需账号/角色由测试在事务内自行创建并回滚。
+
+## 1b 第 4/5 步：实测抓到的 bug 与教训（2026-10-28）
+
+本节全部由**真实登录冒烟 + 真实库单测**抓到，不是推演。改动相关代码前必读。
+
+### GORM Session 会共享 Statement（DISTINCT 被清掉，最严重）
+
+- **现象**：`/system/role/list` 返回 `total=2` 但 `rows` 有 3 条（`role_id=2` 重复），前端表格出现重复行。
+- **根因**：`pkg/page/page.go` 的 `Paginate` 原来写 `countDB := db.Session(&gorm.Session{})` 再 `countDB.Statement.Selects = nil`。
+  gorm v1.25.12 `gorm.go:226` 是 `Statement: db.Statement`（**共享同一指针**），
+  `gorm.go:251-254` 只在 `Context != nil || PrepareStmt || SkipHooks` 时才 `clone()`。
+  所以 `Selects = nil` 直接改到了主查询上，把 `SELECT DISTINCT r.*` 一并清掉。
+- **修复**：`pkg/page/page.go:238` 改为 `db.Session(&gorm.Session{Context: db.Statement.Context})`（传等价 Context 强制克隆）。
+- **通则**：**凡是拿到 `*gorm.DB` 后要去改它的 `Statement`（清 Selects、改 Clauses 等），必须先确保已克隆**；
+  对包级 `db.DB` 尤其危险，污染会跨请求。
+- **回归测试**：`TestPaginateKeepsDistinct`（`internal/service/datascope_fivelandings_test.go`）。
+  已实测"回退修复后必红"，断言有效，不要删。
+
+### `Create` 会写入零值，压掉 DDL 默认值
+
+Java 的 `insertRole/insertDept/insertUser` **不写** `del_flag`/`status`，靠 DDL 默认值 `0` 填充；
+Go 的 `Create` 会显式写出空串，导致 `del_flag=''`，新记录在所有 `del_flag='0'` 的列表里**查不到**（新增"成功"但列表无变化，极易误判为前端问题）。
+已在 `repository/role_repo.go:143`、`dept_repo.go:135`、`user_repo.go:290` 显式补默认值。
+**通则：新增实体前逐个确认该表的 DDL 默认值，Go 侧必须显式补，不能指望 DB。**
+
+### `Select` 传单个逗号串会被拆开并逐段套主表别名
+
+`Select("u.user_id, u.user_name, ...")` 时 gorm 按逗号拆分，每段再套上 `Table()` 的主表别名，
+拼出 `` `r`.`user_name` `` 这类错误列（Error 1054）。
+`repository/notice_repo.go:181` 已改为逐列 `Select([]string{...})`。
+**通则：多表查询的 `Select` 一律用 `[]string`。**
+
+### `sys_dept` 表没有 `remark` 列
+
+`BaseModel.Remark` 是所有实体共用的，直接 `Create` 报 `Unknown column 'remark'`。
+`repository/dept_repo.go:140` 已 `Omit("remark")`。前端提交到部门的 remark 会被丢弃（Java 的 `insertDept` 同样不含 remark）。
+**通则：本库各表列并不齐（`DESC <表>` 为准），不要假设 BaseModel 字段都落得了。**
+
+### `SysUser.Password` 是 `json:"-"`（正确，但有两处连带影响）
+
+防泄漏必须保留。连带影响：
+1. `POST /system/user`、`PUT /system/user/resetPwd` **收不到密码**——已改为用独立结构体字段接收，不能靠 `SysUser` 直接 `ShouldBindJSON`。
+2. `PUT /system/user/profile/updatePwd` **不能拿 `loginUser.User.Password` 比旧密码**：
+   Redis 里的 LoginUser 快照**不含密码**（对应 Java 的 `@JsonProperty(WRITE_ONLY)`，`SysUser.java:202`），
+   拿到的是空串，对正确旧密码也返回"修改密码失败，旧密码错误"。
+   必须**回 DB 重查**，Java 就是这么写的（`SysProfileController.java:99-100`）。
+   已修于 `internal/service/profile_service.go:125`，测试用"密码被清空的 LoginUser"走成功路径盯住这条。
+
+### 其他易漏点（同批实测）
+
+- `RuoYiConfig.getDownloadPath()` **自带尾斜杠**（`RuoYiConfig.java:112`），`/common/download` 拼的是 `downloadPath + fileName`，少了斜杠会拼出 `…/downloadtest.png`。
+- 下载做路径拼接时**不要**先给相对路径补前导 `/` 再 `Clean`——这会把 `../../etc/passwd` 归一化成 `/etc/passwd`，看着没逃逸，实则是把穿越请求悄悄改写成合法请求。直接 `filepath.Join` 再校验前缀（`pkg/filex.SafeJoin`）。
+- gin 的 `MaxMultipartMemory` **只决定内存/落盘阈值，不会拒绝请求**；`10MB/20MB` 硬闸必须自己查，且超限要回 `application/json`（前端 `src/utils/ruoyi.js:225-228` 靠 Content-Type 才能把 Blob 还原成提示）。
+- `http.MaxBytesReader` 报的是英文 `http: request body too large`，需换成中文文案（仍是 JSON）。
+- `DryRun` 的 `Session()` 要放在链式调用**之前**：gorm 会在 `Find` 时再克隆一次 Statement，放链尾拿到的 `tx.Statement.SQL` 是空的。
+
+## 第 1 期 1b 交付记录（2026-10-28）
+
+**范围**：`pkg/page` 分页 + 用户 CRUD + `@DataScope` 五个落点 + `perm_table.go` 双向 diff 护栏 +
+role/dept/post/dict/config/notice 模块 CRUD + notice 3.9 五个新端点 + `pkg/filex` 与 profile 四接口。
+
+**三个必须记住的坑（勿重犯，均为实测 bug）**
+
+1. **GORM Session 共享 Statement**：`db.Session(&gorm.Session{})` 在 `clone==0` 时与主查询共享
+   `Statement`，count 分支里改 `Selects = nil` 会连带清掉主查询的 `DISTINCT`，
+   表现为 `total=2` 却返回 3 行（重复）。必须 `Session(&gorm.Session{Context: db.Statement.Context})`
+   强制克隆。参考 ICE 修复处的 `TestPaginateKeepsDistinct`（回退修复即变红）。
+2. **`SysUser.Password` 是 `json:"-"`**（等价 Java `@JsonProperty(WRITE_ONLY)`，`SysUser.java:202`），
+   **Redis 里的 LoginUser 快照没有密码**。改密/校验旧密码必须回 DB 重查
+   （`SysProfileController.java:99-100`），不能取 `loginUser.User.Password`。
+3. **路径穿越防护不要用 `path.Clean("/"+rel)` 归一化** —— 它把 `../../etc/passwd` 悄悄改写成
+   `/etc/passwd`，看似没逃逸实则把非法请求变成合法请求。统一用 `filepath.Join` + 前缀校验，越界一律拒绝。
+
+**DataScope 五落点已全覆盖**（`SysUserServiceImpl:76/89/102`、`SysRoleServiceImpl:54`、`SysDeptServiceImpl:45`）。
+注意 role/dept 两个落点只写 `deptAlias="d"`、`userAlias` 为空 → 分支 5 在这两处走 `d.dept_id = 0`（返回 0 行），
+不是 `u.user_id = ?`，照抄 selectUserList 的别名必错。
+
+**二期交接（唯一事实来源）**：`perm_table.go` 的 `permRoutesPhase2` 共 **72 条 `// TODO(phase2)`**
+（monitor 26 / system:menu 5 / tool:gen 13 / quartz 17 / Excel 导入导出 8 / 其他 3）。
+每落地一个 controller，就把对应文件加进 `perm_diff_test.go` 的 `scopeFiles`，
+该 controller 下的端点自动从「二期延后」转为「范围内」并要求绑定路由，否则 diff 测试会红。
+这 72 条目前只登记常量不绑路由，**不实现测试也是绿的**，别误以为已覆盖。
+
+**未做 / 遗留**：`monitor/*`、`tool/gen`、Excel 导入导出、XSS/Referer/OpLog 中间件、动态数据源、
+CORS（dev 走 vite proxy 同源，暂不需要）、异步日志 worker 池；前端实机联调尚未做。

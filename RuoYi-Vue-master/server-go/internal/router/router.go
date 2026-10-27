@@ -2,8 +2,14 @@
 package router
 
 import (
+	"fmt"
+	"net/http"
+
+	"github.com/YGeni/ruoyi-go/server-go/config"
 	"github.com/YGeni/ruoyi-go/server-go/internal/handler"
+	"github.com/YGeni/ruoyi-go/server-go/internal/handler/system"
 	"github.com/YGeni/ruoyi-go/server-go/internal/middleware"
+	"github.com/YGeni/ruoyi-go/server-go/pkg/result"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,16 +22,187 @@ func New() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
+	// 对齐 application.yml: spring.servlet.multipart.max-request-size。
+	//
+	// gin 的 MaxMultipartMemory 只决定"多大以内走内存、超出落临时文件"，
+	// **不会拒绝请求**；真正的硬闸在下面两处：
+	//   1. r.MaxMultipartMemory：让大文件落盘而不是吃内存
+	//   2. limitBody：读 body 时直接按 max-request-size 截断
+	r.MaxMultipartMemory = config.C.Spring.Servlet.Multipart.MaxRequestSizeBytes()
+
 	auth := handler.AuthHandler{}
+	common := handler.CommonHandler{}
 
 	// 匿名放行：对齐 SecurityConfig.java:101-108 的 /login、/captchaImage
 	r.GET("/captchaImage", auth.CaptchaImage)
 	r.POST("/login", auth.Login)
 
-	// 需要登录态
+	// 需要登录态但无需权限串（不在 perm_table 内，直接注册）
 	r.POST("/logout", middleware.JWTAuth(), auth.Logout)
 	r.GET("/getInfo", middleware.JWTAuth(), auth.GetInfo)
 	r.GET("/getRouters", middleware.JWTAuth(), auth.GetRouters)
 
+	user := system.UserHandler{}
+	role := system.RoleHandler{}
+	dept := system.DeptHandler{}
+	post := system.PostHandler{}
+	dict := system.DictHandler{}
+	cfg := system.ConfigHandler{}
+	notice := system.NoticeHandler{}
+
+	// ------------------------------------------------------------ 通用上传下载
+	//
+	// 四个端点在 permRoutes 里权限串均为空（对齐 Java：CommonController 无 @PreAuthorize，
+	// SysProfileController 同样无），因此 perm() 只挂 JWTAuth。
+	//
+	// limitBody 必须套在上传接口上：超限要回 application/json 的错误体，
+	// 前端 src/utils/ruoyi.js:225-228 才能把 Blob 还原成提示。
+	perm(r, "POST", "/common/upload", limitBody(), common.Upload)
+	perm(r, "POST", "/common/uploads", limitBody(), common.Uploads)
+	perm(r, "GET", "/common/download/resource", common.ResourceDownload)
+	perm(r, "GET", "/common/download", common.Download)
+
+	profile := system.ProfileHandler{}
+	// ------------------------------------------------------------ 个人信息
+	//
+	// /system/user/profile 必须注册在 /system/user/:userId **之前**，
+	// 否则 gin 会把 "profile" 当 userId 解析（虽然 gin 支持静态/通配共存，
+	// 但显式在前更不容易被后续改动破坏）。
+	perm(r, "GET", "/system/user/profile", profile.GetProfile)
+	perm(r, "PUT", "/system/user/profile", profile.UpdateProfile)
+	perm(r, "POST", "/system/user/profile/avatar", limitBody(), profile.Avatar)
+	perm(r, "PUT", "/system/user/profile/updatePwd", profile.UpdatePwd)
+
+	// ------------------------------------------------------------ 系统管理 - 用户
+	//
+	// perm 的权限串全部从 perm_table.go 的 permRoutes 查（见 perm 的说明），
+	// 路由即文档：忘了登记 -> 启动直接 panic，不会静默"裸奔"。
+	//
+	// 静态段必须注册在通配段之前（可读性；gin 本身支持两者共存）。
+	perm(r, "GET", "/system/user/list", user.List)
+	perm(r, "GET", "/system/user/deptTree", user.DeptTree)
+	perm(r, "GET", "/system/user/authRole/:userId", user.AuthRole)
+	perm(r, "PUT", "/system/user/authRole", user.InsertAuthRole)
+	perm(r, "PUT", "/system/user/resetPwd", user.ResetPwd)
+	perm(r, "PUT", "/system/user/changeStatus", user.ChangeStatus)
+	perm(r, "GET", "/system/user/", user.GetInfo)
+	perm(r, "GET", "/system/user/:userId", user.GetInfo)
+	perm(r, "POST", "/system/user", user.Add)
+	perm(r, "PUT", "/system/user", user.Edit)
+	perm(r, "DELETE", "/system/user/:userIds", user.Remove)
+
+	// ------------------------------------------------------------ 系统管理 - 角色
+	perm(r, "GET", "/system/role/list", role.List)
+	perm(r, "GET", "/system/role/optionselect", role.OptionSelect)
+	perm(r, "GET", "/system/role/deptTree/:roleId", role.DeptTree)
+	perm(r, "GET", "/system/role/authUser/allocatedList", role.AllocatedList)
+	perm(r, "GET", "/system/role/authUser/unallocatedList", role.UnallocatedList)
+	perm(r, "PUT", "/system/role/authUser/cancel", role.AuthUserCancel)
+	perm(r, "PUT", "/system/role/authUser/cancelAll", role.AuthUserCancelAll)
+	perm(r, "PUT", "/system/role/authUser/selectAll", role.AuthUserSelectAll)
+	perm(r, "PUT", "/system/role/dataScope", role.DataScope)
+	perm(r, "PUT", "/system/role/changeStatus", role.ChangeStatus)
+	perm(r, "GET", "/system/role/:roleId", role.GetInfo)
+	perm(r, "POST", "/system/role", role.Add)
+	perm(r, "PUT", "/system/role", role.Edit)
+	perm(r, "DELETE", "/system/role/:roleIds", role.Remove)
+
+	// ------------------------------------------------------------ 系统管理 - 部门
+	perm(r, "GET", "/system/dept/list", dept.List)
+	perm(r, "GET", "/system/dept/list/exclude/:deptId", dept.ListExclude)
+	perm(r, "PUT", "/system/dept/updateSort", dept.UpdateSort)
+	perm(r, "GET", "/system/dept/:deptId", dept.GetInfo)
+	perm(r, "POST", "/system/dept", dept.Add)
+	perm(r, "PUT", "/system/dept", dept.Edit)
+	perm(r, "DELETE", "/system/dept/:deptId", dept.Remove)
+
+	// ------------------------------------------------------------ 系统管理 - 岗位
+	perm(r, "GET", "/system/post/list", post.List)
+	perm(r, "GET", "/system/post/optionselect", post.OptionSelect)
+	perm(r, "GET", "/system/post/:postId", post.GetInfo)
+	perm(r, "POST", "/system/post", post.Add)
+	perm(r, "PUT", "/system/post", post.Edit)
+	perm(r, "DELETE", "/system/post/:postIds", post.Remove)
+
+	// ------------------------------------------------------------ 系统管理 - 字典
+	perm(r, "GET", "/system/dict/type/list", dict.TypeList)
+	perm(r, "GET", "/system/dict/type/optionselect", dict.TypeOptionSelect)
+	perm(r, "DELETE", "/system/dict/type/refreshCache", dict.TypeRefreshCache)
+	perm(r, "GET", "/system/dict/type/:dictId", dict.TypeGetInfo)
+	perm(r, "POST", "/system/dict/type", dict.TypeAdd)
+	perm(r, "PUT", "/system/dict/type", dict.TypeEdit)
+	perm(r, "DELETE", "/system/dict/type/:dictIds", dict.TypeRemove)
+
+	perm(r, "GET", "/system/dict/data/list", dict.DataList)
+	perm(r, "GET", "/system/dict/data/type/:dictType", dict.DataByType)
+	perm(r, "GET", "/system/dict/data/:dictCode", dict.DataGetInfo)
+	perm(r, "POST", "/system/dict/data", dict.DataAdd)
+	perm(r, "PUT", "/system/dict/data", dict.DataEdit)
+	perm(r, "DELETE", "/system/dict/data/:dictCodes", dict.DataRemove)
+
+	// ------------------------------------------------------------ 系统管理 - 参数
+	perm(r, "GET", "/system/config/list", cfg.List)
+	perm(r, "GET", "/system/config/configKey/:configKey", cfg.GetByKey)
+	perm(r, "DELETE", "/system/config/refreshCache", cfg.RefreshCache)
+	perm(r, "GET", "/system/config/:configId", cfg.GetInfo)
+	perm(r, "POST", "/system/config", cfg.Add)
+	perm(r, "PUT", "/system/config", cfg.Edit)
+	perm(r, "DELETE", "/system/config/:configIds", cfg.Remove)
+
+	// ------------------------------------------------------------ 系统管理 - 通知公告
+	//
+	// 后 4 个是 3.9 新增端点（listTop / markRead / markReadAll / readUsers/list），
+	// 必须注册在 /system/notice/:noticeId 之前。
+	perm(r, "GET", "/system/notice/list", notice.List)
+	perm(r, "GET", "/system/notice/listTop", notice.ListTop)
+	perm(r, "POST", "/system/notice/markRead", notice.MarkRead)
+	perm(r, "POST", "/system/notice/markReadAll", notice.MarkReadAll)
+	perm(r, "GET", "/system/notice/readUsers/list", notice.ReadUsers)
+	perm(r, "GET", "/system/notice/:noticeId", notice.GetInfo)
+	perm(r, "POST", "/system/notice", notice.Add)
+	perm(r, "PUT", "/system/notice", notice.Edit)
+	perm(r, "DELETE", "/system/notice/:noticeIds", notice.Remove)
+
 	return r
+}
+
+// perm 注册一条需要登录态的路由，权限串**从 perm_table.go 的 permRoutes 查**。
+//
+// 这样权限串只有一份事实来源（perm_table.go），由
+// internal/router/perm_diff_test.go 与 Java 注解做双向 diff；
+// 路由注册处不再重复写字面量，漏登记会在启动时 panic 而不是静默放行。
+//
+// Permi 必须排在 JWTAuth 之后：它从 context 取 LoginUser，并把权限串写入
+// context 供 service.DataScope 读取（等价 Java 的 PermissionContextHolder）。
+// limitBody 按 multipart.max-request-size 限制请求体大小。
+//
+// 超限回 AjaxResult（code=500 + 中文文案）而不是裸 413/500 文本：
+// 前端下载/上传用的是 responseType: 'blob'，必须靠 Content-Type=application/json
+// 才能把响应还原成错误提示（src/utils/ruoyi.js:225-228）。
+func limitBody() gin.HandlerFunc {
+	max := config.C.Spring.Servlet.Multipart.MaxRequestSizeBytes()
+	return func(c *gin.Context) {
+		if c.Request.Body != nil && c.Request.ContentLength > max {
+			result.Fail(c, result.Error(fmt.Sprintf(config.MsgUploadExceedRequestSize, max/1024/1024)))
+			c.Abort()
+			return
+		}
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, max)
+		c.Next()
+	}
+}
+
+func perm(r *gin.Engine, method, path string, h gin.HandlerFunc, extra ...gin.HandlerFunc) {
+	p, ok := PermOf(method, path)
+	if !ok {
+		panic(fmt.Sprintf("路由 %s %s 未在 perm_table.go 的 permRoutes 中登记，"+
+			"请先补登记（或确认它属于二期延后、不应注册）", method, path))
+	}
+	handlers := []gin.HandlerFunc{middleware.JWTAuth()}
+	handlers = append(handlers, extra...)
+	if p != "" {
+		handlers = append(handlers, middleware.Permi(p))
+	}
+	handlers = append(handlers, h)
+	r.Handle(method, path, handlers...)
 }

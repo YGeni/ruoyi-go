@@ -45,3 +45,6 @@ nbdist/
 !*/build/*.java
 !*/build/*.html
 !*/build/*.xml
+
+### Go 服务上传根目录（1b, 见 config.yaml ruoyi.profile）###
+server-go/uploadPath/

@@ -19,7 +19,10 @@ const (
 	CtxLoginUser = "loginUser"
 	// CtxPermission 当前接口所需的权限串，等价于 Java 的 PermissionContextHolder
 	// （PermissionService.java:38/70 写入，供 @DataScope 读取）。
-	CtxPermission = "permission"
+	//
+	// 真值定义在 service.CtxPermission（internal/service/datascope.go），
+	// 这里做别名以避免两处常量漂移 —— DataScope 的读取方在 service 包内。
+	CtxPermission = service.CtxPermission
 )
 
 // JWTAuth 等价于 JwtAuthenticationTokenFilter + TokenService.verifyToken：

@@ -1,47 +1,381 @@
 package router
 
-// 权限串常量表：替代 Java 侧 115 处 @PreAuthorize("@ss.hasPermi('...')") 注解。
+// 权限串常量表：替代 Java 侧 @PreAuthorize("@ss.hasPermi('...')") 注解。
 //
-// 取值全部来自 sys_menu.perms，与 Java 注解字面量一致
-// （实测：@ss.hasPermi 共 115 处，分布见 AGENTS.md §10.a）。
+// 取值全部来自 sys_menu.perms，与 Java 注解字面量一致。
+// 本文件（常量 + permRoutes 表）由 internal/router/perm_diff_test.go 与 Java 控制器源码
+// 做**双向 diff** 守护：Java 侧增删注解、或本表写错字面量，测试即失败（可作 CI 断言）。
 //
-// 本期（1a）只登记常量，接口尚未绑定权限校验；
-// 1b 逐条在路由上调用 router.Permi(PermSystemUserList) 完成绑定，
-// 并用脚本与 Java 注解清单做双向 diff（AGENTS.md §12 风险 1）。
+// 全量：Java 控制器共 148 个端点、其中 116 个带权限注解、去重后 71 个权限串。
+// 1b 落地范围（permRoutes）覆盖 system/{user,role,dept,post,dict,config,notice,profile}
+// 与 common/*，共 75 个端点；其余（monitor/*、tool/*、system:menu:*、Excel 导入导出）
+// 属二期，只登记常量不绑定路由，由 diff 测试归入「二期延后」清单。
 
+// Go 常量名生成规则：Perm + 各段首字母大写（system:user:resetPwd -> PermSystemUserResetPwd）。
 const (
-	// 系统管理 - 用户
-	PermSystemUserList   = "system:user:list"
-	PermSystemUserQuery  = "system:user:query"
-	PermSystemUserAdd    = "system:user:add"
-	PermSystemUserEdit   = "system:user:edit"
-	PermSystemUserRemove = "system:user:remove"
-	PermSystemUserReset  = "system:user:resetPwd"
-
-	// 系统管理 - 角色
-	PermSystemRoleList   = "system:role:list"
-	PermSystemRoleQuery  = "system:role:query"
+	// monitor:cache
+	PermMonitorCacheList = "monitor:cache:list"
+	// monitor:job
+	PermMonitorJobAdd          = "monitor:job:add"
+	PermMonitorJobChangeStatus = "monitor:job:changeStatus"
+	PermMonitorJobEdit         = "monitor:job:edit"
+	PermMonitorJobExport       = "monitor:job:export"
+	PermMonitorJobList         = "monitor:job:list"
+	PermMonitorJobQuery        = "monitor:job:query"
+	PermMonitorJobRemove       = "monitor:job:remove"
+	// monitor:logininfor
+	PermMonitorLogininforExport = "monitor:logininfor:export"
+	PermMonitorLogininforList   = "monitor:logininfor:list"
+	PermMonitorLogininforRemove = "monitor:logininfor:remove"
+	PermMonitorLogininforUnlock = "monitor:logininfor:unlock"
+	// monitor:online
+	PermMonitorOnlineForceLogout = "monitor:online:forceLogout"
+	PermMonitorOnlineList        = "monitor:online:list"
+	// monitor:operlog
+	PermMonitorOperlogExport = "monitor:operlog:export"
+	PermMonitorOperlogList   = "monitor:operlog:list"
+	PermMonitorOperlogRemove = "monitor:operlog:remove"
+	// monitor:server
+	PermMonitorServerList = "monitor:server:list"
+	// system:config
+	PermSystemConfigAdd    = "system:config:add"
+	PermSystemConfigEdit   = "system:config:edit"
+	PermSystemConfigExport = "system:config:export"
+	PermSystemConfigList   = "system:config:list"
+	PermSystemConfigQuery  = "system:config:query"
+	PermSystemConfigRemove = "system:config:remove"
+	// system:dept
+	PermSystemDeptAdd    = "system:dept:add"
+	PermSystemDeptEdit   = "system:dept:edit"
+	PermSystemDeptList   = "system:dept:list"
+	PermSystemDeptQuery  = "system:dept:query"
+	PermSystemDeptRemove = "system:dept:remove"
+	// system:dict
+	PermSystemDictAdd    = "system:dict:add"
+	PermSystemDictEdit   = "system:dict:edit"
+	PermSystemDictExport = "system:dict:export"
+	PermSystemDictList   = "system:dict:list"
+	PermSystemDictQuery  = "system:dict:query"
+	PermSystemDictRemove = "system:dict:remove"
+	// system:menu
+	PermSystemMenuAdd    = "system:menu:add"
+	PermSystemMenuEdit   = "system:menu:edit"
+	PermSystemMenuList   = "system:menu:list"
+	PermSystemMenuQuery  = "system:menu:query"
+	PermSystemMenuRemove = "system:menu:remove"
+	// system:notice
+	PermSystemNoticeAdd    = "system:notice:add"
+	PermSystemNoticeEdit   = "system:notice:edit"
+	PermSystemNoticeList   = "system:notice:list"
+	PermSystemNoticeRemove = "system:notice:remove"
+	// system:post
+	PermSystemPostAdd    = "system:post:add"
+	PermSystemPostEdit   = "system:post:edit"
+	PermSystemPostExport = "system:post:export"
+	PermSystemPostList   = "system:post:list"
+	PermSystemPostQuery  = "system:post:query"
+	PermSystemPostRemove = "system:post:remove"
+	// system:role
 	PermSystemRoleAdd    = "system:role:add"
 	PermSystemRoleEdit   = "system:role:edit"
+	PermSystemRoleExport = "system:role:export"
+	PermSystemRoleList   = "system:role:list"
+	PermSystemRoleQuery  = "system:role:query"
 	PermSystemRoleRemove = "system:role:remove"
-
-	// 系统管理 - 部门 / 岗位 / 菜单
-	PermSystemDeptList = "system:dept:list"
-	PermSystemPostList = "system:post:list"
-	PermSystemMenuList = "system:menu:list"
-
-	// 系统管理 - 字典 / 参数 / 通知
-	PermSystemDictList   = "system:dict:list"
-	PermSystemConfigList = "system:config:list"
-	PermSystemNoticeList = "system:notice:list"
-
-	// 系统监控
-	PermMonitorOperlogList    = "monitor:operlog:list"
-	PermMonitorLogininforList = "monitor:logininfor:list"
-	PermMonitorOnlineList     = "monitor:online:list"
-	PermMonitorJobList        = "monitor:job:list"
-	PermMonitorCacheList      = "monitor:cache:list"
-
-	// 系统工具
-	PermToolGenList = "tool:gen:list"
+	// system:user
+	PermSystemUserAdd      = "system:user:add"
+	PermSystemUserEdit     = "system:user:edit"
+	PermSystemUserExport   = "system:user:export"
+	PermSystemUserImport   = "system:user:import"
+	PermSystemUserList     = "system:user:list"
+	PermSystemUserQuery    = "system:user:query"
+	PermSystemUserRemove   = "system:user:remove"
+	PermSystemUserResetPwd = "system:user:resetPwd"
+	// tool:gen
+	PermToolGenCode    = "tool:gen:code"
+	PermToolGenEdit    = "tool:gen:edit"
+	PermToolGenImport  = "tool:gen:import"
+	PermToolGenList    = "tool:gen:list"
+	PermToolGenPreview = "tool:gen:preview"
+	PermToolGenQuery   = "tool:gen:query"
+	PermToolGenRemove  = "tool:gen:remove"
 )
+
+// RoutePerm 一条「路由 - 权限」绑定，与 Java 控制器的方法级注解一一对应。
+type RoutePerm struct {
+	Method string // GET/POST/PUT/DELETE
+	Path   string // gin 风格路径（Java 的 {id} 记作 :id）
+	Perm   string // 权限串；为空表示仅需登录态，不加 Permi 中间件
+	Java   string // 来源，便于 diff 定位
+}
+
+// permRoutes 1b 范围内的全量绑定表（75 条）。
+//
+// router.go 注册路由时通过 PermOf(method, path) 取权限串并挂 middleware.Permi。
+var permRoutes = []RoutePerm{
+	{"GET", "/common/download", "", "CommonController"},
+	{"GET", "/common/download/resource", "", "CommonController"},
+	{"POST", "/common/upload", "", "CommonController"},
+	{"POST", "/common/uploads", "", "CommonController"},
+	{"POST", "/system/config", PermSystemConfigAdd, "SysConfigController"},
+	{"PUT", "/system/config", PermSystemConfigEdit, "SysConfigController"},
+	{"GET", "/system/config/configKey/:configKey", "", "SysConfigController"},
+	{"GET", "/system/config/list", PermSystemConfigList, "SysConfigController"},
+	{"DELETE", "/system/config/refreshCache", PermSystemConfigRemove, "SysConfigController"},
+	{"DELETE", "/system/config/:configIds", PermSystemConfigRemove, "SysConfigController"},
+	{"GET", "/system/config/:configId", PermSystemConfigQuery, "SysConfigController"},
+	{"POST", "/system/dept", PermSystemDeptAdd, "SysDeptController"},
+	{"PUT", "/system/dept", PermSystemDeptEdit, "SysDeptController"},
+	{"GET", "/system/dept/list", PermSystemDeptList, "SysDeptController"},
+	{"GET", "/system/dept/list/exclude/:deptId", PermSystemDeptList, "SysDeptController"},
+	{"PUT", "/system/dept/updateSort", PermSystemDeptEdit, "SysDeptController"},
+	{"DELETE", "/system/dept/:deptId", PermSystemDeptRemove, "SysDeptController"},
+	{"GET", "/system/dept/:deptId", PermSystemDeptQuery, "SysDeptController"},
+	{"POST", "/system/dict/data", PermSystemDictAdd, "SysDictDataController"},
+	{"PUT", "/system/dict/data", PermSystemDictEdit, "SysDictDataController"},
+	{"GET", "/system/dict/data/list", PermSystemDictList, "SysDictDataController"},
+	{"GET", "/system/dict/data/type/:dictType", "", "SysDictDataController"},
+	{"DELETE", "/system/dict/data/:dictCodes", PermSystemDictRemove, "SysDictDataController"},
+	{"GET", "/system/dict/data/:dictCode", PermSystemDictQuery, "SysDictDataController"},
+	{"POST", "/system/dict/type", PermSystemDictAdd, "SysDictTypeController"},
+	{"PUT", "/system/dict/type", PermSystemDictEdit, "SysDictTypeController"},
+	{"GET", "/system/dict/type/list", PermSystemDictList, "SysDictTypeController"},
+	{"GET", "/system/dict/type/optionselect", "", "SysDictTypeController"},
+	{"DELETE", "/system/dict/type/refreshCache", PermSystemDictRemove, "SysDictTypeController"},
+	{"DELETE", "/system/dict/type/:dictIds", PermSystemDictRemove, "SysDictTypeController"},
+	{"GET", "/system/dict/type/:dictId", PermSystemDictQuery, "SysDictTypeController"},
+	{"POST", "/system/notice", PermSystemNoticeAdd, "SysNoticeController"},
+	{"PUT", "/system/notice", PermSystemNoticeEdit, "SysNoticeController"},
+	{"GET", "/system/notice/list", PermSystemNoticeList, "SysNoticeController"},
+	{"GET", "/system/notice/listTop", "", "SysNoticeController"},
+	{"POST", "/system/notice/markRead", "", "SysNoticeController"},
+	{"POST", "/system/notice/markReadAll", "", "SysNoticeController"},
+	{"GET", "/system/notice/readUsers/list", PermSystemNoticeList, "SysNoticeController"},
+	{"DELETE", "/system/notice/:noticeIds", PermSystemNoticeRemove, "SysNoticeController"},
+	{"GET", "/system/notice/:noticeId", "", "SysNoticeController"},
+	{"POST", "/system/post", PermSystemPostAdd, "SysPostController"},
+	{"PUT", "/system/post", PermSystemPostEdit, "SysPostController"},
+	{"GET", "/system/post/list", PermSystemPostList, "SysPostController"},
+	{"GET", "/system/post/optionselect", "", "SysPostController"},
+	{"DELETE", "/system/post/:postIds", PermSystemPostRemove, "SysPostController"},
+	{"GET", "/system/post/:postId", PermSystemPostQuery, "SysPostController"},
+	{"POST", "/system/role", PermSystemRoleAdd, "SysRoleController"},
+	{"PUT", "/system/role", PermSystemRoleEdit, "SysRoleController"},
+	{"GET", "/system/role/authUser/allocatedList", PermSystemRoleList, "SysRoleController"},
+	{"PUT", "/system/role/authUser/cancel", PermSystemRoleEdit, "SysRoleController"},
+	{"PUT", "/system/role/authUser/cancelAll", PermSystemRoleEdit, "SysRoleController"},
+	{"PUT", "/system/role/authUser/selectAll", PermSystemRoleEdit, "SysRoleController"},
+	{"GET", "/system/role/authUser/unallocatedList", PermSystemRoleList, "SysRoleController"},
+	{"PUT", "/system/role/changeStatus", PermSystemRoleEdit, "SysRoleController"},
+	{"PUT", "/system/role/dataScope", PermSystemRoleEdit, "SysRoleController"},
+	{"GET", "/system/role/deptTree/:roleId", PermSystemRoleQuery, "SysRoleController"},
+	{"GET", "/system/role/list", PermSystemRoleList, "SysRoleController"},
+	{"GET", "/system/role/optionselect", PermSystemRoleQuery, "SysRoleController"},
+	{"DELETE", "/system/role/:roleIds", PermSystemRoleRemove, "SysRoleController"},
+	{"GET", "/system/role/:roleId", PermSystemRoleQuery, "SysRoleController"},
+	{"POST", "/system/user", PermSystemUserAdd, "SysUserController"},
+	{"PUT", "/system/user", PermSystemUserEdit, "SysUserController"},
+	{"GET", "/system/user/", PermSystemUserQuery, "SysUserController"},
+	{"PUT", "/system/user/authRole", PermSystemUserEdit, "SysUserController"},
+	{"GET", "/system/user/authRole/:userId", PermSystemUserQuery, "SysUserController"},
+	{"PUT", "/system/user/changeStatus", PermSystemUserEdit, "SysUserController"},
+	{"GET", "/system/user/deptTree", PermSystemUserList, "SysUserController"},
+	{"GET", "/system/user/list", PermSystemUserList, "SysUserController"},
+	{"GET", "/system/user/profile", "", "SysProfileController"},
+	{"PUT", "/system/user/profile", "", "SysProfileController"},
+	{"POST", "/system/user/profile/avatar", "", "SysProfileController"},
+	{"PUT", "/system/user/profile/updatePwd", "", "SysProfileController"},
+	{"PUT", "/system/user/resetPwd", PermSystemUserResetPwd, "SysUserController"},
+	{"DELETE", "/system/user/:userIds", PermSystemUserRemove, "SysUserController"},
+	{"GET", "/system/user/:userId", PermSystemUserQuery, "SysUserController"},
+}
+
+// permRoutesPhase2 二期延后端点清单（72 条）。
+//
+// **本表不参与路由绑定**，仅作为交接清单存在：
+//   - 唯一事实来源是 internal/router/perm_diff_test.go 的 scopeFiles /
+//     deferPathKeywords —— 二期每落地一个 handler，把对应控制器文件加进 scopeFiles，
+//     该控制器下的端点就会从「二期延后」自动转为「范围内」，diff 测试随即要求绑定；
+//   - TestPhase2ListMatchesJava 守护本表与 Java 源码一致，改 Java 不改这里会红；
+//   - 未翻入 permRoutes 的条目在 diff 测试里计入「二期延后」，不判失败，
+//     即当前是"不实现也绿"，交接时必须逐条 grep -n "TODO(phase2)" 过一遍。
+var permRoutesPhase2 = []RoutePerm{
+	// CacheController.java
+	{"DELETE", "/monitor/cache/clearCacheAll", PermMonitorCacheList, "CacheController"},              // TODO(phase2) CacheController.java:114
+	{"DELETE", "/monitor/cache/clearCacheKey/:cacheKey", PermMonitorCacheList, "CacheController"},    // TODO(phase2) CacheController.java:106
+	{"DELETE", "/monitor/cache/clearCacheName/:cacheName", PermMonitorCacheList, "CacheController"},  // TODO(phase2) CacheController.java:97
+	{"GET", "/monitor/cache", PermMonitorCacheList, "CacheController"},                               // TODO(phase2) CacheController.java:48
+	{"GET", "/monitor/cache/getKeys/:cacheName", PermMonitorCacheList, "CacheController"},            // TODO(phase2) CacheController.java:80
+	{"GET", "/monitor/cache/getNames", PermMonitorCacheList, "CacheController"},                      // TODO(phase2) CacheController.java:73
+	{"GET", "/monitor/cache/getValue/:cacheName/:cacheKey", PermMonitorCacheList, "CacheController"}, // TODO(phase2) CacheController.java:88
+	// CaptchaController.java
+	{"GET", "/captchaImage", "", "CaptchaController"}, // TODO(phase2) CaptchaController.java:31
+	// GenController.java
+	{"DELETE", "/tool/gen/:tableIds", PermToolGenRemove, "GenController"},      // TODO(phase2) GenController.java:178
+	{"GET", "/tool/gen/:tableId", PermToolGenQuery, "GenController"},           // TODO(phase2) GenController.java:70
+	{"GET", "/tool/gen/batchGenCode", PermToolGenCode, "GenController"},        // TODO(phase2) GenController.java:241
+	{"GET", "/tool/gen/column/:tableId", PermToolGenList, "GenController"},     // TODO(phase2) GenController.java:99
+	{"GET", "/tool/gen/db/list", PermToolGenList, "GenController"},             // TODO(phase2) GenController.java:87
+	{"GET", "/tool/gen/download/:tableName", PermToolGenCode, "GenController"}, // TODO(phase2) GenController.java:201
+	{"GET", "/tool/gen/genCode/:tableName", PermToolGenCode, "GenController"},  // TODO(phase2) GenController.java:213
+	{"GET", "/tool/gen/list", PermToolGenList, "GenController"},                // TODO(phase2) GenController.java:49
+	{"GET", "/tool/gen/preview/:tableId", PermToolGenPreview, "GenController"}, // TODO(phase2) GenController.java:190
+	{"GET", "/tool/gen/synchDb/:tableName", PermToolGenEdit, "GenController"},  // TODO(phase2) GenController.java:229
+	{"POST", "/tool/gen/createTable", "", "GenController"},                     // TODO(phase2) GenController.java:128
+	{"POST", "/tool/gen/importTable", PermToolGenImport, "GenController"},      // TODO(phase2) GenController.java:113
+	{"PUT", "/tool/gen", PermToolGenEdit, "GenController"},                     // TODO(phase2) GenController.java:165
+	// ServerController.java
+	{"GET", "/monitor/server", PermMonitorServerList, "ServerController"}, // TODO(phase2) ServerController.java:19
+	// SysConfigController.java
+	{"POST", "/system/config/export", PermSystemConfigExport, "SysConfigController"}, // TODO(phase2) SysConfigController.java:49
+	// SysDictDataController.java
+	{"POST", "/system/dict/data/export", PermSystemDictExport, "SysDictDataController"}, // TODO(phase2) SysDictDataController.java:52
+	// SysDictTypeController.java
+	{"POST", "/system/dict/type/export", PermSystemDictExport, "SysDictTypeController"}, // TODO(phase2) SysDictTypeController.java:46
+	// SysIndexController.java
+	{"POST", "/unlockscreen", "", "SysIndexController"}, // TODO(phase2) SysIndexController.java:43
+	// SysJobController.java
+	{"DELETE", "/monitor/job/:jobIds", PermMonitorJobRemove, "SysJobController"},         // TODO(phase2) SysJobController.java:177
+	{"GET", "/monitor/job/:jobId", PermMonitorJobQuery, "SysJobController"},              // TODO(phase2) SysJobController.java:70
+	{"GET", "/monitor/job/list", PermMonitorJobList, "SysJobController"},                 // TODO(phase2) SysJobController.java:39
+	{"POST", "/monitor/job", PermMonitorJobAdd, "SysJobController"},                      // TODO(phase2) SysJobController.java:80
+	{"POST", "/monitor/job/export", PermMonitorJobExport, "SysJobController"},            // TODO(phase2) SysJobController.java:57
+	{"PUT", "/monitor/job", PermMonitorJobEdit, "SysJobController"},                      // TODO(phase2) SysJobController.java:116
+	{"PUT", "/monitor/job/changeStatus", PermMonitorJobChangeStatus, "SysJobController"}, // TODO(phase2) SysJobController.java:152
+	{"PUT", "/monitor/job/run", PermMonitorJobChangeStatus, "SysJobController"},          // TODO(phase2) SysJobController.java:165
+	// SysJobLogController.java
+	{"DELETE", "/monitor/jobLog/:jobLogIds", PermMonitorJobRemove, "SysJobLogController"}, // TODO(phase2) SysJobLogController.java:73
+	{"DELETE", "/monitor/jobLog/clean", PermMonitorJobRemove, "SysJobLogController"},      // TODO(phase2) SysJobLogController.java:84
+	{"GET", "/monitor/jobLog/:jobLogId", PermMonitorJobQuery, "SysJobLogController"},      // TODO(phase2) SysJobLogController.java:62
+	{"GET", "/monitor/jobLog/list", PermMonitorJobList, "SysJobLogController"},            // TODO(phase2) SysJobLogController.java:31
+	{"POST", "/monitor/jobLog/export", PermMonitorJobExport, "SysJobLogController"},       // TODO(phase2) SysJobLogController.java:49
+	// SysLoginController.java
+	{"GET", "getInfo", "", "SysLoginController"},    // TODO(phase2) SysLoginController.java:72
+	{"GET", "getRouters", "", "SysLoginController"}, // TODO(phase2) SysLoginController.java:101
+	{"POST", "/login", "", "SysLoginController"},    // TODO(phase2) SysLoginController.java:35
+	// SysLogininforController.java
+	{"DELETE", "/monitor/logininfor/:infoIds", PermMonitorLogininforRemove, "SysLogininforController"},      // TODO(phase2) SysLogininforController.java:57
+	{"DELETE", "/monitor/logininfor/clean", PermMonitorLogininforRemove, "SysLogininforController"},         // TODO(phase2) SysLogininforController.java:65
+	{"GET", "/monitor/logininfor/list", PermMonitorLogininforList, "SysLogininforController"},               // TODO(phase2) SysLogininforController.java:32
+	{"GET", "/monitor/logininfor/unlock/:userName", PermMonitorLogininforUnlock, "SysLogininforController"}, // TODO(phase2) SysLogininforController.java:74
+	{"POST", "/monitor/logininfor/export", PermMonitorLogininforExport, "SysLogininforController"},          // TODO(phase2) SysLogininforController.java:47
+	// SysMenuController.java
+	{"DELETE", "/system/menu/:menuId", PermSystemMenuRemove, "SysMenuController"}, // TODO(phase2) SysMenuController.java:150
+	{"GET", "/system/menu/:menuId", PermSystemMenuQuery, "SysMenuController"},     // TODO(phase2) SysMenuController.java:51
+	{"GET", "/system/menu/list", PermSystemMenuList, "SysMenuController"},         // TODO(phase2) SysMenuController.java:34
+	{"GET", "/system/menu/roleMenuTreeselect/:roleId", "", "SysMenuController"},   // TODO(phase2) SysMenuController.java:71
+	{"GET", "/system/menu/treeselect", "", "SysMenuController"},                   // TODO(phase2) SysMenuController.java:61
+	{"POST", "/system/menu", PermSystemMenuAdd, "SysMenuController"},              // TODO(phase2) SysMenuController.java:84
+	{"PUT", "/system/menu", PermSystemMenuEdit, "SysMenuController"},              // TODO(phase2) SysMenuController.java:108
+	{"PUT", "/system/menu/updateSort", PermSystemMenuEdit, "SysMenuController"},   // TODO(phase2) SysMenuController.java:136
+	// SysOperlogController.java
+	{"DELETE", "/monitor/operlog/:operIds", PermMonitorOperlogRemove, "SysOperlogController"}, // TODO(phase2) SysOperlogController.java:53
+	{"DELETE", "/monitor/operlog/clean", PermMonitorOperlogRemove, "SysOperlogController"},    // TODO(phase2) SysOperlogController.java:61
+	{"GET", "/monitor/operlog/list", PermMonitorOperlogList, "SysOperlogController"},          // TODO(phase2) SysOperlogController.java:31
+	{"POST", "/monitor/operlog/export", PermMonitorOperlogExport, "SysOperlogController"},     // TODO(phase2) SysOperlogController.java:43
+	// SysPostController.java
+	{"POST", "/system/post/export", PermSystemPostExport, "SysPostController"}, // TODO(phase2) SysPostController.java:49
+	// SysRegisterController.java
+	{"POST", "/register", "", "SysRegisterController"}, // TODO(phase2) SysRegisterController.java:22
+	// SysRoleController.java
+	{"POST", "/system/role/export", PermSystemRoleExport, "SysRoleController"}, // TODO(phase2) SysRoleController.java:65
+	// SysUserController.java
+	{"POST", "/system/user/export", PermSystemUserExport, "SysUserController"},     // TODO(phase2) SysUserController.java:68
+	{"POST", "/system/user/importData", PermSystemUserImport, "SysUserController"}, // TODO(phase2) SysUserController.java:78
+	{"POST", "/system/user/importTemplate", "", "SysUserController"},               // TODO(phase2) SysUserController.java:90
+	// SysUserOnlineController.java
+	{"DELETE", "/monitor/online/:tokenId", PermMonitorOnlineForceLogout, "SysUserOnlineController"}, // TODO(phase2) SysUserOnlineController.java:75
+	{"GET", "/monitor/online/list", PermMonitorOnlineList, "SysUserOnlineController"},               // TODO(phase2) SysUserOnlineController.java:35
+	// TestController.java
+	{"DELETE", "/test/user/:userId", "", "TestController"}, // TODO(phase2) TestController.java:73
+	{"GET", "/test/user/:userId", "", "TestController"},    // TODO(phase2) TestController.java:46
+	{"GET", "/test/user/list", "", "TestController"},       // TODO(phase2) TestController.java:38
+	{"POST", "/test/user/save", "", "TestController"},      // TODO(phase2) TestController.java:61
+	{"PUT", "/test/user/update", "", "TestController"},     // TODO(phase2) TestController.java:73
+}
+
+// PermOf 按 method + gin 路径查登记的权限串。
+// 返回 ("", false) 表示未登记；("", true) 表示已登记但无需权限校验。
+func PermOf(method, path string) (string, bool) {
+	for _, r := range permRoutes {
+		if r.Method == method && r.Path == path {
+			return r.Perm, true
+		}
+	}
+	return "", false
+}
+
+// permConstants 全部权限串（71 个），供 diff 测试校验"Java 权限串必须有对应常量"。
+var permConstants = []string{
+	PermMonitorCacheList,
+	PermMonitorJobAdd,
+	PermMonitorJobChangeStatus,
+	PermMonitorJobEdit,
+	PermMonitorJobExport,
+	PermMonitorJobList,
+	PermMonitorJobQuery,
+	PermMonitorJobRemove,
+	PermMonitorLogininforExport,
+	PermMonitorLogininforList,
+	PermMonitorLogininforRemove,
+	PermMonitorLogininforUnlock,
+	PermMonitorOnlineForceLogout,
+	PermMonitorOnlineList,
+	PermMonitorOperlogExport,
+	PermMonitorOperlogList,
+	PermMonitorOperlogRemove,
+	PermMonitorServerList,
+	PermSystemConfigAdd,
+	PermSystemConfigEdit,
+	PermSystemConfigExport,
+	PermSystemConfigList,
+	PermSystemConfigQuery,
+	PermSystemConfigRemove,
+	PermSystemDeptAdd,
+	PermSystemDeptEdit,
+	PermSystemDeptList,
+	PermSystemDeptQuery,
+	PermSystemDeptRemove,
+	PermSystemDictAdd,
+	PermSystemDictEdit,
+	PermSystemDictExport,
+	PermSystemDictList,
+	PermSystemDictQuery,
+	PermSystemDictRemove,
+	PermSystemMenuAdd,
+	PermSystemMenuEdit,
+	PermSystemMenuList,
+	PermSystemMenuQuery,
+	PermSystemMenuRemove,
+	PermSystemNoticeAdd,
+	PermSystemNoticeEdit,
+	PermSystemNoticeList,
+	PermSystemNoticeRemove,
+	PermSystemPostAdd,
+	PermSystemPostEdit,
+	PermSystemPostExport,
+	PermSystemPostList,
+	PermSystemPostQuery,
+	PermSystemPostRemove,
+	PermSystemRoleAdd,
+	PermSystemRoleEdit,
+	PermSystemRoleExport,
+	PermSystemRoleList,
+	PermSystemRoleQuery,
+	PermSystemRoleRemove,
+	PermSystemUserAdd,
+	PermSystemUserEdit,
+	PermSystemUserExport,
+	PermSystemUserImport,
+	PermSystemUserList,
+	PermSystemUserQuery,
+	PermSystemUserRemove,
+	PermSystemUserResetPwd,
+	PermToolGenCode,
+	PermToolGenEdit,
+	PermToolGenImport,
+	PermToolGenList,
+	PermToolGenPreview,
+	PermToolGenQuery,
+	PermToolGenRemove,
+}
