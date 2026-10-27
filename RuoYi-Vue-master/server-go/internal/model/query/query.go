@@ -142,6 +142,16 @@ type NoticeList struct {
 // ReadUserList GET /system/notice/readUsers/list 的查询条件。
 //
 // 对应 SysNoticeReadMapper.xml:73-95：noticeId（必填）+ searchValue。
+// MenuList 菜单查询条件，等价 SysMenuMapper.xml:38-47 的三个动态条件。
+//
+// 注意 /system/menu/list **不分页**（Java 的 list() 没有 startPage()），
+// 前端 src/views/system/menu/index.vue:346 直接 handleTree(response.data)。
+type MenuList struct {
+	MenuName string `form:"menuName" json:"menuName"`
+	Visible  string `form:"visible" json:"visible"`
+	Status   string `form:"status" json:"status"`
+}
+
 type ReadUserList struct {
 	NoticeID int64 `form:"noticeId" json:"noticeId"`
 	BaseList       // searchValue

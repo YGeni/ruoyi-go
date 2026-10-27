@@ -6,8 +6,8 @@
 | 项 | 数量 |
 |---|---|
 | Java 端点总数（admin+generator+quartz） | 147 |
-| 1b 范围内端点 | 75 |
-| 二期延后端点 | 72 |
+| 1b 范围内端点 | 83 |
+| 二期延后端点 | 64 |
 | 缺失（Java→Go） | 0 |
 | 多余（Go→Java） | 0 |
 
@@ -29,6 +29,7 @@
 | DELETE | `/system/dict/data/:dictCodes` | system:dict:remove | SysDictDataController.java:113 |
 | DELETE | `/system/dict/type/:dictIds` | system:dict:remove | SysDictTypeController.java:101 |
 | DELETE | `/system/dict/type/refreshCache` | system:dict:remove | SysDictTypeController.java:113 |
+| DELETE | `/system/menu/:menuId` | system:menu:remove | SysMenuController.java:150 |
 | DELETE | `/system/notice/:noticeIds` | system:notice:remove | SysNoticeController.java:142 |
 | DELETE | `/system/post/:postIds` | system:post:remove | SysPostController.java:112 |
 | DELETE | `/system/role/:roleIds` | system:role:remove | SysRoleController.java:166 |
@@ -47,6 +48,10 @@
 | GET | `/system/dict/type/:dictId` | system:dict:query | SysDictTypeController.java:59 |
 | GET | `/system/dict/type/list` | system:dict:list | SysDictTypeController.java:34 |
 | GET | `/system/dict/type/optionselect` | (仅需登录) | SysDictTypeController.java:125 |
+| GET | `/system/menu/:menuId` | system:menu:query | SysMenuController.java:51 |
+| GET | `/system/menu/list` | system:menu:list | SysMenuController.java:34 |
+| GET | `/system/menu/roleMenuTreeselect/:roleId` | (仅需登录) | SysMenuController.java:71 |
+| GET | `/system/menu/treeselect` | (仅需登录) | SysMenuController.java:61 |
 | GET | `/system/notice/:noticeId` | (仅需登录) | SysNoticeController.java:56 |
 | GET | `/system/notice/list` | system:notice:list | SysNoticeController.java:35 |
 | GET | `/system/notice/listTop` | (仅需登录) | SysNoticeController.java:89 |
@@ -72,6 +77,7 @@
 | POST | `/system/dept` | system:dept:add | SysDeptController.java:75 |
 | POST | `/system/dict/data` | system:dict:add | SysDictDataController.java:89 |
 | POST | `/system/dict/type` | system:dict:add | SysDictTypeController.java:69 |
+| POST | `/system/menu` | system:menu:add | SysMenuController.java:84 |
 | POST | `/system/notice` | system:notice:add | SysNoticeController.java:65 |
 | POST | `/system/notice/markRead` | (仅需登录) | SysNoticeController.java:104 |
 | POST | `/system/notice/markReadAll` | (仅需登录) | SysNoticeController.java:116 |
@@ -84,6 +90,8 @@
 | PUT | `/system/dept/updateSort` | system:dept:edit | SysDeptController.java:117 |
 | PUT | `/system/dict/data` | system:dict:edit | SysDictDataController.java:101 |
 | PUT | `/system/dict/type` | system:dict:edit | SysDictTypeController.java:85 |
+| PUT | `/system/menu` | system:menu:edit | SysMenuController.java:108 |
+| PUT | `/system/menu/updateSort` | system:menu:edit | SysMenuController.java:136 |
 | PUT | `/system/notice` | system:notice:edit | SysNoticeController.java:77 |
 | PUT | `/system/post` | system:post:edit | SysPostController.java:92 |
 | PUT | `/system/role` | system:role:edit | SysRoleController.java:110 |
@@ -114,7 +122,6 @@
 | DELETE | `/monitor/online/:tokenId` | monitor:online:forceLogout | SysUserOnlineController.java:75 |
 | DELETE | `/monitor/operlog/:operIds` | monitor:operlog:remove | SysOperlogController.java:53 |
 | DELETE | `/monitor/operlog/clean` | monitor:operlog:remove | SysOperlogController.java:61 |
-| DELETE | `/system/menu/:menuId` | system:menu:remove | SysMenuController.java:150 |
 | DELETE | `/test/user/:userId` | (仅需登录) | TestController.java:73 |
 | DELETE | `/tool/gen/:tableIds` | tool:gen:remove | GenController.java:178 |
 | GET | `/captchaImage` | (仅需登录) | CaptchaController.java:31 |
@@ -131,10 +138,6 @@
 | GET | `/monitor/online/list` | monitor:online:list | SysUserOnlineController.java:35 |
 | GET | `/monitor/operlog/list` | monitor:operlog:list | SysOperlogController.java:31 |
 | GET | `/monitor/server` | monitor:server:list | ServerController.java:19 |
-| GET | `/system/menu/:menuId` | system:menu:query | SysMenuController.java:51 |
-| GET | `/system/menu/list` | system:menu:list | SysMenuController.java:34 |
-| GET | `/system/menu/roleMenuTreeselect/:roleId` | (仅需登录) | SysMenuController.java:71 |
-| GET | `/system/menu/treeselect` | (仅需登录) | SysMenuController.java:61 |
 | GET | `/test/user/:userId` | (仅需登录) | TestController.java:46 |
 | GET | `/test/user/list` | (仅需登录) | TestController.java:38 |
 | GET | `/tool/gen/:tableId` | tool:gen:query | GenController.java:70 |
@@ -158,7 +161,6 @@
 | POST | `/system/config/export` | system:config:export | SysConfigController.java:49 |
 | POST | `/system/dict/data/export` | system:dict:export | SysDictDataController.java:52 |
 | POST | `/system/dict/type/export` | system:dict:export | SysDictTypeController.java:46 |
-| POST | `/system/menu` | system:menu:add | SysMenuController.java:84 |
 | POST | `/system/post/export` | system:post:export | SysPostController.java:49 |
 | POST | `/system/role/export` | system:role:export | SysRoleController.java:65 |
 | POST | `/system/user/export` | system:user:export | SysUserController.java:68 |
@@ -171,7 +173,5 @@
 | PUT | `/monitor/job` | monitor:job:edit | SysJobController.java:116 |
 | PUT | `/monitor/job/changeStatus` | monitor:job:changeStatus | SysJobController.java:152 |
 | PUT | `/monitor/job/run` | monitor:job:changeStatus | SysJobController.java:165 |
-| PUT | `/system/menu` | system:menu:edit | SysMenuController.java:108 |
-| PUT | `/system/menu/updateSort` | system:menu:edit | SysMenuController.java:136 |
 | PUT | `/test/user/update` | (仅需登录) | TestController.java:73 |
 | PUT | `/tool/gen` | tool:gen:edit | GenController.java:165 |

@@ -42,6 +42,22 @@ type MetaVo struct {
 	Link    string `json:"link,omitempty"`
 }
 
+// TreeSelect 下拉树节点，等价于 ruoyi-common/.../core/domain/TreeSelect.java:17-33。
+//
+// 字段与 JSON 必须满足前端 src/views/system/role/index.vue:180,183 的
+// node-key="id" + props {label:'label', children:'children'}，
+// 用 TreeSelect 而不是裸 SysMenu（菜单页的上级选择用的是 SysMenu，
+// props 是 {value:'menuId',label:'menuName'}，两者不能混）。
+//
+// Java 的 children 带 @JsonInclude(NON_EMPTY)（TreeSelect.java:31），
+// Go 侧用 omitempty 等价：叶子节点不输出 children。
+type TreeSelect struct {
+	ID       int64        `json:"id"`
+	Label    string       `json:"label"`
+	Disabled bool         `json:"disabled"`
+	Children []TreeSelect `json:"children,omitempty"`
+}
+
 // RouterVo 路由配置，等价于 ruoyi-system/.../domain/vo/RouterVo.java:11-57。
 //
 // Java 侧类上有 @JsonInclude(JsonInclude.Include.NON_EMPTY)

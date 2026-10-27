@@ -1,11 +1,15 @@
 package service
 
 import (
+	"errors"
+	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/YGeni/ruoyi-go/server-go/config"
 	"github.com/YGeni/ruoyi-go/server-go/internal/model/entity"
+	"github.com/YGeni/ruoyi-go/server-go/internal/model/query"
 	"github.com/YGeni/ruoyi-go/server-go/internal/repository"
 )
 
@@ -45,14 +49,20 @@ func getChildPerms(list []entity.SysMenu, parentID int64) []entity.SysMenu {
 }
 
 func recursionFn(list []entity.SysMenu, menu *entity.SysMenu) {
+	// **必须先递归再赋值**。
+	//
+	// 原实现是 `menu.Children = children` 之后再 `child := children[i]; recursionFn(&child)`——
+	// Go 的 getChildList 返回的是**值拷贝**，对 &child 的修改不会回写到 children[i]，
+	// 于是第三层及更深的 children 全部丢失（Java 版本是对象引用所以没问题）。
+	// 实测 sys_menu 最大层级是 4（系统管理 > 日志管理 > 操作日志），
+	// 该 bug 会让 getRouters 丢掉三级路由、菜单树的深层节点也出不来。
 	children := getChildList(list, menu.MenuID)
-	menu.Children = children
 	for i := range children {
 		if len(getChildList(list, children[i].MenuID)) > 0 {
-			child := children[i]
-			recursionFn(list, &child)
+			recursionFn(list, &children[i])
 		}
 	}
+	menu.Children = children
 }
 
 func getChildList(list []entity.SysMenu, menuID int64) []entity.SysMenu {
@@ -190,4 +200,225 @@ func innerLinkReplaceEach(path string) string {
 	replacer := strings.NewReplacer(
 		config.HTTP, "", config.HTTPS, "", config.WWW, "", ".", "/", ":", "/")
 	return replacer.Replace(path)
+}
+
+// ---------- 菜单管理（SysMenuServiceImpl）----------
+
+// SelectMenuList 等价 SysMenuServiceImpl.selectMenuList(L74-84)：
+// 管理员查全部，其余按角色查。
+func SelectMenuList(lu *entity.LoginUser, q *query.MenuList) ([]entity.SysMenu, error) {
+	if lu == nil || lu.User == nil {
+		return nil, errors.New("未登录")
+	}
+	if lu.User.UserID == 1 { // SecurityUtils.isAdmin
+		return repository.SelectMenuList(q)
+	}
+	return repository.SelectMenuListByUserID(q, lu.User.UserID)
+}
+
+// SelectMenuByID 按主键查菜单，等价 selectMenuById(L272-276)。
+func SelectMenuByID(menuID int64) (*entity.SysMenu, error) {
+	return repository.SelectMenuByID(menuID)
+}
+
+// BuildMenuTree 等价 SysMenuServiceImpl.buildMenuTree(L231-248)。
+//
+// 判定"顶级节点"的方式是 **parentId 不在本批 menuId 集合里**（不是 parentId==0），
+// 因此按条件过滤出一个子树时，该子树的根也会被正确识别为顶级节点。
+// 若一个顶级节点都没找到（tempList 不含任何节点的 parentId），原样返回整批。
+func BuildMenuTree(menus []entity.SysMenu) []entity.SysMenu {
+	ids := make(map[int64]bool, len(menus))
+	for i := range menus {
+		ids[menus[i].MenuID] = true
+	}
+	out := make([]entity.SysMenu, 0, len(menus))
+	for i := range menus {
+		menu := menus[i]
+		if !ids[menu.ParentID] {
+			recursionFn(menus, &menu)
+			out = append(out, menu)
+		}
+	}
+	if len(out) == 0 {
+		return menus
+	}
+	return out
+}
+
+// BuildMenuTreeSelect 等价 buildMenuTreeSelect(L259-262)：建树后转成 TreeSelect。
+func BuildMenuTreeSelect(menus []entity.SysMenu) []entity.TreeSelect {
+	trees := BuildMenuTree(menus)
+	out := make([]entity.TreeSelect, 0, len(trees))
+	for i := range trees {
+		out = append(out, toTreeSelect(trees[i]))
+	}
+	return out
+}
+
+func toTreeSelect(m entity.SysMenu) entity.TreeSelect {
+	ts := entity.TreeSelect{ID: m.MenuID, Label: m.MenuName}
+	for _, c := range m.Children {
+		ts.Children = append(ts.Children, toTreeSelect(c))
+	}
+	return ts
+}
+
+// SelectMenuIDsByRoleID 等价 selectMenuListByRoleId(L160-165)：
+// 先取角色的 menuCheckStrictly，再决定要不要排除"父菜单也在结果集里"的子菜单。
+func SelectMenuIDsByRoleID(roleID int64) ([]int64, error) {
+	role, err := repository.SelectRoleByID(roleID)
+	if err != nil {
+		return nil, err
+	}
+	strict := role != nil && role.MenuCheckStrictly
+	return repository.SelectMenuIDsByRoleID(roleID, strict)
+}
+
+// isHTTP 等价 StringUtils.ishttp：以 http:// 或 https:// 开头。
+func isHTTP(s string) bool {
+	return strings.HasPrefix(s, config.HTTP) || strings.HasPrefix(s, config.HTTPS)
+}
+
+// checkMenuNameUnique 等价 checkMenuNameUnique(L383-393)：true 表示可用。
+func checkMenuNameUnique(m *entity.SysMenu) (bool, error) {
+	info, err := repository.CheckMenuNameUnique(m.MenuName, m.ParentID)
+	if err != nil {
+		return false, err
+	}
+	if info != nil && info.MenuID != m.MenuID {
+		return false, nil
+	}
+	return true, nil
+}
+
+// checkRouteConfigUnique 等价 checkRouteConfigUnique(L397-428)：true 表示可用。
+//
+// 三条冲突规则逐条对齐：
+//  1. 同级下 path 相同（parentId 相同且 path 相同，忽略大小写）
+//  2. 根目录（parentId == 0）下 path 必须全局唯一
+//  3. routeName 必须全局唯一（routeName 为空时取 path）
+func checkRouteConfigUnique(m *entity.SysMenu) (bool, error) {
+	routeName := m.RouteName
+	if routeName == "" {
+		routeName = m.Path
+	}
+	list, err := repository.SelectMenusByPathOrRouteName(m.Path, routeName)
+	if err != nil {
+		return false, err
+	}
+	for i := range list {
+		it := list[i]
+		if it.MenuID == m.MenuID {
+			continue
+		}
+		dbRouteName := it.RouteName
+		if dbRouteName == "" {
+			dbRouteName = it.Path
+		}
+		switch {
+		case strings.EqualFold(m.Path, it.Path) && m.ParentID == it.ParentID:
+			return false, nil
+		case strings.EqualFold(m.Path, it.Path) && m.ParentID == MENU_ROOT_ID:
+			return false, nil
+		case strings.EqualFold(routeName, dbRouteName):
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+// menuNameUniqueErr 菜单名重复的文案（SysMenuController.java:91/115）。
+func menuNameUniqueErr(verb, name string) error {
+	return fmt.Errorf("%s菜单'%s'失败，菜单名称已存在", verb, name)
+}
+
+// InsertMenu 新增菜单，等价 SysMenuController.add(L87-103) 的三条校验。
+func InsertMenu(lu *entity.LoginUser, m *entity.SysMenu) error {
+	m.CreateBy = usernameOf(lu)
+	ok, err := checkMenuNameUnique(m)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return menuNameUniqueErr("新增", m.MenuName)
+	}
+	if m.IsFrame == config.YesFrame && !isHTTP(m.Path) {
+		return fmt.Errorf("新增菜单'%s'失败，地址必须以http(s)://开头", m.MenuName)
+	}
+	ok, err = checkRouteConfigUnique(m)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("新增菜单'%s'失败，路由名称或地址已存在", m.MenuName)
+	}
+	return repository.InsertMenu(m)
+}
+
+// UpdateMenu 修改菜单，等价 SysMenuController.edit(L111-131) 的四条校验。
+func UpdateMenu(lu *entity.LoginUser, m *entity.SysMenu) error {
+	m.UpdateBy = usernameOf(lu)
+	ok, err := checkMenuNameUnique(m)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return menuNameUniqueErr("修改", m.MenuName)
+	}
+	if m.IsFrame == config.YesFrame && !isHTTP(m.Path) {
+		return fmt.Errorf("修改菜单'%s'失败，地址必须以http(s)://开头", m.MenuName)
+	}
+	if m.MenuID == m.ParentID {
+		return fmt.Errorf("修改菜单'%s'失败，上级菜单不能选择自己", m.MenuName)
+	}
+	ok, err = checkRouteConfigUnique(m)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("修改菜单'%s'失败，路由名称或地址已存在", m.MenuName)
+	}
+	return repository.UpdateMenu(m)
+}
+
+// UpdateMenuSort 保存菜单排序，等价 updateMenuSort(L339-352)。
+//
+// Java 用 String[] split(",") 后逐个更新，任一转换失败抛 "保存排序异常，请联系管理员"。
+func UpdateMenuSort(menuIDs, orderNums []string) error {
+	if len(menuIDs) != len(orderNums) {
+		return errors.New("保存排序异常，请联系管理员")
+	}
+	for i := range menuIDs {
+		id, err := strconv.ParseInt(strings.TrimSpace(menuIDs[i]), 10, 64)
+		if err != nil {
+			return errors.New("保存排序异常，请联系管理员")
+		}
+		num, err := strconv.Atoi(strings.TrimSpace(orderNums[i]))
+		if err != nil {
+			return errors.New("保存排序异常，请联系管理员")
+		}
+		if err := repository.UpdateMenuSort(id, num); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// DeleteMenu 删除菜单，等价 SysMenuController.remove(L153-164) 的两条前置校验。
+func DeleteMenu(menuID int64) error {
+	has, err := repository.HasChildByMenuID(menuID)
+	if err != nil {
+		return err
+	}
+	if has {
+		return errors.New("存在子菜单,不允许删除")
+	}
+	used, err := repository.CheckMenuExistRole(menuID)
+	if err != nil {
+		return err
+	}
+	if used {
+		return errors.New("菜单已分配,不允许删除")
+	}
+	return repository.DeleteMenuByID(menuID)
 }

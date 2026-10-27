@@ -79,6 +79,8 @@ var scopeFiles = map[string]bool{
 	"SysNoticeController.java":   true,
 	"SysProfileController.java":  true,
 	"CommonController.java":      true,
+	// 菜单管理原属二期清单，因前端"系统管理 > 菜单管理"页面直接报错而提前落地。
+	"SysMenuController.java": true,
 }
 
 // deferPathKeywords 本期明确不做的路径（Excel 导入导出，见 commit message 遗留项）。
@@ -402,12 +404,16 @@ func TestPermRoutesNoDuplicatePath(t *testing.T) {
 func TestRegisteredRoutesHavePermEntry(t *testing.T) {
 	// 无需权限串的白名单（1a 已交付 + 静态资源）
 	whitelist := map[string]bool{
-		"GET /captchaImage":      true,
-		"POST /login":            true,
-		"POST /logout":           true,
-		"GET /getInfo":           true,
-		"GET /getRouters":        true,
-		"GET /profile/*filepath": true,
+		"GET /captchaImage": true,
+		"POST /login":       true,
+		"POST /logout":      true,
+		"GET /getInfo":      true,
+		"GET /getRouters":   true,
+		// 静态资源（router.go 的 r.Static，对齐 ResourcesConfig.java:33-34）。
+		// gin 的 Static 会同时注册 GET 与 HEAD 两个方法，两个都要在白名单里，
+		// 否则这道护栏会把 HEAD 报成"无归属"。
+		"GET /profile/*filepath":  true,
+		"HEAD /profile/*filepath": true,
 	}
 	registered := map[string]bool{}
 	for _, r := range New().Routes() {

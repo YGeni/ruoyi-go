@@ -33,6 +33,22 @@ func New() *gin.Engine {
 	auth := handler.AuthHandler{}
 	common := handler.CommonHandler{}
 
+	// 静态资源：等价 ResourcesConfig.java:33-34 的
+	//
+	//	registry.addResourceHandler(Constants.RESOURCE_PREFIX + "/**")
+	//	        .addResourceLocations("file:" + RuoYiConfig.getProfile() + "/");
+	//
+	// sys_user.avatar 存的就是 "/profile/avatar/2026/10/28/xxx.png"，
+	// 前端 userAvatar.vue:136 拼成 VITE_APP_BASE_API + imgUrl 后直接当 <img src>，
+	// 没有这个映射头像预览会 404（前端不做容错，直接显示破图）。
+	//
+	// 免鉴权：SecurityConfig.java:105 对 GET /profile/** 是 permitAll。
+	// http.FileServer 自身会清掉 ".."，不存在目录穿越。
+	//
+	// 注意 profile 目录可能还不存在（还没上传过任何文件），
+	// gin.Static 对不存在的根目录不会 panic，只是请求返回 404，与 Java 行为一致。
+	r.Static(config.ResourcePrefix, config.C.RuoYi.Profile)
+
 	// 匿名放行：对齐 SecurityConfig.java:101-108 的 /login、/captchaImage
 	r.GET("/captchaImage", auth.CaptchaImage)
 	r.POST("/login", auth.Login)
@@ -43,6 +59,7 @@ func New() *gin.Engine {
 	r.GET("/getRouters", middleware.JWTAuth(), auth.GetRouters)
 
 	user := system.UserHandler{}
+	menu := system.MenuHandler{}
 	role := system.RoleHandler{}
 	dept := system.DeptHandler{}
 	post := system.PostHandler{}
@@ -63,6 +80,17 @@ func New() *gin.Engine {
 	perm(r, "GET", "/common/download", common.Download)
 
 	profile := system.ProfileHandler{}
+	// ------------------------------------------------------------ 系统管理 - 菜单
+	perm(r, "GET", "/system/menu/list", menu.List)
+	perm(r, "GET", "/system/menu/treeselect", menu.TreeSelect)
+	perm(r, "GET", "/system/menu/roleMenuTreeselect/:roleId", menu.RoleMenuTreeSelect)
+	perm(r, "POST", "/system/menu", menu.Add)
+	perm(r, "PUT", "/system/menu", menu.Edit)
+	perm(r, "PUT", "/system/menu/updateSort", menu.UpdateSort)
+	// :menuId 通配段必须最后注册，否则会吃掉上面的静态段
+	perm(r, "DELETE", "/system/menu/:menuId", menu.Remove)
+	perm(r, "GET", "/system/menu/:menuId", menu.GetInfo)
+
 	// ------------------------------------------------------------ 个人信息
 	//
 	// /system/user/profile 必须注册在 /system/user/:userId **之前**，

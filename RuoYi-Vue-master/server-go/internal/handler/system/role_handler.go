@@ -294,7 +294,23 @@ func (RoleHandler) DeptTree(c *gin.Context) {
 	if ids == nil {
 		ids = []int64{}
 	}
-	result.OK(c, result.SuccessData(map[string]any{"checkedKeys": ids}))
+	// Java 的 SysRoleController.java:250-251 会 put 两个键：checkedKeys 与 depts。
+	// 前端 src/views/system/role/index.vue:458 读的是 response.depts，
+	// 只回 checkedKeys 会让"数据权限" Tab 的部门树一片空白。
+	lu := mustLoginUser(c)
+	depts, _, err := service.SelectDeptList(c, lu, &query.DeptList{},
+		&page.PageDomain{PageNum: 1, PageSize: 10000})
+	if err != nil {
+		fail(c, err)
+		return
+	}
+	if depts == nil {
+		depts = []entity.SysDept{}
+	}
+	// 注意 **必须挂在顶层，不能塞进 data**：
+	// Java 的 AjaxResult.success() 只含 code/msg，两个 put 都是顶层键，
+	// 前端 src/views/system/role/index.vue:458 读的是 response.depts。
+	result.OK(c, result.Success().Put("checkedKeys", ids).Put("depts", depts))
 }
 
 // AllocatedList GET /system/role/authUser/allocatedList

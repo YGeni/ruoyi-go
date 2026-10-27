@@ -357,10 +357,25 @@ Go 的 `Create` 会显式写出空串，导致 `del_flag=''`，新记录在所�
 - `http.MaxBytesReader` 报的是英文 `http: request body too large`，需换成中文文案（仍是 JSON）。
 - `DryRun` 的 `Session()` 要放在链式调用**之前**：gorm 会在 `Find` 时再克隆一次 Statement，放链尾拿到的 `tx.Statement.SQL` 是空的。
 
+### 追记（菜单管理落地时，同为实测）
+
+- **值语义建树会吃掉深层 children**：Java 的 `recursionFn` 依赖**对象引用**（`getChildList` 返回的是 list 里的同一批对象），
+  Go 照抄成 `menu.Children = children` 之后再 `child := children[i]; recursionFn(&child)` 就错了——
+  `children` 是值拷贝，对 `&child` 的修改不会回写。必须**先递归再赋值**（`recursionFn(list, &children[i])` 循环结束后再 `menu.Children = children`）。
+  库里 `sys_menu` 最大层级是 4，该 bug 会让 `getRouters` 丢掉三级路由、菜单树深层节点出不来。回归用例 `TestBuildMenuTreeDeep`。
+- **本库 `sys_menu.is_frame` / `is_cache` 是 `int`，不是若依标准的 `char(1)`**（`DESC sys_menu` 实测；`visible`/`status`/`menu_type` 仍是 char(1)）。
+  实体按 Java 侧建模为 string，插入空串会报 `Error 1366 Incorrect integer value: '' for column 'is_cache'`。
+  写入时必须 Omit 空的这两个字段（由 DDL 默认值 1 / 0 填充）。**同理：任何"以为一定是 char(1)"的列，写入前先 DESC 确认。**
+- **`AjaxResult` 的 `put` 是顶层键，不是 `data`**：Java 的 `AjaxResult.success()` 只含 `code`/`msg`，
+  `.put("depts", ...)` 后前端读的是 `response.depts`（如 `src/views/system/role/index.vue:458`）。
+  Go 侧若写成 `result.SuccessData(map{...})` 会把键塞进 `data`，前端拿到 `undefined`。
+  凡 Java 用 `ajax.put(...)` 的，Go 一律 `result.Success().Put(k, v)`。
+
 ## 第 1 期 1b 交付记录（2026-10-28）
 
 **范围**：`pkg/page` 分页 + 用户 CRUD + `@DataScope` 五个落点 + `perm_table.go` 双向 diff 护栏 +
-role/dept/post/dict/config/notice 模块 CRUD + notice 3.9 五个新端点 + `pkg/filex` 与 profile 四接口。
+role/dept/post/dict/config/notice 模块 CRUD + notice 3.9 五个新端点 + `pkg/filex` 与 profile 四接口 +
+菜单管理（8 个端点，原属二期，因前端页面 404 提前落地）。
 
 **三个必须记住的坑（勿重犯，均为实测 bug）**
 
@@ -382,7 +397,7 @@ role/dept/post/dict/config/notice 模块 CRUD + notice 3.9 五个新端点 + `pk
 （monitor 26 / system:menu 5 / tool:gen 13 / quartz 17 / Excel 导入导出 8 / 其他 3）。
 每落地一个 controller，就把对应文件加进 `perm_diff_test.go` 的 `scopeFiles`，
 该 controller 下的端点自动从「二期延后」转为「范围内」并要求绑定路由，否则 diff 测试会红。
-这 72 条目前只登记常量不绑路由，**不实现测试也是绿的**，别误以为已覆盖。
+这 64 条目前只登记常量不绑路由，**不实现测试也是绿的**，别误以为已覆盖。
 
 **未做 / 遗留**：`monitor/*`、`tool/gen`、Excel 导入导出、XSS/Referer/OpLog 中间件、动态数据源、
 CORS（dev 走 vite proxy 同源，暂不需要）、异步日志 worker 池；前端实机联调尚未做。

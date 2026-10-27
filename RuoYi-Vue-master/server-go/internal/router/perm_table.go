@@ -147,6 +147,15 @@ var permRoutes = []RoutePerm{
 	{"POST", "/system/notice", PermSystemNoticeAdd, "SysNoticeController"},
 	{"PUT", "/system/notice", PermSystemNoticeEdit, "SysNoticeController"},
 	{"GET", "/system/notice/list", PermSystemNoticeList, "SysNoticeController"},
+	// SysMenuController.java
+	{"POST", "/system/menu", PermSystemMenuAdd, "SysMenuController"},
+	{"PUT", "/system/menu", PermSystemMenuEdit, "SysMenuController"},
+	{"GET", "/system/menu/list", PermSystemMenuList, "SysMenuController"},
+	{"GET", "/system/menu/roleMenuTreeselect/:roleId", "", "SysMenuController"},
+	{"GET", "/system/menu/treeselect", "", "SysMenuController"},
+	{"PUT", "/system/menu/updateSort", PermSystemMenuEdit, "SysMenuController"},
+	{"DELETE", "/system/menu/:menuId", PermSystemMenuRemove, "SysMenuController"},
+	{"GET", "/system/menu/:menuId", PermSystemMenuQuery, "SysMenuController"},
 	{"GET", "/system/notice/listTop", "", "SysNoticeController"},
 	{"POST", "/system/notice/markRead", "", "SysNoticeController"},
 	{"POST", "/system/notice/markReadAll", "", "SysNoticeController"},
@@ -190,7 +199,7 @@ var permRoutes = []RoutePerm{
 	{"GET", "/system/user/:userId", PermSystemUserQuery, "SysUserController"},
 }
 
-// permRoutesPhase2 二期延后端点清单（72 条）。
+// permRoutesPhase2 二期延后端点清单（64 条）。
 //
 // **本表不参与路由绑定**，仅作为交接清单存在：
 //   - 唯一事实来源是 internal/router/perm_diff_test.go 的 scopeFiles /
@@ -259,15 +268,6 @@ var permRoutesPhase2 = []RoutePerm{
 	{"GET", "/monitor/logininfor/list", PermMonitorLogininforList, "SysLogininforController"},               // TODO(phase2) SysLogininforController.java:32
 	{"GET", "/monitor/logininfor/unlock/:userName", PermMonitorLogininforUnlock, "SysLogininforController"}, // TODO(phase2) SysLogininforController.java:74
 	{"POST", "/monitor/logininfor/export", PermMonitorLogininforExport, "SysLogininforController"},          // TODO(phase2) SysLogininforController.java:47
-	// SysMenuController.java
-	{"DELETE", "/system/menu/:menuId", PermSystemMenuRemove, "SysMenuController"}, // TODO(phase2) SysMenuController.java:150
-	{"GET", "/system/menu/:menuId", PermSystemMenuQuery, "SysMenuController"},     // TODO(phase2) SysMenuController.java:51
-	{"GET", "/system/menu/list", PermSystemMenuList, "SysMenuController"},         // TODO(phase2) SysMenuController.java:34
-	{"GET", "/system/menu/roleMenuTreeselect/:roleId", "", "SysMenuController"},   // TODO(phase2) SysMenuController.java:71
-	{"GET", "/system/menu/treeselect", "", "SysMenuController"},                   // TODO(phase2) SysMenuController.java:61
-	{"POST", "/system/menu", PermSystemMenuAdd, "SysMenuController"},              // TODO(phase2) SysMenuController.java:84
-	{"PUT", "/system/menu", PermSystemMenuEdit, "SysMenuController"},              // TODO(phase2) SysMenuController.java:108
-	{"PUT", "/system/menu/updateSort", PermSystemMenuEdit, "SysMenuController"},   // TODO(phase2) SysMenuController.java:136
 	// SysOperlogController.java
 	{"DELETE", "/monitor/operlog/:operIds", PermMonitorOperlogRemove, "SysOperlogController"}, // TODO(phase2) SysOperlogController.java:53
 	{"DELETE", "/monitor/operlog/clean", PermMonitorOperlogRemove, "SysOperlogController"},    // TODO(phase2) SysOperlogController.java:61
