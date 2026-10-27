@@ -3,7 +3,11 @@
 方案评审通过之后，**开一个新会话**，把下面这段粘进去。
 
 ```text
-按上一轮确认的方案，实现第一期：项目骨架 + 配置 + 认证授权 + 用户/角色/菜单/字典。
+按 AGENTS.md §7–§12（方案评审定稿，必读）确认的方案，实现
+第 1 期中的 **1a 步**（见 §9"实施顺序"）：项目骨架 + 配置 + 认证授权 + 登录/菜单/验证码。
+
+范围严格限定为 1a，**不要写 1b**（数据权限、各模块 CRUD、文件上传）的内容。
+目标：前端能用 admin/admin123 登录成功，并看到完整菜单。
 
 【严格限定范围，超出部分不要写】
 参照实现（自行读取）：
@@ -19,7 +23,8 @@
   utils/request.js、store/modules/permission.js、views/login.vue、api/login.js、api/menu.js
 
 【本期产出】
-1. go.mod、目录骨架、viper 配置（严格对齐 application.yml + application-druid.yml，Redis key 名沿用）
+1. go.mod（**语言版本必须写 go 1.25**，本机实测 go1.26.5，禁止写 1.22）、目录骨架、
+   viper 配置（严格对齐 application.yml + application-druid.yml，Redis key 名沿用）
 2. 验证码 / 登录 / 退出 / 获取用户信息 / getRouters 五个接口
 3. JWT 签发与自动刷新，登录态存 Redis，key 沿用 login_tokens:
    校验时必须剥离 Authorization 头的 "Bearer " 前缀（前端恒定带前缀，见 src/utils/request.js:32；
@@ -42,7 +47,11 @@
 【流程与验收】
 - 先列出本次要创建的文件清单，等我确认后再逐个实现，每完成一个文件同步进度
 - 完成后依次执行 go build ./... 和 go vet ./...，必须零报错零告警
-- 为权限中间件和数据权限各写一个表驱动单测，覆盖 admin 直通、跨部门数据隔离两个场景
+- 为**权限中间件**写表驱动单测，必须覆盖三种情形：普通权限命中、`*:*:*` 直通、
+  无权限返回 403 且 msg 为"没有权限，请联系管理员授权"
+- 为 **BaseModel 时间填充（BeforeCreate/BeforeUpdate hook）与 del_flag 常量**
+  各写单测（原库所有表无 DB 默认时间，且 del_flag 是 '0'/'2' 三态字符串，见 §12 风险 3）
+- 数据权限单测不在本期，留给 1b
 - 给出可实际执行的 curl 冒烟序列（取验证码 → 登录 → 带 token 调 getRouters），
   并真实跑一遍贴出结果。跑不通的接口如实说明，不要谎称通过
 - 全部验证通过后 git commit 一次，commit message 说明本期范围与遗留项

@@ -1,0 +1,74 @@
+# 对齐 ruoyi-admin/src/main/resources/application.yml + application-druid.yml
+# 键名尽量与 Java 侧保持一致；Go 侧用 viper 读取（config/config.go）
+
+server:
+  # application.yml: server.port = 8080（前端 vite.config.js:5 的代理目标，禁止改动）
+  port: 8080
+  # gin 模式：debug / release / test
+  mode: debug
+
+ruoyi:
+  name: RuoYi
+  version: 3.9.2
+  # application.yml: ruoyi.profile（上传根目录）
+  profile: D:/ruoyi/uploadPath
+  # application.yml: ruoyi.addressEnabled（IP 归属地查询开关，默认关闭）
+  addressEnabled: false
+  # application.yml: ruoyi.captchaType = math（math 数字计算 / char 字符验证）
+  captchaType: math
+
+# application.yml: user.password.*
+user:
+  password:
+    maxRetryCount: 5
+    lockTime: 10
+
+# application-druid.yml: spring.datasource.druid.master
+datasource:
+  master:
+    host: localhost
+    port: 3306
+    database: ry-vue
+    username: root
+    password: password
+    # 原 JDBC url 参数：useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
+    params: charset=utf8mb4&parseTime=True&loc=Local&timeout=30s&readTimeout=60s&writeTimeout=60s
+    # application-druid.yml: initialSize / minIdle / maxActive / maxWait
+    initialSize: 5
+    minIdle: 10
+    maxActive: 20
+    maxWait: 60000
+  # application-druid.yml: spring.datasource.druid.slave（默认关闭，1a 不实现路由）
+  slave:
+    enabled: false
+    host: ""
+    port: 3306
+    database: ""
+    username: ""
+    password: ""
+
+# application.yml: spring.data.redis
+redis:
+  host: localhost
+  port: 6379
+  database: 0
+  password: ""
+
+# application.yml: token.*
+token:
+  header: Authorization
+  secret: abcdefghijklmnopqrstuvwxyz
+  expireTime: 30
+
+# application.yml: logging.level.com.ruoyi
+log:
+  level: debug
+
+# application.yml: xss.* / referer.*（1a 未启用对应中间件，配置先对齐占位）
+xss:
+  enabled: true
+  excludes: /system/notice
+  urlPatterns: /system/*,/monitor/*,/tool/*
+referer:
+  enabled: false
+  allowedDomains: localhost,127.0.0.1,ruoyi.vip,www.ruoyi.vip
