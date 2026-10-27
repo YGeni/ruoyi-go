@@ -1,7 +1,6 @@
 package system
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/YGeni/ruoyi-go/server-go/internal/model/entity"
@@ -18,7 +17,17 @@ type DeptHandler struct{}
 
 // List GET /system/dept/list
 //
-// 等价 SysDeptController.java:52-59：startPage() + selectDeptList + getDataTable。
+// 等价 SysDeptController.java:43-47：**没有 startPage()，直接 success(depts)**。
+//
+// 返回体必须是 {code, msg, data:[...]}，不能是 getDataTable 的 {rows, total}。
+// 前端 src/views/system/dept/index.vue:193 写的是
+//
+//	deptList.value = proxy.handleTree(response.data, "deptId")
+//
+// 之前这里错写成 DataTable，response.data 是 undefined，
+// 前端 handleTree 里的 for...of 直接抛
+// "undefined is not an object (evaluating 'd of data')"（ruoyi.js:167）。
+//
 // 该接口是 **DataScope 五个落点之一**（@DataScope(deptAlias="d")，无 userAlias）。
 func (DeptHandler) List(c *gin.Context) {
 	lu, ok := loginUser(c)
@@ -30,7 +39,7 @@ func (DeptHandler) List(c *gin.Context) {
 		fail(c, err)
 		return
 	}
-	rows, total, err := service.SelectDeptList(c, lu, &q, page.FromRequest(c))
+	rows, _, err := service.SelectDeptList(c, lu, &q, page.NoLimit())
 	if err != nil {
 		fail(c, err)
 		return
@@ -38,7 +47,7 @@ func (DeptHandler) List(c *gin.Context) {
 	if rows == nil {
 		rows = []entity.SysDept{}
 	}
-	c.JSON(http.StatusOK, result.DataTable(rows, total))
+	result.OK(c, result.SuccessData(rows))
 }
 
 // ListExclude GET /system/dept/list/exclude/:deptId
@@ -62,7 +71,7 @@ func (DeptHandler) ListExclude(c *gin.Context) {
 		fail(c, err)
 		return
 	}
-	rows, _, err := service.SelectDeptList(c, lu, &q, &page.PageDomain{PageNum: 1, PageSize: 10000})
+	rows, _, err := service.SelectDeptList(c, lu, &q, page.NoLimit())
 	if err != nil {
 		fail(c, err)
 		return

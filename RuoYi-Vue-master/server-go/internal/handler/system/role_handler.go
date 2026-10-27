@@ -298,8 +298,7 @@ func (RoleHandler) DeptTree(c *gin.Context) {
 	// 前端 src/views/system/role/index.vue:458 读的是 response.depts，
 	// 只回 checkedKeys 会让"数据权限" Tab 的部门树一片空白。
 	lu := mustLoginUser(c)
-	depts, _, err := service.SelectDeptList(c, lu, &query.DeptList{},
-		&page.PageDomain{PageNum: 1, PageSize: 10000})
+	depts, _, err := service.SelectDeptList(c, lu, &query.DeptList{}, page.NoLimit())
 	if err != nil {
 		fail(c, err)
 		return

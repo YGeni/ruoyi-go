@@ -224,6 +224,20 @@ func (p *PageDomain) Offset() int {
 //
 // 注意：db 上的 Where/Joins/Scopes 等条件会被完整保留；
 // 调用方传进来的 db 不应自带 Order/Limit/Offset。
+// NoLimitPageSize 给"Java 侧没有 startPage() 的列表接口"用的页大小。
+const NoLimitPageSize = 10000
+
+// NoLimit 返回一个不分页的 PageDomain。
+//
+// 用于对齐 Java 侧**没写 startPage()**、直接 success(list) 的端点，
+// 例如 SysDeptController.java:43-47 的 /system/dept/list。
+//
+// 注意**不能**直接传 &PageDomain{}：Paginate 末行是无条件的
+// q.Limit(p.PageSize)，PageSize=0 会拼出 LIMIT 0 -> 返回空列表。
+func NoLimit() *PageDomain {
+	return &PageDomain{PageNum: 1, PageSize: NoLimitPageSize, Reasonable: DefaultReasonable}
+}
+
 func Paginate[T any](db *gorm.DB, p *PageDomain, alias, countExpr string, dest *[]T) (int64, error) {
 	if p == nil {
 		p = &PageDomain{PageNum: DefaultPageNum, PageSize: DefaultPageSize, Reasonable: DefaultReasonable}
