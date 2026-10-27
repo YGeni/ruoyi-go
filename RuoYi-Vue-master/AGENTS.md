@@ -42,7 +42,8 @@ Gin + GORM + Casbin + golang-jwt/v5 + go-redis/v9 + robfig/cron/v3 + excelize + 
 
 - `docs/go-migration/00-prepare.md` — 前置准备（一键脚本 `server-go/scripts/setup.sh`：拉前端、起 MySQL/Redis、初始化 31 张表）
 - `docs/go-migration/01-review-prompt.md` — 第 0 期：交给 Codex 的**方案评审**提示词
-- `docs/go-migration/02-phase1-prompt.md` — 第 1 期：骨架 + 认证授权落地提示词
+- `docs/go-migration/02-phase1-prompt.md` — 第 1 期 **1a**：骨架 + 认证授权落地提示词（已交付 35748a9）
+- `docs/go-migration/02b-phase1b-prompt.md` — 第 1 期 **1b**：分页 + 用户 CRUD + 数据权限 + 其余模块
 - `docs/go-migration/03-module-prompt-template.md` — 后续模块通用提示词模板
 - `AGENTS.md` §7–§12 — **方案评审结论（2026-10-28 定稿）**：目录结构 / go.mod / 三期计划 / 8 个 Java 机制的 Go 替代 / 前端契约清单 / 三大风险。落地实现前先读这一节。
 
@@ -253,3 +254,34 @@ Java 侧是 AOP + `PermissionContextHolder` request scope + `${}` 拼串三件�
 **风险 3：写入侧语义差异 + 前端隐性契约**
 `sql/` 全库**无 `ON UPDATE CURRENT_TIMESTAMP`、无 `CURRENT_TIMESTAMP` 默认值**（grep 零命中），`create_time/update_time` 全靠应用层写；`del_flag` 为 `'0'/'2'` 三态字符串（GORM `DeletedAt` 语义相反，不可直接复用）；`sys_job` 复合主键、`sys_job_log` 无 `update_time`、4 张关联表无任何时间字段；`sys_dict_type.dict_type` 与 `sys_notice_read(user_id, notice_id)` 唯一约束；`char(1)`/`int` 的 0/1 标记建议统一建模为 `string`。前端侧隐性依赖：`download-filename`、601、1 秒防重、`Bearer ` 前缀、8080 端口。
 规避：①统一 BaseModel 用 `*time.Time` + `BeforeCreate/BeforeUpdate` hook 显式填时间，`del_flag` 用 `string` + 常量 `Exists="0"/Deleted="2"`，**且必须为这两项各写表驱动单测，与权限/数据权限单测同级别必要**；②建库显式 `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`（原 SQL 未声明字符集，`sys_notice.notice_content` 为 longblob 正文）；③维护"前端契约测试矩阵"（登录、getInfo 六字段、getRouters 三值、导出头、上传返回、401/500/601 各一例），每次发版回归。
+
+## 第 1 期 1a 已交付（commit 35748a9，30 文件 + go.sum）
+
+**已实测验证**：`gofmt -l` 空、`go build ./...` OK、`go vet ./...` 零输出、`go test ./...` 两个包通过；
+`captchaImage → login → getInfo → getRouters` 全链路跑通（`meta` 正常，`Preload` dept/roles 生效）；
+`getInfo` 六字段齐全；无 token / logout 后 401；`pwd_err_cnt:admin` 递增且 TTL 600s；
+`sys_logininfor` 同步写入、`sys_user.login_ip/login_date` 回写均已确认。
+
+**未验证（进入 1b 前必须补）**
+- token 剩余不足 20 分钟时的自动刷新
+- InnerLink 分支：库内无 `is_frame=1` + http 路径菜单，**无数据可触发**，需用真实外链菜单补验
+
+**已知偏差（已留 `// DIFF(review)`）**：验证码输出 PNG（`pkg/captcha/captcha.go`），Java 侧为 JPEG；
+前端固定拼接 `data:image/gif;base64,` 前缀，两者均可显示。
+
+**数据层待办（阻塞 1b 的 diff 类验收）**
+Docker 初始化 SQL 时客户端字符集为 latin1 → `sys_menu.menu_name`、`sys_dict_data.dict_label` 等
+中文被 cp1252 误读后二次编码入库（hex 形如 `C3A7C2B3...`）。**重导数据即可修复，不要改表结构**：
+
+```bash
+docker exec -i ruoyi-go-mysql mysql -uroot -ppassword -e "DROP DATABASE \`ry-vue\`; CREATE DATABASE \`ry-vue\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+for f in sql/quartz.sql sql/ry_20260417.sql; do
+  docker exec -i ruoyi-go-mysql mysql -uroot -ppassword --default-character-set=utf8mb4 ry-vue < "$f"
+done
+```
+
+修完才能让 1b 的列表、二期 Excel 逐格 diff、三期模板逐字节 diff 有意义。
+
+**1b 范围**（详见 `docs/go-migration/02b-phase1b-prompt.md`）：`pkg/page` + 用户 CRUD + `@DataScope` 五分支 GORM Scopes +
+表驱动 golden 测试 + role/dept/post/dict/config/notice + 文件上传下载 + profile。
+**实施顺序硬约束：先做 page → user → DataScope 并验证通过，再铺其余模块。**

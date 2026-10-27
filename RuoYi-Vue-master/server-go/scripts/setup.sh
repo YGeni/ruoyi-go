@@ -57,8 +57,9 @@ count="${count:-0}"
 
 if [[ "${count}" -lt "${EXPECT_TABLES}" ]]; then
   info "表数量 ${count}/${EXPECT_TABLES}，导入 sql 脚本"
-  docker exec -i ruoyi-go-mysql mysql -uroot -ppassword ry-vue < "${REPO_ROOT}/sql/quartz.sql"
-  docker exec -i ruoyi-go-mysql mysql -uroot -ppassword ry-vue < "${REPO_ROOT}/sql/ry_20260417.sql"
+  # 必须显式指定客户端字符集 utf8mb4：否则中文会被按 latin1/cp1252 解读后二次编码入库（乱码）
+  docker exec -i ruoyi-go-mysql mysql -uroot -ppassword --default-character-set=utf8mb4 ry-vue < "${REPO_ROOT}/sql/quartz.sql"
+  docker exec -i ruoyi-go-mysql mysql -uroot -ppassword --default-character-set=utf8mb4 ry-vue < "${REPO_ROOT}/sql/ry_20260417.sql"
   count="$(docker exec -i ruoyi-go-mysql mysql -uroot -ppassword -N -B -e "${count_sql}" | tr -d '[:space:]')"
 fi
 
