@@ -25,9 +25,18 @@ Gin + GORM + Casbin + golang-jwt/v5 + go-redis/v9 + robfig/cron/v3 + excelize + 
 | --- | --- |
 | 项目根目录 | `/Users/mac/Desktop/若依/RuoYi-Vue-master` |
 | 原版本 | RuoYi-Vue 3.9.2 / Spring Boot / Java 17 |
-| 前端参考（不含本仓库） | `/tmp/ruoyi-ui-ref/ruoyi-ui` |
+| 前端参考（相邻目录） | `/Users/mac/Desktop/若依/RuoYi-Vue3-master`（**Vue3**，不是 Vue2） |
+| 服务端口 | 8080（`vite.config.js:5` 的 proxy target） |
 | 配置基线 | `ruoyi-admin/src/main/resources/application.yml`、`application-druid.yml` |
 | 服务端口 / 库 | 8080、MySQL `ry-vue`、Redis db0 |
+
+## 前端契约锚点（一律以 Vue3 前端源码为准）
+
+- `src/utils/request.js:32` — 请求头恒定带 `Authorization: Bearer <token>`，**Go 侧必须剥离 `Bearer ` 前缀**再验签（原实现见 `ruoyi-framework/.../web/service/TokenService.java:219-227`）
+- `src/utils/request.js:78-109` — code 语义：200 成功 / 401 会话失效重登 / 500 错误 / 601 警告，其余非 200 一律 reject
+- `src/store/modules/permission.js:35-97` — `getRouters` 返回树的解析方式：`component` 取 `Layout` / `ParentView` / `InnerLink` 或 views 相对路径；叶子节点会被 `delete children` 与 `delete redirect`
+- `src/views/login.vue:143-150` — 验证码接口返回 `{ captchaEnabled, img, uuid }`，`img` 为**不含** `data:image/gif;base64,` 前缀的裸 base64，前端自行拼接
+- `vite.config.js:5,48-54` — dev 代理目标 `http://localhost:8080`，并去除 `/dev-api` 前缀
 
 ## 迁移文档索引
 

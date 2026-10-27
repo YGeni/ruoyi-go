@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Go(Gin) 迁移前置准备：拉前端契约基准 + 起 MySQL/Redis + 校验数据初始化
+# Go(Gin) 迁移前置准备：校验前端契约基准 + 起 MySQL/Redis + 校验数据初始化
 # 幂等：重复执行安全。任意项目位置均可运行。
 #
 set -euo pipefail
@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 SERVER_GO="${REPO_ROOT}/server-go"
 COMPOSE_FILE="${SERVER_GO}/docker-compose.yml"
-UI_REF="/tmp/ruoyi-ui-ref"
+UI_REF="${UI_REF:-/Users/mac/Desktop/若依/RuoYi-Vue3-master}"
 EXPECT_TABLES=31
 
 info() { printf '\033[36m[info]\033[0m %s\n' "$*"; }
@@ -20,13 +20,14 @@ command -v docker >/dev/null 2>&1 || { err "未检测到 docker，请先安装 D
 docker info >/dev/null 2>&1       || { err "docker 守护进程未运行，请先启动 Docker Desktop"; exit 1; }
 
 # ---- 1. 前端契约基准 ----
-info "1/4 准备前端契约基准 -> ${UI_REF}"
-if [[ -d "${UI_REF}/ruoyi-ui/src" ]]; then
-  ok "已存在，跳过克隆"
+# 前端就在本机（RuoYi-Vue3），不联网克隆。可用 UI_REF 环境变量覆盖路径。
+info "1/4 校验前端契约基准 -> ${UI_REF}"
+if [[ -d "${UI_REF}/src/api" && -d "${UI_REF}/src/store/modules" ]]; then
+  ok "前端存在（RuoYi-Vue3），契约校验以它为准"
 else
-  rm -rf "${UI_REF}"
-  git clone --depth=1 https://github.com/yangzongzhuan/RuoYi-Vue.git "${UI_REF}"
-  ok "克隆完成"
+  err "未在 ${UI_REF} 找到 RuoYi-Vue3 前端源码"
+  err "请检查路径，或用 UI_REF=/your/path ./scripts/setup.sh 指定"
+  exit 1
 fi
 
 # ---- 2. 启动依赖 ----
@@ -72,7 +73,7 @@ cat <<EOF
 准备就绪：
   MySQL   localhost:3306  root/password  db=ry-vue  (${count} 张表)
   Redis   localhost:6379  db0
-  前端契约基准  ${UI_REF}/ruoyi-ui/src
+  前端契约基准  ${UI_REF}  (RuoYi-Vue3, vite proxy -> localhost:8080)
 
 下一步：把 ${REPO_ROOT}/docs/go-migration/01-review-prompt.md 中的代码块
 复制给 Codex，开启第 0 期方案评审。

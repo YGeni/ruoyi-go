@@ -15,17 +15,24 @@
 - ruoyi-system/src/main/resources/mapper/system/ 下的 SysUserMapper.xml、SysMenuMapper.xml、SysRoleMapper.xml
 - ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysLoginController.java
 - ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysMenuController.java（getRouters）
+- 前端契约：/Users/mac/Desktop/若依/RuoYi-Vue3-master/src 下的
+  utils/request.js、store/modules/permission.js、views/login.vue、api/login.js、api/menu.js
 
 【本期产出】
 1. go.mod、目录骨架、viper 配置（严格对齐 application.yml + application-druid.yml，Redis key 名沿用）
 2. 验证码 / 登录 / 退出 / 获取用户信息 / getRouters 五个接口
 3. JWT 签发与自动刷新，登录态存 Redis，key 沿用 login_tokens:
+   校验时必须剥离 Authorization 头的 "Bearer " 前缀（前端恒定带前缀，见 src/utils/request.js:32；
+   原实现见 ruoyi-framework/.../web/service/TokenService.java:219-227）
 4. 权限中间件替代 @PreAuthorize hasPermi / hasAnyPermi / hasRole / hasAnyRoles，admin 直通
 5. 密码 BCrypt + Redis 登录失败计数（pwd_err_cnt:，5 次锁 10 分钟）
 6. resultMap 的 association/collection（user→dept、user→roles）用 GORM Preload 实现
 
 【硬性约束】
-- 返回体字段名与语义必须能被 /tmp/ruoyi-ui-ref/ruoyi-ui 直接消费，禁止自定义 code 值
+- 服务端口必须是 8080，与 vite.config.js:5 的代理目标一致
+- 返回体字段名与语义必须能被本机 RuoYi-Vue3 前端直接消费，禁止自定义 code 值
+- 验证码返回 { captchaEnabled, img, uuid }，img 为不含 data URI 前缀的裸 base64
+- getRouters 的字段必须满足 src/store/modules/permission.js:59-97 的解析方式
 - 禁止字符串拼接 SQL：所有动态条件、数据权限片段一律用 GORM 构造器参数化
 - find_in_set(ancestors)、date_format、sysdate() 等 MySQL 专有写法改写为等价实现，
   并在改动处注明原语义

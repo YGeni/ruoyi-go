@@ -15,14 +15,13 @@ cd /Users/mac/Desktop/若依/RuoYi-Vue-master
 
 ## 手工步骤（脚本的等价展开）
 
-### 1. 拉取缺失的前端用作契约基准
+### 1. 前端契约基准（在本机，无需克隆）
 
-本仓库不包含前端（无 `ruoyi-ui`、无 `package.json`、无 `.vue`），但后端契约必须能被前端直接消费。
+前端仓库 `/Users/mac/Desktop/若依/RuoYi-Vue3-master`（RuoYi-**Vue3**）与后端同级相邻，
+`setup.sh` 会校验它存在；路径不同时用 `UI_REF=/your/path ./scripts/setup.sh` 覆盖。
 
-```bash
-git clone --depth=1 https://github.com/yangzongzhuan/RuoYi-Vue.git /tmp/ruoyi-ui-ref
-ls /tmp/ruoyi-ui-ref/ruoyi-ui/src   # 后续所有"契约验证"都以它为准
-```
+**注意**：脚本不再联网克隆Vue2 版仓库——Vue2 的 `getRouters` 返回结构与 Vue3 不同，
+拿它做契约基准会导致第 1 期验收对不上。一切契约以本仓库 Vue3 前端源码为准。
 
 ### 2. 启动本地依赖
 

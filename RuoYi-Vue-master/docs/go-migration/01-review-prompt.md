@@ -37,9 +37,20 @@ robfig/cron/v3 + excelize + viper + zap + go-playground/validator + base64Captch
    f) Velocity 代码生成器（后端模板需在 Go 侧重做，vm/vue/* 与 vm/ts/* 前端模板必须保留）
    g) XSS Filter（排除 /system/notice）、Referer 防盗链、Repeatable Body 过滤器
    h) @DataSource 动态数据源（注意 slave 默认 enabled:false）
-5. 必须与原前端保持一致的契约清单。请读 /tmp/ruoyi-ui-ref/ruoyi-ui/src 下的实际调用后列出：
-   统一返回体 AjaxResult、列表返回体 TableDataInfo、分页入参、401/403 语义、
-   getRouters 的菜单树结构、验证码接口返回结构、导入导出接口的文件名与 Content-Type
+5. 必须与原前端保持一致的契约清单。前端源码在本机 /Users/mac/Desktop/若依/RuoYi-Vue3-master
+   （RuoYi-**Vue3**，不是 Vue2），请实际读它的源码后列出，重点核对以下已确认的锚点：
+   - src/utils/request.js:78-109 —— code 语义：200 成功、401 会话失效跳登录、
+     500 错误提示、601 警告；非 200 一律 reject
+   - src/utils/request.js:32 —— 请求头 Authorization 带 "Bearer " 前缀，
+     Go 侧必须剥离前缀再验签（对应原实现 ruoyi-framework/.../web/service/TokenService.java:219-227）
+   - src/store/modules/permission.js:35-97 —— getRouters 的返回值由它解析：
+     component 取值 'Layout' / 'ParentView' / 'InnerLink' 或 views 相对路径；
+     叶子节点会被 delete children 与 redirect
+   - src/views/login.vue:143-150 —— 验证码接口返回 { captchaEnabled, img, uuid }，
+     img 是不含 "data:image/gif;base64," 前缀的裸 base64，前端自行拼接
+   - vite.config.js:5,48-54 —— 前端 dev 代理目标是 http://localhost:8080 并去掉 /dev-api 前缀，
+     Go 后端若改用其他端口需同步改这里
+   - 统一返回体 AjaxResult、列表返回体 TableDataInfo、分页入参、导入导出的文件名与 Content-Type
 6. 三条你认为最大的技术风险，以及规避手段
 
 格式要求：先用 300 字以内给结论，再展开。所有结论必须标注来源文件路径，
