@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+.AppleDouble
+._*
+
+# IDE
+.idea
+*.iml
+*.ipr
+*.iws
+.vscode
+.classpath
+.project
+.settings
+.factorypath
+
+# Java / Maven
+target/
+build/
+*.log
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.local
+.temp
+.cache
+
+# Env
+*.local
+.env.local
+.env.*.local

@@ -1,0 +1,48 @@
+# Go(Gin) 迁移期本地依赖：MySQL + Redis
+# 凭据与 ruoyi-admin/src/main/resources/application-druid.yml 保持一致：root / password / ry-vue
+# 用法：./scripts/setup.sh  或  docker compose -f server-go/docker-compose.yml up -d
+
+name: ruoyi-go-dev
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ruoyi-go-mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --default-time-zone=+08:00
+      - --lower_case_table_names=1
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: ry-vue
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # 首次初始化会按目录内文件名顺序执行 *.sql
+      - ../sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-ppassword", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: ruoyi-go-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "no", "--save", ""]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  mysql_data:
