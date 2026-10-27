@@ -15,6 +15,7 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/pkg/jwtx"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/redisx"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/securityx"
+	"github.com/YGeni/ruoyi-go/server-go/pkg/uax"
 
 	"github.com/google/uuid"
 )
@@ -38,7 +39,7 @@ type LoginBody struct {
 // 验证码校验 -> 前置校验 -> 用户状态校验 -> 密码校验 -> 记录登录信息 -> 签发令牌。
 //
 // 返回 JWT 字符串（前端存入 Cookie: Admin-Token，请求头带 "Bearer " 前缀）。
-func Login(body LoginBody, ip string) (string, error) {
+func Login(body LoginBody, ip, userAgent string) (string, error) {
 	if err := validateCaptcha(body, ip); err != nil {
 		return "", err
 	}
@@ -62,7 +63,7 @@ func Login(body LoginBody, ip string) (string, error) {
 	if err := repository.UpdateLoginInfo(user.UserID, ip, time.Now()); err != nil {
 		return "", err
 	}
-	return createToken(user, ip)
+	return createToken(user, ip, userAgent)
 }
 
 // Logout 退出登录，等价于 LogoutSuccessHandlerImpl.java:47-51：删除 Redis 登录态。
@@ -142,7 +143,7 @@ func loadUserByUsername(username, ip string) (*entity.SysUser, error) {
 // ---------- 令牌：对应 TokenService.java ----------
 
 // createToken 等价于 TokenService.createToken(L115-126)。
-func createToken(user *entity.SysUser, ip string) (string, error) {
+func createToken(user *entity.SysUser, ip, userAgent string) (string, error) {
 	perms, err := GetMenuPermission(user)
 	if err != nil {
 		return "", err
@@ -156,9 +157,15 @@ func createToken(user *entity.SysUser, ip string) (string, error) {
 		Permissions: perms,
 		User:        user,
 	}
-	// DIFF(review): Java 的 setUserAgent(L163-171) 会解析浏览器、操作系统并调用
-	// whois.pconline 解析归属地（ruoyi.addressEnabled 默认 false）。
-	// 本期不引入 UA 解析库，Browser / Os / LoginLocation 留空，1b 再补齐。
+	// 等价 TokenService.setUserAgent(L163-171)：解析浏览器、操作系统与归属地。
+	//
+	// 这三个字段**只在登录时写入** Redis 快照，
+	// "系统监控 > 在线用户"页面（SysUserOnlineServiceImpl.loginUserToUserOnline L76-94）
+	// 直接读它们渲染 tokenId / ipaddr / loginLocation / browser / os / loginTime 六列。
+	// 之前留空导致在线用户页这几列全空。
+	loginUser.Browser = uax.Browser(userAgent)
+	loginUser.Os = uax.OS(userAgent)
+	loginUser.LoginLocation = uax.Location(ip)
 	if err := RefreshToken(loginUser); err != nil {
 		return "", err
 	}

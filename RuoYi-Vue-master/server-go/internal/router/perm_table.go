@@ -156,6 +156,9 @@ var permRoutes = []RoutePerm{
 	{"PUT", "/system/menu/updateSort", PermSystemMenuEdit, "SysMenuController"},
 	{"DELETE", "/system/menu/:menuId", PermSystemMenuRemove, "SysMenuController"},
 	{"GET", "/system/menu/:menuId", PermSystemMenuQuery, "SysMenuController"},
+	// SysUserOnlineController.java
+	{"GET", "/monitor/online/list", PermMonitorOnlineList, "SysUserOnlineController"},
+	{"DELETE", "/monitor/online/:tokenId", PermMonitorOnlineForceLogout, "SysUserOnlineController"},
 	{"GET", "/system/notice/listTop", "", "SysNoticeController"},
 	{"POST", "/system/notice/markRead", "", "SysNoticeController"},
 	{"POST", "/system/notice/markReadAll", "", "SysNoticeController"},
@@ -199,7 +202,7 @@ var permRoutes = []RoutePerm{
 	{"GET", "/system/user/:userId", PermSystemUserQuery, "SysUserController"},
 }
 
-// permRoutesPhase2 二期延后端点清单（64 条）。
+// permRoutesPhase2 二期延后端点清单（62 条）。
 //
 // **本表不参与路由绑定**，仅作为交接清单存在：
 //   - 唯一事实来源是 internal/router/perm_diff_test.go 的 scopeFiles /
@@ -284,8 +287,6 @@ var permRoutesPhase2 = []RoutePerm{
 	{"POST", "/system/user/importData", PermSystemUserImport, "SysUserController"}, // TODO(phase2) SysUserController.java:78
 	{"POST", "/system/user/importTemplate", "", "SysUserController"},               // TODO(phase2) SysUserController.java:90
 	// SysUserOnlineController.java
-	{"DELETE", "/monitor/online/:tokenId", PermMonitorOnlineForceLogout, "SysUserOnlineController"}, // TODO(phase2) SysUserOnlineController.java:75
-	{"GET", "/monitor/online/list", PermMonitorOnlineList, "SysUserOnlineController"},               // TODO(phase2) SysUserOnlineController.java:35
 	// TestController.java
 	{"DELETE", "/test/user/:userId", "", "TestController"}, // TODO(phase2) TestController.java:73
 	{"GET", "/test/user/:userId", "", "TestController"},    // TODO(phase2) TestController.java:46

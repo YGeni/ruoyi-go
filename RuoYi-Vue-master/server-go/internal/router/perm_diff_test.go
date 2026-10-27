@@ -80,7 +80,8 @@ var scopeFiles = map[string]bool{
 	"SysProfileController.java":  true,
 	"CommonController.java":      true,
 	// 菜单管理原属二期清单，因前端"系统管理 > 菜单管理"页面直接报错而提前落地。
-	"SysMenuController.java": true,
+	"SysMenuController.java":       true,
+	"SysUserOnlineController.java": true,
 }
 
 // deferPathKeywords 本期明确不做的路径（Excel 导入导出，见 commit message 遗留项）。

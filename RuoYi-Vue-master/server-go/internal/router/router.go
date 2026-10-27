@@ -60,6 +60,7 @@ func New() *gin.Engine {
 
 	user := system.UserHandler{}
 	menu := system.MenuHandler{}
+	monitor := system.MonitorHandler{}
 	role := system.RoleHandler{}
 	dept := system.DeptHandler{}
 	post := system.PostHandler{}
@@ -90,6 +91,10 @@ func New() *gin.Engine {
 	// :menuId 通配段必须最后注册，否则会吃掉上面的静态段
 	perm(r, "DELETE", "/system/menu/:menuId", menu.Remove)
 	perm(r, "GET", "/system/menu/:menuId", menu.GetInfo)
+
+	// ------------------------------------------------------------ 系统监控 - 在线用户
+	perm(r, "GET", "/monitor/online/list", monitor.OnlineList)
+	perm(r, "DELETE", "/monitor/online/:tokenId", monitor.ForceLogout)
 
 	// ------------------------------------------------------------ 个人信息
 	//

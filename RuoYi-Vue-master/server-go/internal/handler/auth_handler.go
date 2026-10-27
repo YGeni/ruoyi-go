@@ -41,7 +41,10 @@ func (AuthHandler) Login(c *gin.Context) {
 		result.Fail(c, result.Error(config.MsgUserNotExists))
 		return
 	}
-	token, err := service.Login(body, c.ClientIP())
+	// 第三个参数是 User-Agent：Java 的 TokenService.setUserAgent(L163-171)
+	// 从 ServletUtils.getRequest() 里取，用于写 LoginUser 的 browser / os，
+	// 最终显示在"在线用户"页面。
+	token, err := service.Login(body, c.ClientIP(), c.GetHeader("User-Agent"))
 	if err != nil {
 		result.Fail(c, result.Error(err.Error()))
 		return

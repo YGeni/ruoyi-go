@@ -99,6 +99,15 @@ type LoginUser struct {
 	User          *SysUser `json:"user"`
 }
 
+// Username 等价于 LoginUser.getUsername()（LoginUser.java:134-137），
+// 即 user.getUserName()。SysUserOnlineServiceImpl 组装在线用户时用的就是这个。
+func (l *LoginUser) Username() string {
+	if l == nil || l.User == nil {
+		return ""
+	}
+	return l.User.UserName
+}
+
 // IsAdmin 等价于 SecurityUtils.isAdmin(userId)。
 func (l *LoginUser) IsAdmin() bool { return l != nil && l.UserID == 1 }
 

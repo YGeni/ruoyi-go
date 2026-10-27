@@ -366,6 +366,16 @@ Go 的 `Create` 会显式写出空串，导致 `del_flag=''`，新记录在所�
 - **本库 `sys_menu.is_frame` / `is_cache` 是 `int`，不是若依标准的 `char(1)`**（`DESC sys_menu` 实测；`visible`/`status`/`menu_type` 仍是 char(1)）。
   实体按 Java 侧建模为 string，插入空串会报 `Error 1366 Incorrect integer value: '' for column 'is_cache'`。
   写入时必须 Omit 空的这两个字段（由 DDL 默认值 1 / 0 填充）。**同理：任何"以为一定是 char(1)"的列，写入前先 DESC 确认。**
+- **列表返回体的形状必须逐个端点核 Java 有没有 `startPage()`**（集体踩过两次）：
+  带 `startPage()` 的走 `getDataTable` -> `{code,msg,rows,total}`；
+  不带的走 `success(list)` -> `{code,msg,data:[...]}`。
+  两类在 `system/` 下混着：`/system/dept/list`（`SysDeptController.java:43-47`）与
+  `/system/menu/list`（`SysMenuController.java:41-46`）是 **data**，
+  其余 user/role/post/dict/config/notice 都是 **rows/total**；
+  `/monitor/online/list` 虽是 getDataTable，但**没有 startPage()**，total 恒等于列表长度。
+  写错形状前端不报错、直接白屏（`handleTree(response.data)` 抛
+  "undefined is not an object"，`ruoyi.js:167`）。
+- **`redis-cli --scan --pattern X` 只打印不删除**，清理登录态必须 `... | xargs redis-cli DEL`（冒烟脚本踩过，导致在线用户列表多出历史 token）。
 - **`AjaxResult` 的 `put` 是顶层键，不是 `data`**：Java 的 `AjaxResult.success()` 只含 `code`/`msg`，
   `.put("depts", ...)` 后前端读的是 `response.depts`（如 `src/views/system/role/index.vue:458`）。
   Go 侧若写成 `result.SuccessData(map{...})` 会把键塞进 `data`，前端拿到 `undefined`。
