@@ -87,6 +87,7 @@ var scopeFiles = map[string]bool{
 	"SysIndexController.java":      true,
 	"SysRegisterController.java":   true,
 	"CacheController.java":         true,
+	"ServerController.java":        true,
 }
 
 // deferPathKeywords 本期明确不做的路径（Excel 导入导出，见 commit message 遗留项）。

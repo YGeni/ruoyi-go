@@ -113,6 +113,7 @@ func New() *gin.Engine {
 	perm(r, "DELETE", "/monitor/cache/clearCacheName/:cacheName", monitor.ClearCacheName)
 	perm(r, "DELETE", "/monitor/cache/clearCacheKey/:cacheKey", monitor.ClearCacheKey)
 	perm(r, "DELETE", "/monitor/cache/clearCacheAll", monitor.ClearCacheAll)
+	perm(r, "GET", "/monitor/server", monitor.ServerInfo)
 
 	// ------------------------------------------------------------ 个人信息
 	//

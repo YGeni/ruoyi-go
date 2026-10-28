@@ -164,6 +164,8 @@ var permRoutes = []RoutePerm{
 	{"DELETE", "/monitor/cache/clearCacheName/:cacheName", PermMonitorCacheList, "CacheController"},
 	{"DELETE", "/monitor/cache/clearCacheKey/:cacheKey", PermMonitorCacheList, "CacheController"},
 	{"DELETE", "/monitor/cache/clearCacheAll", PermMonitorCacheList, "CacheController"},
+	// ServerController.java
+	{"GET", "/monitor/server", PermMonitorServerList, "ServerController"},
 	// SysIndexController.java（/unlockscreen 需登录态但无权限串，见 router.go 直接注册）
 	{"POST", "/unlockscreen", "", "SysIndexController"},
 	// SysRegisterController.java（匿名放行，见 router.go 直接注册）
@@ -225,7 +227,7 @@ var permRoutes = []RoutePerm{
 	{"GET", "/system/user/:userId", PermSystemUserQuery, "SysUserController"},
 }
 
-// permRoutesPhase2 二期延后端点清单（44 条）。
+// permRoutesPhase2 二期延后端点清单（43 条）。
 //
 // **本表不参与路由绑定**，仅作为交接清单存在：
 //   - 唯一事实来源是 internal/router/perm_diff_test.go 的 scopeFiles /
@@ -235,7 +237,6 @@ var permRoutes = []RoutePerm{
 //   - 未翻入 permRoutes 的条目在 diff 测试里计入「二期延后」，不判失败，
 //     即当前是"不实现也绿"，交接时必须逐条 grep -n "TODO(phase2)" 过一遍。
 var permRoutesPhase2 = []RoutePerm{
-	// CacheController.java
 	// CaptchaController.java
 	{"GET", "/captchaImage", "", "CaptchaController"}, // TODO(phase2) CaptchaController.java:31
 	// GenController.java
@@ -253,7 +254,6 @@ var permRoutesPhase2 = []RoutePerm{
 	{"POST", "/tool/gen/importTable", PermToolGenImport, "GenController"},      // TODO(phase2) GenController.java:113
 	{"PUT", "/tool/gen", PermToolGenEdit, "GenController"},                     // TODO(phase2) GenController.java:165
 	// ServerController.java
-	{"GET", "/monitor/server", PermMonitorServerList, "ServerController"}, // TODO(phase2) ServerController.java:19
 	// SysConfigController.java
 	{"POST", "/system/config/export", PermSystemConfigExport, "SysConfigController"}, // TODO(phase2) SysConfigController.java:49
 	// SysDictDataController.java

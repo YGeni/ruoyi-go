@@ -7,6 +7,7 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/internal/model/query"
 	"github.com/YGeni/ruoyi-go/server-go/internal/service"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/excelx"
+	"github.com/YGeni/ruoyi-go/server-go/pkg/osx"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/page"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/result"
 
@@ -334,4 +335,24 @@ func (MonitorHandler) ClearCacheAll(c *gin.Context) {
 		return
 	}
 	result.OK(c, result.Success())
+}
+
+// ServerInfo GET /monitor/server
+//
+// 等价 ServerController.java:22-28：Server.copyTo() 后 success(server)。
+// 前端 src/views/monitor/server/index.vue 直接读 response.data 的
+// cpu / mem / jvm / sys / sysFiles 五个块。
+//
+// 注意该接口**有约 1 秒耗时**：CPU 占用率要两次采样取差值
+// （对齐 Java 的 OSHI_WAIT_SECOND，Server.java:31）。
+func (MonitorHandler) ServerInfo(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	srv, err := osx.Collect()
+	if err != nil {
+		fail(c, err)
+		return
+	}
+	result.OK(c, result.SuccessData(srv))
 }

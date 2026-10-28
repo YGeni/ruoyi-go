@@ -6,8 +6,8 @@
 | 项 | 数量 |
 |---|---|
 | Java 端点总数（admin+generator+quartz） | 147 |
-| 1b 范围内端点 | 103 |
-| 二期延后端点 | 44 |
+| 1b 范围内端点 | 104 |
+| 二期延后端点 | 43 |
 | 缺失（Java→Go） | 0 |
 | 多余（Go→Java） | 0 |
 
@@ -52,6 +52,7 @@
 | GET | `/monitor/logininfor/unlock/:userName` | monitor:logininfor:unlock | SysLogininforController.java:74 |
 | GET | `/monitor/online/list` | monitor:online:list | SysUserOnlineController.java:35 |
 | GET | `/monitor/operlog/list` | monitor:operlog:list | SysOperlogController.java:31 |
+| GET | `/monitor/server` | monitor:server:list | ServerController.java:19 |
 | GET | `/system/config/:configId` | system:config:query | SysConfigController.java:62 |
 | GET | `/system/config/configKey/:configKey` | (仅需登录) | SysConfigController.java:72 |
 | GET | `/system/config/list` | system:config:list | SysConfigController.java:34 |
@@ -141,7 +142,6 @@
 | GET | `/monitor/job/list` | monitor:job:list | SysJobController.java:39 |
 | GET | `/monitor/jobLog/:jobLogId` | monitor:job:query | SysJobLogController.java:62 |
 | GET | `/monitor/jobLog/list` | monitor:job:list | SysJobLogController.java:31 |
-| GET | `/monitor/server` | monitor:server:list | ServerController.java:19 |
 | GET | `/test/user/:userId` | (仅需登录) | TestController.java:46 |
 | GET | `/test/user/list` | (仅需登录) | TestController.java:38 |
 | GET | `/tool/gen/:tableId` | tool:gen:query | GenController.java:70 |
