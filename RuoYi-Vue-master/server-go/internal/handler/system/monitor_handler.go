@@ -241,3 +241,97 @@ func writeXlsx(c *gin.Context, sheet string, headers []string, rows [][]any) {
 		return
 	}
 }
+
+// ---------- 缓存监控：对应 CacheController.java ----------
+
+// CacheInfo GET /monitor/cache
+//
+// 等价 CacheController.java:52-70：success({info, dbSize, commandStats})。
+// 前端 index.vue:80 读 response.data，:95 用 response.data.commandStats 画饼图。
+func (MonitorHandler) CacheInfo(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	info, err := service.RedisInfo()
+	if err != nil {
+		fail(c, err)
+		return
+	}
+	result.OK(c, result.SuccessData(info))
+}
+
+// CacheNames GET /monitor/cache/getNames
+func (MonitorHandler) CacheNames(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	result.OK(c, result.SuccessData(service.CacheNames()))
+}
+
+// CacheKeys GET /monitor/cache/getKeys/:cacheName
+func (MonitorHandler) CacheKeys(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	keys, err := service.CacheKeys(c.Param("cacheName"))
+	if err != nil {
+		fail(c, err)
+		return
+	}
+	result.OK(c, result.SuccessData(keys))
+}
+
+// CacheValue GET /monitor/cache/getValue/:cacheName/:cacheKey
+//
+// :cacheKey 含前缀（如 "sys_config:sys.account.registerUser"），
+// 中间带 ':' 不影响 gin 的 :param 匹配——冒号只出现在声明位置时才是参数。
+func (MonitorHandler) CacheValue(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	v, err := service.CacheValue(c.Param("cacheName"), c.Param("cacheKey"))
+	if err != nil {
+		fail(c, err)
+		return
+	}
+	result.OK(c, result.SuccessData(v))
+}
+
+// ClearCacheName DELETE /monitor/cache/clearCacheName/:cacheName
+func (MonitorHandler) ClearCacheName(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	if err := service.ClearCacheName(c.Param("cacheName")); err != nil {
+		fail(c, err)
+		return
+	}
+	result.OK(c, result.Success())
+}
+
+// ClearCacheKey DELETE /monitor/cache/clearCacheKey/:cacheKey
+func (MonitorHandler) ClearCacheKey(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	if err := service.ClearCacheKey(c.Param("cacheKey")); err != nil {
+		fail(c, err)
+		return
+	}
+	result.OK(c, result.Success())
+}
+
+// ClearCacheAll DELETE /monitor/cache/clearCacheAll
+//
+// 危险：keys("*") 全删，会连 login_tokens:* 一起清掉（Java 同样如此），
+// 触发后当前登录态立即失效。
+func (MonitorHandler) ClearCacheAll(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	if err := service.ClearCacheAll(); err != nil {
+		fail(c, err)
+		return
+	}
+	result.OK(c, result.Success())
+}

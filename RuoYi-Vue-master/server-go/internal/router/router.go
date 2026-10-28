@@ -106,6 +106,13 @@ func New() *gin.Engine {
 	perm(r, "POST", "/monitor/operlog/export", monitor.OperLogExport)
 	perm(r, "DELETE", "/monitor/operlog/:operIds", monitor.OperLogRemove)
 	perm(r, "DELETE", "/monitor/operlog/clean", monitor.OperLogClean)
+	perm(r, "GET", "/monitor/cache", monitor.CacheInfo)
+	perm(r, "GET", "/monitor/cache/getNames", monitor.CacheNames)
+	perm(r, "GET", "/monitor/cache/getKeys/:cacheName", monitor.CacheKeys)
+	perm(r, "GET", "/monitor/cache/getValue/:cacheName/:cacheKey", monitor.CacheValue)
+	perm(r, "DELETE", "/monitor/cache/clearCacheName/:cacheName", monitor.ClearCacheName)
+	perm(r, "DELETE", "/monitor/cache/clearCacheKey/:cacheKey", monitor.ClearCacheKey)
+	perm(r, "DELETE", "/monitor/cache/clearCacheAll", monitor.ClearCacheAll)
 
 	// ------------------------------------------------------------ 个人信息
 	//

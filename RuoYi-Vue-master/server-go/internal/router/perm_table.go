@@ -156,6 +156,14 @@ var permRoutes = []RoutePerm{
 	{"PUT", "/system/menu/updateSort", PermSystemMenuEdit, "SysMenuController"},
 	{"DELETE", "/system/menu/:menuId", PermSystemMenuRemove, "SysMenuController"},
 	{"GET", "/system/menu/:menuId", PermSystemMenuQuery, "SysMenuController"},
+	// CacheController.java
+	{"GET", "/monitor/cache", PermMonitorCacheList, "CacheController"},
+	{"GET", "/monitor/cache/getNames", PermMonitorCacheList, "CacheController"},
+	{"GET", "/monitor/cache/getKeys/:cacheName", PermMonitorCacheList, "CacheController"},
+	{"GET", "/monitor/cache/getValue/:cacheName/:cacheKey", PermMonitorCacheList, "CacheController"},
+	{"DELETE", "/monitor/cache/clearCacheName/:cacheName", PermMonitorCacheList, "CacheController"},
+	{"DELETE", "/monitor/cache/clearCacheKey/:cacheKey", PermMonitorCacheList, "CacheController"},
+	{"DELETE", "/monitor/cache/clearCacheAll", PermMonitorCacheList, "CacheController"},
 	// SysIndexController.java（/unlockscreen 需登录态但无权限串，见 router.go 直接注册）
 	{"POST", "/unlockscreen", "", "SysIndexController"},
 	// SysRegisterController.java（匿名放行，见 router.go 直接注册）
@@ -217,7 +225,7 @@ var permRoutes = []RoutePerm{
 	{"GET", "/system/user/:userId", PermSystemUserQuery, "SysUserController"},
 }
 
-// permRoutesPhase2 二期延后端点清单（51 条）。
+// permRoutesPhase2 二期延后端点清单（44 条）。
 //
 // **本表不参与路由绑定**，仅作为交接清单存在：
 //   - 唯一事实来源是 internal/router/perm_diff_test.go 的 scopeFiles /
@@ -228,13 +236,6 @@ var permRoutes = []RoutePerm{
 //     即当前是"不实现也绿"，交接时必须逐条 grep -n "TODO(phase2)" 过一遍。
 var permRoutesPhase2 = []RoutePerm{
 	// CacheController.java
-	{"DELETE", "/monitor/cache/clearCacheAll", PermMonitorCacheList, "CacheController"},              // TODO(phase2) CacheController.java:114
-	{"DELETE", "/monitor/cache/clearCacheKey/:cacheKey", PermMonitorCacheList, "CacheController"},    // TODO(phase2) CacheController.java:106
-	{"DELETE", "/monitor/cache/clearCacheName/:cacheName", PermMonitorCacheList, "CacheController"},  // TODO(phase2) CacheController.java:97
-	{"GET", "/monitor/cache", PermMonitorCacheList, "CacheController"},                               // TODO(phase2) CacheController.java:48
-	{"GET", "/monitor/cache/getKeys/:cacheName", PermMonitorCacheList, "CacheController"},            // TODO(phase2) CacheController.java:80
-	{"GET", "/monitor/cache/getNames", PermMonitorCacheList, "CacheController"},                      // TODO(phase2) CacheController.java:73
-	{"GET", "/monitor/cache/getValue/:cacheName/:cacheKey", PermMonitorCacheList, "CacheController"}, // TODO(phase2) CacheController.java:88
 	// CaptchaController.java
 	{"GET", "/captchaImage", "", "CaptchaController"}, // TODO(phase2) CaptchaController.java:31
 	// GenController.java

@@ -6,8 +6,8 @@
 | 项 | 数量 |
 |---|---|
 | Java 端点总数（admin+generator+quartz） | 147 |
-| 1b 范围内端点 | 96 |
-| 二期延后端点 | 51 |
+| 1b 范围内端点 | 103 |
+| 二期延后端点 | 44 |
 | 缺失（Java→Go） | 0 |
 | 多余（Go→Java） | 0 |
 
@@ -23,6 +23,9 @@
 
 | Method | Path | 权限串 | Java 来源 |
 |---|---|---|---|
+| DELETE | `/monitor/cache/clearCacheAll` | monitor:cache:list | CacheController.java:114 |
+| DELETE | `/monitor/cache/clearCacheKey/:cacheKey` | monitor:cache:list | CacheController.java:106 |
+| DELETE | `/monitor/cache/clearCacheName/:cacheName` | monitor:cache:list | CacheController.java:97 |
 | DELETE | `/monitor/logininfor/:infoIds` | monitor:logininfor:remove | SysLogininforController.java:57 |
 | DELETE | `/monitor/logininfor/clean` | monitor:logininfor:remove | SysLogininforController.java:65 |
 | DELETE | `/monitor/online/:tokenId` | monitor:online:forceLogout | SysUserOnlineController.java:75 |
@@ -41,6 +44,10 @@
 | DELETE | `/system/user/:userIds` | system:user:remove | SysUserController.java:177 |
 | GET | `/common/download` | (仅需登录) | CommonController.java:34 |
 | GET | `/common/download/resource` | (仅需登录) | CommonController.java:137 |
+| GET | `/monitor/cache` | monitor:cache:list | CacheController.java:48 |
+| GET | `/monitor/cache/getKeys/:cacheName` | monitor:cache:list | CacheController.java:80 |
+| GET | `/monitor/cache/getNames` | monitor:cache:list | CacheController.java:73 |
+| GET | `/monitor/cache/getValue/:cacheName/:cacheKey` | monitor:cache:list | CacheController.java:88 |
 | GET | `/monitor/logininfor/list` | monitor:logininfor:list | SysLogininforController.java:32 |
 | GET | `/monitor/logininfor/unlock/:userName` | monitor:logininfor:unlock | SysLogininforController.java:74 |
 | GET | `/monitor/online/list` | monitor:online:list | SysUserOnlineController.java:35 |
@@ -124,19 +131,12 @@
 
 | Method | Path | 权限串 | Java 来源 |
 |---|---|---|---|
-| DELETE | `/monitor/cache/clearCacheAll` | monitor:cache:list | CacheController.java:114 |
-| DELETE | `/monitor/cache/clearCacheKey/:cacheKey` | monitor:cache:list | CacheController.java:106 |
-| DELETE | `/monitor/cache/clearCacheName/:cacheName` | monitor:cache:list | CacheController.java:97 |
 | DELETE | `/monitor/job/:jobIds` | monitor:job:remove | SysJobController.java:177 |
 | DELETE | `/monitor/jobLog/:jobLogIds` | monitor:job:remove | SysJobLogController.java:73 |
 | DELETE | `/monitor/jobLog/clean` | monitor:job:remove | SysJobLogController.java:84 |
 | DELETE | `/test/user/:userId` | (仅需登录) | TestController.java:73 |
 | DELETE | `/tool/gen/:tableIds` | tool:gen:remove | GenController.java:178 |
 | GET | `/captchaImage` | (仅需登录) | CaptchaController.java:31 |
-| GET | `/monitor/cache` | monitor:cache:list | CacheController.java:48 |
-| GET | `/monitor/cache/getKeys/:cacheName` | monitor:cache:list | CacheController.java:80 |
-| GET | `/monitor/cache/getNames` | monitor:cache:list | CacheController.java:73 |
-| GET | `/monitor/cache/getValue/:cacheName/:cacheKey` | monitor:cache:list | CacheController.java:88 |
 | GET | `/monitor/job/:jobId` | monitor:job:query | SysJobController.java:70 |
 | GET | `/monitor/job/list` | monitor:job:list | SysJobController.java:39 |
 | GET | `/monitor/jobLog/:jobLogId` | monitor:job:query | SysJobLogController.java:62 |
