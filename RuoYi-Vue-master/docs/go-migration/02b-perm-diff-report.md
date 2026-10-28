@@ -6,8 +6,8 @@
 | 项 | 数量 |
 |---|---|
 | Java 端点总数（admin+generator+quartz） | 147 |
-| 1b 范围内端点 | 117 |
-| 二期延后端点 | 30 |
+| 1b 范围内端点 | 130 |
+| 二期延后端点 | 17 |
 | 缺失（Java→Go） | 0 |
 | 多余（Go→Java） | 0 |
 
@@ -45,6 +45,7 @@
 | DELETE | `/system/post/:postIds` | system:post:remove | SysPostController.java:112 |
 | DELETE | `/system/role/:roleIds` | system:role:remove | SysRoleController.java:166 |
 | DELETE | `/system/user/:userIds` | system:user:remove | SysUserController.java:177 |
+| DELETE | `/tool/gen/:tableIds` | tool:gen:remove | GenController.java:178 |
 | GET | `/common/download` | (仅需登录) | CommonController.java:34 |
 | GET | `/common/download/resource` | (仅需登录) | CommonController.java:137 |
 | GET | `/monitor/cache` | monitor:cache:list | CacheController.java:48 |
@@ -95,6 +96,15 @@
 | GET | `/system/user/deptTree` | system:user:list | SysUserController.java:250 |
 | GET | `/system/user/list` | system:user:list | SysUserController.java:44 |
 | GET | `/system/user/profile` | (仅需登录) | SysProfileController.java:38 |
+| GET | `/tool/gen/:tableId` | tool:gen:query | GenController.java:70 |
+| GET | `/tool/gen/batchGenCode` | tool:gen:code | GenController.java:241 |
+| GET | `/tool/gen/column/:tableId` | tool:gen:list | GenController.java:99 |
+| GET | `/tool/gen/db/list` | tool:gen:list | GenController.java:87 |
+| GET | `/tool/gen/download/:tableName` | tool:gen:code | GenController.java:201 |
+| GET | `/tool/gen/genCode/:tableName` | tool:gen:code | GenController.java:213 |
+| GET | `/tool/gen/list` | tool:gen:list | GenController.java:49 |
+| GET | `/tool/gen/preview/:tableId` | tool:gen:preview | GenController.java:190 |
+| GET | `/tool/gen/synchDb/:tableName` | tool:gen:edit | GenController.java:229 |
 | POST | `/common/upload` | (仅需登录) | CommonController.java:74 |
 | POST | `/common/uploads` | (仅需登录) | CommonController.java:100 |
 | POST | `/monitor/job` | monitor:job:add | SysJobController.java:80 |
@@ -115,6 +125,8 @@
 | POST | `/system/role` | system:role:add | SysRoleController.java:89 |
 | POST | `/system/user` | system:user:add | SysUserController.java:122 |
 | POST | `/system/user/profile/avatar` | (仅需登录) | SysProfileController.java:124 |
+| POST | `/tool/gen/createTable` | (仅需登录) | GenController.java:128 |
+| POST | `/tool/gen/importTable` | tool:gen:import | GenController.java:113 |
 | POST | `/unlockscreen` | (仅需登录) | SysIndexController.java:43 |
 | PUT | `/monitor/job` | monitor:job:edit | SysJobController.java:116 |
 | PUT | `/monitor/job/changeStatus` | monitor:job:changeStatus | SysJobController.java:152 |
@@ -140,25 +152,16 @@
 | PUT | `/system/user/profile` | (仅需登录) | SysProfileController.java:61 |
 | PUT | `/system/user/profile/updatePwd` | (仅需登录) | SysProfileController.java:91 |
 | PUT | `/system/user/resetPwd` | system:user:resetPwd | SysUserController.java:192 |
+| PUT | `/tool/gen` | tool:gen:edit | GenController.java:165 |
 
 ## 二期延后（本轮不实现路由）
 
 | Method | Path | 权限串 | Java 来源 |
 |---|---|---|---|
 | DELETE | `/test/user/:userId` | (仅需登录) | TestController.java:73 |
-| DELETE | `/tool/gen/:tableIds` | tool:gen:remove | GenController.java:178 |
 | GET | `/captchaImage` | (仅需登录) | CaptchaController.java:31 |
 | GET | `/test/user/:userId` | (仅需登录) | TestController.java:46 |
 | GET | `/test/user/list` | (仅需登录) | TestController.java:38 |
-| GET | `/tool/gen/:tableId` | tool:gen:query | GenController.java:70 |
-| GET | `/tool/gen/batchGenCode` | tool:gen:code | GenController.java:241 |
-| GET | `/tool/gen/column/:tableId` | tool:gen:list | GenController.java:99 |
-| GET | `/tool/gen/db/list` | tool:gen:list | GenController.java:87 |
-| GET | `/tool/gen/download/:tableName` | tool:gen:code | GenController.java:201 |
-| GET | `/tool/gen/genCode/:tableName` | tool:gen:code | GenController.java:213 |
-| GET | `/tool/gen/list` | tool:gen:list | GenController.java:49 |
-| GET | `/tool/gen/preview/:tableId` | tool:gen:preview | GenController.java:190 |
-| GET | `/tool/gen/synchDb/:tableName` | tool:gen:edit | GenController.java:229 |
 | GET | `getInfo` | (仅需登录) | SysLoginController.java:72 |
 | GET | `getRouters` | (仅需登录) | SysLoginController.java:101 |
 | POST | `/login` | (仅需登录) | SysLoginController.java:35 |
@@ -171,7 +174,4 @@
 | POST | `/system/user/importData` | system:user:import | SysUserController.java:78 |
 | POST | `/system/user/importTemplate` | (仅需登录) | SysUserController.java:90 |
 | POST | `/test/user/save` | (仅需登录) | TestController.java:61 |
-| POST | `/tool/gen/createTable` | (仅需登录) | GenController.java:128 |
-| POST | `/tool/gen/importTable` | tool:gen:import | GenController.java:113 |
 | PUT | `/test/user/update` | (仅需登录) | TestController.java:73 |
-| PUT | `/tool/gen` | tool:gen:edit | GenController.java:165 |

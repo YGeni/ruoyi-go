@@ -220,3 +220,13 @@ type JobLogList struct {
 	Status       string `form:"status" json:"status"`
 	InvokeTarget string `form:"invokeTarget" json:"invokeTarget"`
 }
+
+// GenTableList GET /tool/gen/list 与 /tool/gen/db/list 的查询条件。
+//
+// 对应 GenTableMapper.xml 的 selectGenTableList 各 if 分支：
+// table_name like / table_comment like / params.beginTime / params.endTime。
+type GenTableList struct {
+	BaseList
+	TableName    string `form:"tableName" json:"tableName"`
+	TableComment string `form:"tableComment" json:"tableComment"`
+}

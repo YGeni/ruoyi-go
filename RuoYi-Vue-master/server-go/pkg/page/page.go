@@ -252,6 +252,12 @@ func Paginate[T any](db *gorm.DB, p *PageDomain, alias, countExpr string, dest *
 	countDB := db.Session(&gorm.Session{Context: db.Statement.Context})
 	// 必须清掉主查询的 Select：GORM 的 Count 会把 Selects[0] 当成 count(<expr>) 的参数，
 	// 遇到 "u.*" 会拼出 count(`u`.`*`)，MySQL 报 1054 Unknown column。
+	//
+	// 注意 countDB 与主查询 **共用同一个 Statement**（Session 不传 NewDB），
+	// 所以清完之后必须给主查询**恢复**回来，否则调用方设的 Select 会被吞掉 ——
+	// 表现为"行数对、字段全空"（information_schema 那两个查询踩过一次）。
+	savedSelects := countDB.Statement.Selects
+	savedClause, hasClause := countDB.Statement.Clauses["SELECT"]
 	countDB.Statement.Selects = nil
 	delete(countDB.Statement.Clauses, "SELECT")
 	if strings.TrimSpace(countExpr) == "" {
@@ -265,6 +271,10 @@ func Paginate[T any](db *gorm.DB, p *PageDomain, alias, countExpr string, dest *
 	}
 	p.fix(total)
 
+	db.Statement.Selects = savedSelects
+	if hasClause {
+		db.Statement.Clauses["SELECT"] = savedClause
+	}
 	q := db.Session(&gorm.Session{})
 	if order := p.OrderBy(alias); order != "" {
 		q = q.Order(order)

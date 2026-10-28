@@ -88,6 +88,7 @@ var scopeFiles = map[string]bool{
 	"SysRegisterController.java":   true,
 	"CacheController.java":         true,
 	"ServerController.java":        true,
+	"GenController.java":           true,
 	"SysJobLogController.java":     true,
 	"SysJobController.java":        true,
 }

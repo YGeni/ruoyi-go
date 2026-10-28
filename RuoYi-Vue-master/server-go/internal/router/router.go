@@ -128,6 +128,20 @@ func New() *gin.Engine {
 	perm(r, "GET", "/monitor/jobLog/:jobLogId", job.JobLogGet)
 	perm(r, "DELETE", "/monitor/jobLog/:jobLogIds", job.JobLogRemove)
 	perm(r, "DELETE", "/monitor/jobLog/clean", job.JobLogClean)
+	gen := system.GenHandler{}
+	perm(r, "GET", "/tool/gen/list", gen.GenList)
+	perm(r, "GET", "/tool/gen/db/list", gen.GenDbList)
+	perm(r, "GET", "/tool/gen/:tableId", gen.GenGet)
+	perm(r, "GET", "/tool/gen/preview/:tableId", gen.GenPreview)
+	perm(r, "GET", "/tool/gen/genCode/:tableName", gen.GenCode)
+	perm(r, "GET", "/tool/gen/synchDb/:tableName", gen.GenSynchDb)
+	perm(r, "POST", "/tool/gen/importTable", gen.GenImport)
+	perm(r, "POST", "/tool/gen/createTable", gen.GenCreateTable)
+	perm(r, "PUT", "/tool/gen", gen.GenEdit)
+	perm(r, "DELETE", "/tool/gen/:tableIds", gen.GenRemove)
+	perm(r, "GET", "/tool/gen/column/:tableId", gen.GenColumnList)
+	perm(r, "GET", "/tool/gen/download/:tableName", gen.GenDownload)
+	perm(r, "GET", "/tool/gen/batchGenCode", gen.GenBatchGenCode)
 
 	// ------------------------------------------------------------ 个人信息
 	//

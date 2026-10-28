@@ -181,6 +181,20 @@ var permRoutes = []RoutePerm{
 	{"GET", "/monitor/jobLog/:jobLogId", PermMonitorJobQuery, "SysJobLogController"},
 	{"DELETE", "/monitor/jobLog/:jobLogIds", PermMonitorJobRemove, "SysJobLogController"},
 	{"DELETE", "/monitor/jobLog/clean", PermMonitorJobRemove, "SysJobLogController"},
+	// GenController.java
+	{"GET", "/tool/gen/list", PermToolGenList, "GenController"},
+	{"GET", "/tool/gen/db/list", PermToolGenList, "GenController"},
+	{"GET", "/tool/gen/:tableId", PermToolGenQuery, "GenController"},
+	{"PUT", "/tool/gen", PermToolGenEdit, "GenController"},
+	{"POST", "/tool/gen/importTable", PermToolGenImport, "GenController"},
+	{"POST", "/tool/gen/createTable", "", "GenController"},
+	{"GET", "/tool/gen/preview/:tableId", PermToolGenPreview, "GenController"},
+	{"GET", "/tool/gen/genCode/:tableName", PermToolGenCode, "GenController"},
+	{"GET", "/tool/gen/synchDb/:tableName", PermToolGenEdit, "GenController"},
+	{"DELETE", "/tool/gen/:tableIds", PermToolGenRemove, "GenController"},
+	{"GET", "/tool/gen/column/:tableId", PermToolGenList, "GenController"},
+	{"GET", "/tool/gen/download/:tableName", PermToolGenCode, "GenController"},
+	{"GET", "/tool/gen/batchGenCode", PermToolGenCode, "GenController"},
 	// SysIndexController.java（/unlockscreen 需登录态但无权限串，见 router.go 直接注册）
 	{"POST", "/unlockscreen", "", "SysIndexController"},
 	// SysRegisterController.java（匿名放行，见 router.go 直接注册）
@@ -242,7 +256,7 @@ var permRoutes = []RoutePerm{
 	{"GET", "/system/user/:userId", PermSystemUserQuery, "SysUserController"},
 }
 
-// permRoutesPhase2 二期延后端点清单（30 条）。
+// permRoutesPhase2 二期延后端点清单（17 条）。
 //
 // **本表不参与路由绑定**，仅作为交接清单存在：
 //   - 唯一事实来源是 internal/router/perm_diff_test.go 的 scopeFiles /
@@ -255,19 +269,6 @@ var permRoutesPhase2 = []RoutePerm{
 	// CaptchaController.java
 	{"GET", "/captchaImage", "", "CaptchaController"}, // TODO(phase2) CaptchaController.java:31
 	// GenController.java
-	{"DELETE", "/tool/gen/:tableIds", PermToolGenRemove, "GenController"},      // TODO(phase2) GenController.java:178
-	{"GET", "/tool/gen/:tableId", PermToolGenQuery, "GenController"},           // TODO(phase2) GenController.java:70
-	{"GET", "/tool/gen/batchGenCode", PermToolGenCode, "GenController"},        // TODO(phase2) GenController.java:241
-	{"GET", "/tool/gen/column/:tableId", PermToolGenList, "GenController"},     // TODO(phase2) GenController.java:99
-	{"GET", "/tool/gen/db/list", PermToolGenList, "GenController"},             // TODO(phase2) GenController.java:87
-	{"GET", "/tool/gen/download/:tableName", PermToolGenCode, "GenController"}, // TODO(phase2) GenController.java:201
-	{"GET", "/tool/gen/genCode/:tableName", PermToolGenCode, "GenController"},  // TODO(phase2) GenController.java:213
-	{"GET", "/tool/gen/list", PermToolGenList, "GenController"},                // TODO(phase2) GenController.java:49
-	{"GET", "/tool/gen/preview/:tableId", PermToolGenPreview, "GenController"}, // TODO(phase2) GenController.java:190
-	{"GET", "/tool/gen/synchDb/:tableName", PermToolGenEdit, "GenController"},  // TODO(phase2) GenController.java:229
-	{"POST", "/tool/gen/createTable", "", "GenController"},                     // TODO(phase2) GenController.java:128
-	{"POST", "/tool/gen/importTable", PermToolGenImport, "GenController"},      // TODO(phase2) GenController.java:113
-	{"PUT", "/tool/gen", PermToolGenEdit, "GenController"},                     // TODO(phase2) GenController.java:165
 	// ServerController.java
 	// SysConfigController.java
 	{"POST", "/system/config/export", PermSystemConfigExport, "SysConfigController"}, // TODO(phase2) SysConfigController.java:49
