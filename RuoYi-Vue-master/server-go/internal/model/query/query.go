@@ -31,12 +31,21 @@ type BaseList struct {
 //
 // DIFF(review): gin 的 form 绑定不支持 "params[beginTime]" 这种方括号嵌套 key，
 // 因此这里直接按字面 key 从 query 读取；语义与 Java 的 params.beginTime 一致。
+//
+// 导出接口是 **POST + application/x-www-form-urlencoded**（request.js:127-133 的
+// download 用 tansParams 把参数放进了请求体），拿不到 query，因此再兜一层 PostForm。
 func (b *BaseList) FillDateRange(c *gin.Context) {
 	if b == nil {
 		return
 	}
 	b.BeginTime = c.Query(KeyBeginTime)
 	b.EndTime = c.Query(KeyEndTime)
+	if b.BeginTime == "" {
+		b.BeginTime = c.PostForm(KeyBeginTime)
+	}
+	if b.EndTime == "" {
+		b.EndTime = c.PostForm(KeyEndTime)
+	}
 }
 
 // HasDateRange 是否传了日期范围。
@@ -155,4 +164,34 @@ type MenuList struct {
 type ReadUserList struct {
 	NoticeID int64 `form:"noticeId" json:"noticeId"`
 	BaseList       // searchValue
+}
+
+// LogininforList GET /monitor/logininfor/list 的查询条件。
+//
+// 对应 SysLogininforMapper.xml 的 selectLogininforList 各 if 分支：
+// ipaddr like / status = / user_name like / params.beginTime / params.endTime，
+// 默认 order by info_id desc。
+type LogininforList struct {
+	BaseList
+	Ipaddr   string `form:"ipaddr" json:"ipaddr"`
+	UserName string `form:"userName" json:"userName"`
+	Status   string `form:"status" json:"status"`
+}
+
+// OperLogList GET /monitor/operlog/list 的查询条件。
+//
+// 对应 SysOperLogMapper.xml 的 selectOperLogList 各 if 分支：
+// oper_ip like / title like / business_type = / status = / oper_name like
+// / params.beginTime / params.endTime，默认 order by oper_id desc。
+//
+// DIFF(review): XML 里还有一个 businessTypes（数组，IN 查询）分支，
+// 前端 operlog 页面只提交单个 businessType（src/views/monitor/operlog/index.vue:33），
+// 该分支不实现。
+type OperLogList struct {
+	BaseList
+	OperIp       string `form:"operIp" json:"operIp"`
+	Title        string `form:"title" json:"title"`
+	BusinessType *int   `form:"businessType" json:"businessType"`
+	Status       *int   `form:"status" json:"status"`
+	OperName     string `form:"operName" json:"operName"`
 }

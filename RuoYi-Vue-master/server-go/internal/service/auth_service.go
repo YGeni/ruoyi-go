@@ -40,10 +40,10 @@ type LoginBody struct {
 //
 // 返回 JWT 字符串（前端存入 Cookie: Admin-Token，请求头带 "Bearer " 前缀）。
 func Login(body LoginBody, ip, userAgent string) (string, error) {
-	if err := validateCaptcha(body, ip); err != nil {
+	if err := validateCaptcha(body, ip, userAgent); err != nil {
 		return "", err
 	}
-	if err := loginPreCheck(body, ip); err != nil {
+	if err := loginPreCheck(body, ip, userAgent); err != nil {
 		return "", err
 	}
 	user, err := loadUserByUsername(body.Username, ip)
@@ -52,14 +52,14 @@ func Login(body LoginBody, ip, userAgent string) (string, error) {
 	}
 	// 密码校验 + 失败计数（pwd_err_cnt:<username>，5 次锁 10 分钟）
 	if err := securityx.Validate(body.Username, body.Password, user.Password); err != nil {
-		recordLogin(body.Username, ip, LoginStatusFail, config.MsgUserNotExists)
+		recordLogin(body.Username, ip, userAgent, LoginStatusFail, config.MsgUserNotExists)
 		if errors.Is(err, securityx.ErrPasswordNotMatch) || errors.Is(err, securityx.ErrPasswordRetryExceed) {
 			return "", err
 		}
 		return "", err
 	}
 	// 记录登录日志并更新最后登录信息
-	recordLogin(body.Username, ip, LoginStatusSuccess, config.MsgLoginSuccess)
+	recordLogin(body.Username, ip, userAgent, LoginStatusSuccess, config.MsgLoginSuccess)
 	if err := repository.UpdateLoginInfo(user.UserID, ip, time.Now()); err != nil {
 		return "", err
 	}
@@ -80,7 +80,7 @@ func Logout(token string) error {
 }
 
 // validateCaptcha 等价于 SysLoginService.validateCaptcha(L110-129)。
-func validateCaptcha(body LoginBody, ip string) error {
+func validateCaptcha(body LoginBody, ip, userAgent string) error {
 	enabled, err := captchaEnabled()
 	if err != nil {
 		return err
@@ -89,17 +89,17 @@ func validateCaptcha(body LoginBody, ip string) error {
 		return nil
 	}
 	if body.UUID == "" || !captcha.Verify(body.UUID, body.Code) {
-		recordLogin(body.Username, ip, LoginStatusFail, config.MsgCaptchaExpire)
+		recordLogin(body.Username, ip, userAgent, LoginStatusFail, config.MsgCaptchaExpire)
 		return errors.New(config.MsgCaptchaExpire)
 	}
 	return nil
 }
 
 // loginPreCheck 等价于 SysLoginService.loginPreCheck(L136-165)。
-func loginPreCheck(body LoginBody, ip string) error {
+func loginPreCheck(body LoginBody, ip, userAgent string) error {
 	// 用户名 2-20 位、密码 5-20 位（UserConstants:73-80）
 	if len(body.Username) < 2 || len(body.Username) > 20 || len(body.Password) < 5 || len(body.Password) > 20 {
-		recordLogin(body.Username, ip, LoginStatusFail, config.MsgUserNotExists)
+		recordLogin(body.Username, ip, userAgent, LoginStatusFail, config.MsgUserNotExists)
 		return errors.New(config.MsgUserNotExists)
 	}
 	// IP 黑名单（sys.login.blackIPList）
@@ -107,11 +107,11 @@ func loginPreCheck(body LoginBody, ip string) error {
 		for _, item := range strings.Split(black, "|") {
 			if strings.Contains(strings.TrimSpace(item), "*") {
 				if strings.HasPrefix(ip, strings.TrimSuffix(strings.TrimSpace(item), "*")) {
-					recordLogin(body.Username, ip, LoginStatusFail, config.MsgLoginBlocked)
+					recordLogin(body.Username, ip, userAgent, LoginStatusFail, config.MsgLoginBlocked)
 					return errors.New(config.MsgLoginBlocked)
 				}
 			} else if strings.TrimSpace(item) == ip {
-				recordLogin(body.Username, ip, LoginStatusFail, config.MsgLoginBlocked)
+				recordLogin(body.Username, ip, userAgent, LoginStatusFail, config.MsgLoginBlocked)
 				return errors.New(config.MsgLoginBlocked)
 			}
 		}
@@ -126,15 +126,15 @@ func loadUserByUsername(username, ip string) (*entity.SysUser, error) {
 		return nil, err
 	}
 	if user == nil {
-		recordLogin(username, ip, LoginStatusFail, config.MsgUserNotExists)
+		recordLogin(username, ip, "", LoginStatusFail, config.MsgUserNotExists)
 		return nil, errors.New(config.MsgUserNotExists)
 	}
 	if model.IsDeleted(user.DelFlag) {
-		recordLogin(username, ip, LoginStatusFail, config.MsgUserDeleted)
+		recordLogin(username, ip, "", LoginStatusFail, config.MsgUserDeleted)
 		return nil, errors.New(config.MsgUserDeleted)
 	}
 	if user.Status == config.Disable {
-		recordLogin(username, ip, LoginStatusFail, config.MsgUserBlocked)
+		recordLogin(username, ip, "", LoginStatusFail, config.MsgUserBlocked)
 		return nil, errors.New(config.MsgUserBlocked)
 	}
 	return user, nil
@@ -215,14 +215,21 @@ func captchaEnabled() (bool, error) {
 	return strings.EqualFold(strings.TrimSpace(v), "true"), nil
 }
 
-// recordLogin 同步写入 sys_logininfor（本期最小实现，见 repository.InsertLogininfor 注释）。
-func recordLogin(username, ip, status, msg string) {
+// recordLogin 同步写入 sys_logininfor，等价 AsyncFactory.recordLogininfor
+// （AsyncFactory.java:73-90）：用户名、IP、归属地、浏览器、操作系统、状态、消息、时间。
+//
+// 这五个字段就是"系统监控 > 登录日志"页面渲染的列，
+// 与登录态快照（createToken 里写的那一份）取的是同一套 uax 解析结果。
+func recordLogin(username, ip, userAgent, status, msg string) {
 	_ = repository.InsertLogininfor(&entity.SysLogininfor{
-		UserName:  username,
-		Ipaddr:    ip,
-		Status:    status,
-		Msg:       msg,
-		LoginTime: time.Now(),
+		UserName:      username,
+		Ipaddr:        ip,
+		LoginLocation: uax.Location(ip),
+		Browser:       uax.Browser(userAgent),
+		Os:            uax.OS(userAgent),
+		Status:        status,
+		Msg:           msg,
+		LoginTime:     time.Now(),
 	})
 }
 

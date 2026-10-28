@@ -6,8 +6,8 @@
 | 项 | 数量 |
 |---|---|
 | Java 端点总数（admin+generator+quartz） | 147 |
-| 1b 范围内端点 | 85 |
-| 二期延后端点 | 62 |
+| 1b 范围内端点 | 94 |
+| 二期延后端点 | 53 |
 | 缺失（Java→Go） | 0 |
 | 多余（Go→Java） | 0 |
 
@@ -23,7 +23,11 @@
 
 | Method | Path | 权限串 | Java 来源 |
 |---|---|---|---|
+| DELETE | `/monitor/logininfor/:infoIds` | monitor:logininfor:remove | SysLogininforController.java:57 |
+| DELETE | `/monitor/logininfor/clean` | monitor:logininfor:remove | SysLogininforController.java:65 |
 | DELETE | `/monitor/online/:tokenId` | monitor:online:forceLogout | SysUserOnlineController.java:75 |
+| DELETE | `/monitor/operlog/:operIds` | monitor:operlog:remove | SysOperlogController.java:53 |
+| DELETE | `/monitor/operlog/clean` | monitor:operlog:remove | SysOperlogController.java:61 |
 | DELETE | `/system/config/:configIds` | system:config:remove | SysConfigController.java:113 |
 | DELETE | `/system/config/refreshCache` | system:config:remove | SysConfigController.java:125 |
 | DELETE | `/system/dept/:deptId` | system:dept:remove | SysDeptController.java:131 |
@@ -37,7 +41,10 @@
 | DELETE | `/system/user/:userIds` | system:user:remove | SysUserController.java:177 |
 | GET | `/common/download` | (仅需登录) | CommonController.java:34 |
 | GET | `/common/download/resource` | (仅需登录) | CommonController.java:137 |
+| GET | `/monitor/logininfor/list` | monitor:logininfor:list | SysLogininforController.java:32 |
+| GET | `/monitor/logininfor/unlock/:userName` | monitor:logininfor:unlock | SysLogininforController.java:74 |
 | GET | `/monitor/online/list` | monitor:online:list | SysUserOnlineController.java:35 |
+| GET | `/monitor/operlog/list` | monitor:operlog:list | SysOperlogController.java:31 |
 | GET | `/system/config/:configId` | system:config:query | SysConfigController.java:62 |
 | GET | `/system/config/configKey/:configKey` | (仅需登录) | SysConfigController.java:72 |
 | GET | `/system/config/list` | system:config:list | SysConfigController.java:34 |
@@ -75,6 +82,8 @@
 | GET | `/system/user/profile` | (仅需登录) | SysProfileController.java:38 |
 | POST | `/common/upload` | (仅需登录) | CommonController.java:74 |
 | POST | `/common/uploads` | (仅需登录) | CommonController.java:100 |
+| POST | `/monitor/logininfor/export` | monitor:logininfor:export | SysLogininforController.java:47 |
+| POST | `/monitor/operlog/export` | monitor:operlog:export | SysOperlogController.java:43 |
 | POST | `/system/config` | system:config:add | SysConfigController.java:81 |
 | POST | `/system/dept` | system:dept:add | SysDeptController.java:75 |
 | POST | `/system/dict/data` | system:dict:add | SysDictDataController.java:89 |
@@ -119,10 +128,6 @@
 | DELETE | `/monitor/job/:jobIds` | monitor:job:remove | SysJobController.java:177 |
 | DELETE | `/monitor/jobLog/:jobLogIds` | monitor:job:remove | SysJobLogController.java:73 |
 | DELETE | `/monitor/jobLog/clean` | monitor:job:remove | SysJobLogController.java:84 |
-| DELETE | `/monitor/logininfor/:infoIds` | monitor:logininfor:remove | SysLogininforController.java:57 |
-| DELETE | `/monitor/logininfor/clean` | monitor:logininfor:remove | SysLogininforController.java:65 |
-| DELETE | `/monitor/operlog/:operIds` | monitor:operlog:remove | SysOperlogController.java:53 |
-| DELETE | `/monitor/operlog/clean` | monitor:operlog:remove | SysOperlogController.java:61 |
 | DELETE | `/test/user/:userId` | (仅需登录) | TestController.java:73 |
 | DELETE | `/tool/gen/:tableIds` | tool:gen:remove | GenController.java:178 |
 | GET | `/captchaImage` | (仅需登录) | CaptchaController.java:31 |
@@ -134,9 +139,6 @@
 | GET | `/monitor/job/list` | monitor:job:list | SysJobController.java:39 |
 | GET | `/monitor/jobLog/:jobLogId` | monitor:job:query | SysJobLogController.java:62 |
 | GET | `/monitor/jobLog/list` | monitor:job:list | SysJobLogController.java:31 |
-| GET | `/monitor/logininfor/list` | monitor:logininfor:list | SysLogininforController.java:32 |
-| GET | `/monitor/logininfor/unlock/:userName` | monitor:logininfor:unlock | SysLogininforController.java:74 |
-| GET | `/monitor/operlog/list` | monitor:operlog:list | SysOperlogController.java:31 |
 | GET | `/monitor/server` | monitor:server:list | ServerController.java:19 |
 | GET | `/test/user/:userId` | (仅需登录) | TestController.java:46 |
 | GET | `/test/user/list` | (仅需登录) | TestController.java:38 |
@@ -155,8 +157,6 @@
 | POST | `/monitor/job` | monitor:job:add | SysJobController.java:80 |
 | POST | `/monitor/job/export` | monitor:job:export | SysJobController.java:57 |
 | POST | `/monitor/jobLog/export` | monitor:job:export | SysJobLogController.java:49 |
-| POST | `/monitor/logininfor/export` | monitor:logininfor:export | SysLogininforController.java:47 |
-| POST | `/monitor/operlog/export` | monitor:operlog:export | SysOperlogController.java:43 |
 | POST | `/register` | (仅需登录) | SysRegisterController.java:22 |
 | POST | `/system/config/export` | system:config:export | SysConfigController.java:49 |
 | POST | `/system/dict/data/export` | system:dict:export | SysDictDataController.java:52 |

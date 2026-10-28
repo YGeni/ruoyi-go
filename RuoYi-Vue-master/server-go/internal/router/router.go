@@ -95,6 +95,15 @@ func New() *gin.Engine {
 	// ------------------------------------------------------------ 系统监控 - 在线用户
 	perm(r, "GET", "/monitor/online/list", monitor.OnlineList)
 	perm(r, "DELETE", "/monitor/online/:tokenId", monitor.ForceLogout)
+	perm(r, "GET", "/monitor/logininfor/list", monitor.LogininforList)
+	perm(r, "POST", "/monitor/logininfor/export", monitor.LogininforExport)
+	perm(r, "DELETE", "/monitor/logininfor/:infoIds", monitor.LogininforRemove)
+	perm(r, "DELETE", "/monitor/logininfor/clean", monitor.LogininforClean)
+	perm(r, "GET", "/monitor/logininfor/unlock/:userName", monitor.LogininforUnlock)
+	perm(r, "GET", "/monitor/operlog/list", monitor.OperLogList)
+	perm(r, "POST", "/monitor/operlog/export", monitor.OperLogExport)
+	perm(r, "DELETE", "/monitor/operlog/:operIds", monitor.OperLogRemove)
+	perm(r, "DELETE", "/monitor/operlog/clean", monitor.OperLogClean)
 
 	// ------------------------------------------------------------ 个人信息
 	//

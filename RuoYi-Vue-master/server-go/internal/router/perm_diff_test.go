@@ -82,10 +82,38 @@ var scopeFiles = map[string]bool{
 	// 菜单管理原属二期清单，因前端"系统管理 > 菜单管理"页面直接报错而提前落地。
 	"SysMenuController.java":       true,
 	"SysUserOnlineController.java": true,
+	"SysLogininforController.java": true,
+	"SysOperlogController.java":    true,
 }
 
 // deferPathKeywords 本期明确不做的路径（Excel 导入导出，见 commit message 遗留项）。
 var deferPathKeywords = []string{"export", "importData", "importTemplate"}
+
+// undeferScope 已补齐导出的端点，不再随 deferPathKeywords 一起延后。
+//
+// 关键字延后是**全局**的（所有控制器的 export 都先不做），
+// 但导出是逐个模块补的：补完一个就把它加进这里，
+// 否则 TestPermTableBidirectionalDiff 会把它判成"Go 独有"。
+// key 是 "控制器文件名|路径"。
+var undeferScope = map[string]bool{
+	"SysLogininforController.java|/monitor/logininfor/export": true,
+	"SysOperlogController.java|/monitor/operlog/export":       true,
+}
+
+// isDeferred 该端点是否属于"本期明确不做"。
+//
+// 两个 diff 用例必须用同一口径，否则会出现"一边算范围内、一边算延后"的自相矛盾。
+func isDeferred(e javaEndpoint) bool {
+	if undeferScope[e.File+"|"+e.Path] {
+		return false
+	}
+	for _, kw := range deferPathKeywords {
+		if strings.Contains(e.Path, kw) {
+			return true
+		}
+	}
+	return false
+}
 
 // javaEndpoint 一个 Java 控制器端点。
 type javaEndpoint struct {
@@ -244,14 +272,7 @@ func TestPermTableBidirectionalDiff(t *testing.T) {
 
 	var inScope, deferred []javaEndpoint
 	for _, e := range java {
-		skip := false
-		for _, kw := range deferPathKeywords {
-			if strings.Contains(e.Path, kw) {
-				skip = true
-				break
-			}
-		}
-		if scopeFiles[e.File] && !skip {
+		if scopeFiles[e.File] && !isDeferred(e) {
 			inScope = append(inScope, e)
 		} else {
 			deferred = append(deferred, e)
@@ -346,14 +367,7 @@ func TestPhase2ListMatchesJava(t *testing.T) {
 	java := loadJavaEndpoints(t)
 	javaDef := map[string]bool{}
 	for _, e := range java {
-		skip := false
-		for _, kw := range deferPathKeywords {
-			if strings.Contains(e.Path, kw) {
-				skip = true
-				break
-			}
-		}
-		if scopeFiles[e.File] && !skip {
+		if scopeFiles[e.File] && !isDeferred(e) {
 			continue // 范围内，由 permRoutes 负责
 		}
 		javaDef[key(e.Method, e.Path)] = true

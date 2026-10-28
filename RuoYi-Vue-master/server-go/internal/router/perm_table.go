@@ -159,6 +159,17 @@ var permRoutes = []RoutePerm{
 	// SysUserOnlineController.java
 	{"GET", "/monitor/online/list", PermMonitorOnlineList, "SysUserOnlineController"},
 	{"DELETE", "/monitor/online/:tokenId", PermMonitorOnlineForceLogout, "SysUserOnlineController"},
+	// SysLogininforController.java
+	{"GET", "/monitor/logininfor/list", PermMonitorLogininforList, "SysLogininforController"},
+	{"POST", "/monitor/logininfor/export", PermMonitorLogininforExport, "SysLogininforController"},
+	{"DELETE", "/monitor/logininfor/:infoIds", PermMonitorLogininforRemove, "SysLogininforController"},
+	{"DELETE", "/monitor/logininfor/clean", PermMonitorLogininforRemove, "SysLogininforController"},
+	{"GET", "/monitor/logininfor/unlock/:userName", PermMonitorLogininforUnlock, "SysLogininforController"},
+	// SysOperlogController.java
+	{"GET", "/monitor/operlog/list", PermMonitorOperlogList, "SysOperlogController"},
+	{"POST", "/monitor/operlog/export", PermMonitorOperlogExport, "SysOperlogController"},
+	{"DELETE", "/monitor/operlog/:operIds", PermMonitorOperlogRemove, "SysOperlogController"},
+	{"DELETE", "/monitor/operlog/clean", PermMonitorOperlogRemove, "SysOperlogController"},
 	{"GET", "/system/notice/listTop", "", "SysNoticeController"},
 	{"POST", "/system/notice/markRead", "", "SysNoticeController"},
 	{"POST", "/system/notice/markReadAll", "", "SysNoticeController"},
@@ -202,7 +213,7 @@ var permRoutes = []RoutePerm{
 	{"GET", "/system/user/:userId", PermSystemUserQuery, "SysUserController"},
 }
 
-// permRoutesPhase2 二期延后端点清单（62 条）。
+// permRoutesPhase2 二期延后端点清单（53 条）。
 //
 // **本表不参与路由绑定**，仅作为交接清单存在：
 //   - 唯一事实来源是 internal/router/perm_diff_test.go 的 scopeFiles /
@@ -266,16 +277,7 @@ var permRoutesPhase2 = []RoutePerm{
 	{"GET", "getRouters", "", "SysLoginController"}, // TODO(phase2) SysLoginController.java:101
 	{"POST", "/login", "", "SysLoginController"},    // TODO(phase2) SysLoginController.java:35
 	// SysLogininforController.java
-	{"DELETE", "/monitor/logininfor/:infoIds", PermMonitorLogininforRemove, "SysLogininforController"},      // TODO(phase2) SysLogininforController.java:57
-	{"DELETE", "/monitor/logininfor/clean", PermMonitorLogininforRemove, "SysLogininforController"},         // TODO(phase2) SysLogininforController.java:65
-	{"GET", "/monitor/logininfor/list", PermMonitorLogininforList, "SysLogininforController"},               // TODO(phase2) SysLogininforController.java:32
-	{"GET", "/monitor/logininfor/unlock/:userName", PermMonitorLogininforUnlock, "SysLogininforController"}, // TODO(phase2) SysLogininforController.java:74
-	{"POST", "/monitor/logininfor/export", PermMonitorLogininforExport, "SysLogininforController"},          // TODO(phase2) SysLogininforController.java:47
 	// SysOperlogController.java
-	{"DELETE", "/monitor/operlog/:operIds", PermMonitorOperlogRemove, "SysOperlogController"}, // TODO(phase2) SysOperlogController.java:53
-	{"DELETE", "/monitor/operlog/clean", PermMonitorOperlogRemove, "SysOperlogController"},    // TODO(phase2) SysOperlogController.java:61
-	{"GET", "/monitor/operlog/list", PermMonitorOperlogList, "SysOperlogController"},          // TODO(phase2) SysOperlogController.java:31
-	{"POST", "/monitor/operlog/export", PermMonitorOperlogExport, "SysOperlogController"},     // TODO(phase2) SysOperlogController.java:43
 	// SysPostController.java
 	{"POST", "/system/post/export", PermSystemPostExport, "SysPostController"}, // TODO(phase2) SysPostController.java:49
 	// SysRegisterController.java
