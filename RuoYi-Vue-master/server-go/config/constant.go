@@ -158,6 +158,7 @@ const (
 // ---------- sys_config 配置键 ----------
 const (
 	ConfigCaptchaEnabled     = "sys.account.captchaEnabled"
+	ConfigRegisterUser       = "sys.account.registerUser"
 	ConfigChrtype            = "sys.account.chrtype"
 	ConfigInitPasswordModify = "sys.account.initPasswordModify"
 	ConfigPasswordValidDays  = "sys.account.passwordValidateDays"

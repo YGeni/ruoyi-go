@@ -52,11 +52,13 @@ func New() *gin.Engine {
 	// 匿名放行：对齐 SecurityConfig.java:101-108 的 /login、/captchaImage
 	r.GET("/captchaImage", auth.CaptchaImage)
 	r.POST("/login", auth.Login)
+	r.POST("/register", auth.Register)
 
 	// 需要登录态但无需权限串（不在 perm_table 内，直接注册）
 	r.POST("/logout", middleware.JWTAuth(), auth.Logout)
 	r.GET("/getInfo", middleware.JWTAuth(), auth.GetInfo)
 	r.GET("/getRouters", middleware.JWTAuth(), auth.GetRouters)
+	r.POST("/unlockscreen", middleware.JWTAuth(), auth.UnlockScreen)
 
 	user := system.UserHandler{}
 	menu := system.MenuHandler{}

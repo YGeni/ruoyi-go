@@ -6,8 +6,8 @@
 | 项 | 数量 |
 |---|---|
 | Java 端点总数（admin+generator+quartz） | 147 |
-| 1b 范围内端点 | 94 |
-| 二期延后端点 | 53 |
+| 1b 范围内端点 | 96 |
+| 二期延后端点 | 51 |
 | 缺失（Java→Go） | 0 |
 | 多余（Go→Java） | 0 |
 
@@ -84,6 +84,7 @@
 | POST | `/common/uploads` | (仅需登录) | CommonController.java:100 |
 | POST | `/monitor/logininfor/export` | monitor:logininfor:export | SysLogininforController.java:47 |
 | POST | `/monitor/operlog/export` | monitor:operlog:export | SysOperlogController.java:43 |
+| POST | `/register` | (仅需登录) | SysRegisterController.java:22 |
 | POST | `/system/config` | system:config:add | SysConfigController.java:81 |
 | POST | `/system/dept` | system:dept:add | SysDeptController.java:75 |
 | POST | `/system/dict/data` | system:dict:add | SysDictDataController.java:89 |
@@ -96,6 +97,7 @@
 | POST | `/system/role` | system:role:add | SysRoleController.java:89 |
 | POST | `/system/user` | system:user:add | SysUserController.java:122 |
 | POST | `/system/user/profile/avatar` | (仅需登录) | SysProfileController.java:124 |
+| POST | `/unlockscreen` | (仅需登录) | SysIndexController.java:43 |
 | PUT | `/system/config` | system:config:edit | SysConfigController.java:97 |
 | PUT | `/system/dept` | system:dept:edit | SysDeptController.java:91 |
 | PUT | `/system/dept/updateSort` | system:dept:edit | SysDeptController.java:117 |
@@ -157,7 +159,6 @@
 | POST | `/monitor/job` | monitor:job:add | SysJobController.java:80 |
 | POST | `/monitor/job/export` | monitor:job:export | SysJobController.java:57 |
 | POST | `/monitor/jobLog/export` | monitor:job:export | SysJobLogController.java:49 |
-| POST | `/register` | (仅需登录) | SysRegisterController.java:22 |
 | POST | `/system/config/export` | system:config:export | SysConfigController.java:49 |
 | POST | `/system/dict/data/export` | system:dict:export | SysDictDataController.java:52 |
 | POST | `/system/dict/type/export` | system:dict:export | SysDictTypeController.java:46 |
@@ -169,7 +170,6 @@
 | POST | `/test/user/save` | (仅需登录) | TestController.java:61 |
 | POST | `/tool/gen/createTable` | (仅需登录) | GenController.java:128 |
 | POST | `/tool/gen/importTable` | tool:gen:import | GenController.java:113 |
-| POST | `/unlockscreen` | (仅需登录) | SysIndexController.java:43 |
 | PUT | `/monitor/job` | monitor:job:edit | SysJobController.java:116 |
 | PUT | `/monitor/job/changeStatus` | monitor:job:changeStatus | SysJobController.java:152 |
 | PUT | `/monitor/job/run` | monitor:job:changeStatus | SysJobController.java:165 |

@@ -84,6 +84,8 @@ var scopeFiles = map[string]bool{
 	"SysUserOnlineController.java": true,
 	"SysLogininforController.java": true,
 	"SysOperlogController.java":    true,
+	"SysIndexController.java":      true,
+	"SysRegisterController.java":   true,
 }
 
 // deferPathKeywords 本期明确不做的路径（Excel 导入导出，见 commit message 遗留项）。

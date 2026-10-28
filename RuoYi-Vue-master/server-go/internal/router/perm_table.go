@@ -156,6 +156,10 @@ var permRoutes = []RoutePerm{
 	{"PUT", "/system/menu/updateSort", PermSystemMenuEdit, "SysMenuController"},
 	{"DELETE", "/system/menu/:menuId", PermSystemMenuRemove, "SysMenuController"},
 	{"GET", "/system/menu/:menuId", PermSystemMenuQuery, "SysMenuController"},
+	// SysIndexController.java（/unlockscreen 需登录态但无权限串，见 router.go 直接注册）
+	{"POST", "/unlockscreen", "", "SysIndexController"},
+	// SysRegisterController.java（匿名放行，见 router.go 直接注册）
+	{"POST", "/register", "", "SysRegisterController"},
 	// SysUserOnlineController.java
 	{"GET", "/monitor/online/list", PermMonitorOnlineList, "SysUserOnlineController"},
 	{"DELETE", "/monitor/online/:tokenId", PermMonitorOnlineForceLogout, "SysUserOnlineController"},
@@ -213,7 +217,7 @@ var permRoutes = []RoutePerm{
 	{"GET", "/system/user/:userId", PermSystemUserQuery, "SysUserController"},
 }
 
-// permRoutesPhase2 二期延后端点清单（53 条）。
+// permRoutesPhase2 二期延后端点清单（51 条）。
 //
 // **本表不参与路由绑定**，仅作为交接清单存在：
 //   - 唯一事实来源是 internal/router/perm_diff_test.go 的 scopeFiles /
@@ -256,7 +260,6 @@ var permRoutesPhase2 = []RoutePerm{
 	// SysDictTypeController.java
 	{"POST", "/system/dict/type/export", PermSystemDictExport, "SysDictTypeController"}, // TODO(phase2) SysDictTypeController.java:46
 	// SysIndexController.java
-	{"POST", "/unlockscreen", "", "SysIndexController"}, // TODO(phase2) SysIndexController.java:43
 	// SysJobController.java
 	{"DELETE", "/monitor/job/:jobIds", PermMonitorJobRemove, "SysJobController"},         // TODO(phase2) SysJobController.java:177
 	{"GET", "/monitor/job/:jobId", PermMonitorJobQuery, "SysJobController"},              // TODO(phase2) SysJobController.java:70
@@ -281,7 +284,6 @@ var permRoutesPhase2 = []RoutePerm{
 	// SysPostController.java
 	{"POST", "/system/post/export", PermSystemPostExport, "SysPostController"}, // TODO(phase2) SysPostController.java:49
 	// SysRegisterController.java
-	{"POST", "/register", "", "SysRegisterController"}, // TODO(phase2) SysRegisterController.java:22
 	// SysRoleController.java
 	{"POST", "/system/role/export", PermSystemRoleExport, "SysRoleController"}, // TODO(phase2) SysRoleController.java:65
 	// SysUserController.java

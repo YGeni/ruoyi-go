@@ -52,6 +52,51 @@ func (AuthHandler) Login(c *gin.Context) {
 	result.OK(c, result.Success().Put(config.Token, token))
 }
 
+// Register POST /register
+//
+// 等价 SysRegisterController.java:28-39：先看 sys.account.registerUser 开关，
+// 关着就直接 error；开了才走 SysRegisterService.register 的校验链。
+//
+// 匿名放行（SecurityConfig.java 的 permitAll），因此**不挂** JWTAuth。
+func (AuthHandler) Register(c *gin.Context) {
+	var body service.RegisterBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		result.Fail(c, result.Error(config.MsgUserNotExists))
+		return
+	}
+	if err := service.Register(body, c.ClientIP(), c.GetHeader("User-Agent")); err != nil {
+		result.Fail(c, result.Error(err.Error()))
+		return
+	}
+	result.OK(c, result.Success())
+}
+
+// UnlockScreen POST /unlockscreen
+//
+// 等价 SysIndexController.java:43-63：校验当前登录用户的密码，成功回
+// success("解锁成功")。
+//
+// 需要登录态（Java 的 SecurityUtils.getUsername() 依赖 SecurityContext），
+// 但**不在** permitAll 列表里，所以挂 JWTAuth + 空权限串。
+func (AuthHandler) UnlockScreen(c *gin.Context) {
+	lu, ok := loginUser(c)
+	if !ok {
+		return
+	}
+	var body struct {
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		result.Fail(c, result.Error(service.MsgUnlockPwdEmpty))
+		return
+	}
+	if err := service.UnlockScreen(lu, body.Password); err != nil {
+		result.Fail(c, result.Error(err.Error()))
+		return
+	}
+	result.OK(c, result.SuccessMsg(service.MsgUnlockSuccess))
+}
+
 // Logout POST /logout
 //
 // 等价 LogoutSuccessHandlerImpl.java:47-51：删除 login_tokens:<uuid> 登录态。
