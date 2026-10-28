@@ -114,6 +114,20 @@ func New() *gin.Engine {
 	perm(r, "DELETE", "/monitor/cache/clearCacheKey/:cacheKey", monitor.ClearCacheKey)
 	perm(r, "DELETE", "/monitor/cache/clearCacheAll", monitor.ClearCacheAll)
 	perm(r, "GET", "/monitor/server", monitor.ServerInfo)
+	job := system.JobHandler{}
+	perm(r, "GET", "/monitor/job/list", job.JobList)
+	perm(r, "POST", "/monitor/job/export", job.JobExport)
+	perm(r, "GET", "/monitor/job/:jobId", job.JobGet)
+	perm(r, "POST", "/monitor/job", job.JobAdd)
+	perm(r, "PUT", "/monitor/job", job.JobEdit)
+	perm(r, "PUT", "/monitor/job/changeStatus", job.JobChangeStatus)
+	perm(r, "PUT", "/monitor/job/run", job.JobRun)
+	perm(r, "DELETE", "/monitor/job/:jobIds", job.JobRemove)
+	perm(r, "GET", "/monitor/jobLog/list", job.JobLogList)
+	perm(r, "POST", "/monitor/jobLog/export", job.JobLogExport)
+	perm(r, "GET", "/monitor/jobLog/:jobLogId", job.JobLogGet)
+	perm(r, "DELETE", "/monitor/jobLog/:jobLogIds", job.JobLogRemove)
+	perm(r, "DELETE", "/monitor/jobLog/clean", job.JobLogClean)
 
 	// ------------------------------------------------------------ 个人信息
 	//

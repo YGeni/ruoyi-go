@@ -195,3 +195,28 @@ type OperLogList struct {
 	Status       *int   `form:"status" json:"status"`
 	OperName     string `form:"operName" json:"operName"`
 }
+
+// JobList GET /monitor/job/list 的查询条件。
+//
+// 对应 SysJobMapper.xml 的 selectJobList 各 if 分支：
+// job_name like / job_group = / status = / invoke_target like。
+type JobList struct {
+	BaseList
+	JobName      string `form:"jobName" json:"jobName"`
+	JobGroup     string `form:"jobGroup" json:"jobGroup"`
+	Status       string `form:"status" json:"status"`
+	InvokeTarget string `form:"invokeTarget" json:"invokeTarget"`
+}
+
+// JobLogList GET /monitor/jobLog/list 的查询条件。
+//
+// 对应 SysJobLogMapper.xml 的 selectJobLogList：
+// job_name like / job_group = / status = / invoke_target like
+// + params.beginTime / params.endTime（按 create_time 范围）。
+type JobLogList struct {
+	BaseList
+	JobName      string `form:"jobName" json:"jobName"`
+	JobGroup     string `form:"jobGroup" json:"jobGroup"`
+	Status       string `form:"status" json:"status"`
+	InvokeTarget string `form:"invokeTarget" json:"invokeTarget"`
+}

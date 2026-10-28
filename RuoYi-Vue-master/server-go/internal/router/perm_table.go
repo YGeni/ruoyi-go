@@ -166,6 +166,21 @@ var permRoutes = []RoutePerm{
 	{"DELETE", "/monitor/cache/clearCacheAll", PermMonitorCacheList, "CacheController"},
 	// ServerController.java
 	{"GET", "/monitor/server", PermMonitorServerList, "ServerController"},
+	// SysJobController.java
+	{"GET", "/monitor/job/list", PermMonitorJobList, "SysJobController"},
+	{"POST", "/monitor/job/export", PermMonitorJobExport, "SysJobController"},
+	{"GET", "/monitor/job/:jobId", PermMonitorJobQuery, "SysJobController"},
+	{"POST", "/monitor/job", PermMonitorJobAdd, "SysJobController"},
+	{"PUT", "/monitor/job", PermMonitorJobEdit, "SysJobController"},
+	{"PUT", "/monitor/job/changeStatus", PermMonitorJobChangeStatus, "SysJobController"},
+	{"PUT", "/monitor/job/run", PermMonitorJobChangeStatus, "SysJobController"},
+	{"DELETE", "/monitor/job/:jobIds", PermMonitorJobRemove, "SysJobController"},
+	// SysJobLogController.java
+	{"GET", "/monitor/jobLog/list", PermMonitorJobList, "SysJobLogController"},
+	{"POST", "/monitor/jobLog/export", PermMonitorJobExport, "SysJobLogController"},
+	{"GET", "/monitor/jobLog/:jobLogId", PermMonitorJobQuery, "SysJobLogController"},
+	{"DELETE", "/monitor/jobLog/:jobLogIds", PermMonitorJobRemove, "SysJobLogController"},
+	{"DELETE", "/monitor/jobLog/clean", PermMonitorJobRemove, "SysJobLogController"},
 	// SysIndexController.java（/unlockscreen 需登录态但无权限串，见 router.go 直接注册）
 	{"POST", "/unlockscreen", "", "SysIndexController"},
 	// SysRegisterController.java（匿名放行，见 router.go 直接注册）
@@ -227,7 +242,7 @@ var permRoutes = []RoutePerm{
 	{"GET", "/system/user/:userId", PermSystemUserQuery, "SysUserController"},
 }
 
-// permRoutesPhase2 二期延后端点清单（43 条）。
+// permRoutesPhase2 二期延后端点清单（30 条）。
 //
 // **本表不参与路由绑定**，仅作为交接清单存在：
 //   - 唯一事实来源是 internal/router/perm_diff_test.go 的 scopeFiles /
@@ -261,21 +276,6 @@ var permRoutesPhase2 = []RoutePerm{
 	// SysDictTypeController.java
 	{"POST", "/system/dict/type/export", PermSystemDictExport, "SysDictTypeController"}, // TODO(phase2) SysDictTypeController.java:46
 	// SysIndexController.java
-	// SysJobController.java
-	{"DELETE", "/monitor/job/:jobIds", PermMonitorJobRemove, "SysJobController"},         // TODO(phase2) SysJobController.java:177
-	{"GET", "/monitor/job/:jobId", PermMonitorJobQuery, "SysJobController"},              // TODO(phase2) SysJobController.java:70
-	{"GET", "/monitor/job/list", PermMonitorJobList, "SysJobController"},                 // TODO(phase2) SysJobController.java:39
-	{"POST", "/monitor/job", PermMonitorJobAdd, "SysJobController"},                      // TODO(phase2) SysJobController.java:80
-	{"POST", "/monitor/job/export", PermMonitorJobExport, "SysJobController"},            // TODO(phase2) SysJobController.java:57
-	{"PUT", "/monitor/job", PermMonitorJobEdit, "SysJobController"},                      // TODO(phase2) SysJobController.java:116
-	{"PUT", "/monitor/job/changeStatus", PermMonitorJobChangeStatus, "SysJobController"}, // TODO(phase2) SysJobController.java:152
-	{"PUT", "/monitor/job/run", PermMonitorJobChangeStatus, "SysJobController"},          // TODO(phase2) SysJobController.java:165
-	// SysJobLogController.java
-	{"DELETE", "/monitor/jobLog/:jobLogIds", PermMonitorJobRemove, "SysJobLogController"}, // TODO(phase2) SysJobLogController.java:73
-	{"DELETE", "/monitor/jobLog/clean", PermMonitorJobRemove, "SysJobLogController"},      // TODO(phase2) SysJobLogController.java:84
-	{"GET", "/monitor/jobLog/:jobLogId", PermMonitorJobQuery, "SysJobLogController"},      // TODO(phase2) SysJobLogController.java:62
-	{"GET", "/monitor/jobLog/list", PermMonitorJobList, "SysJobLogController"},            // TODO(phase2) SysJobLogController.java:31
-	{"POST", "/monitor/jobLog/export", PermMonitorJobExport, "SysJobLogController"},       // TODO(phase2) SysJobLogController.java:49
 	// SysLoginController.java
 	{"GET", "getInfo", "", "SysLoginController"},    // TODO(phase2) SysLoginController.java:72
 	{"GET", "getRouters", "", "SysLoginController"}, // TODO(phase2) SysLoginController.java:101

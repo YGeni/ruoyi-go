@@ -6,7 +6,9 @@ import (
 	"fmt"
 
 	"github.com/YGeni/ruoyi-go/server-go/config"
+	"github.com/YGeni/ruoyi-go/server-go/internal/repository"
 	"github.com/YGeni/ruoyi-go/server-go/internal/router"
+	"github.com/YGeni/ruoyi-go/server-go/internal/scheduler"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/db"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/logger"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/redisx"
@@ -33,6 +35,14 @@ func main() {
 		logger.Sugar.Fatalf("Redis 初始化失败: %v", err)
 	}
 	defer redisx.Close()
+
+	// 启动定时任务调度器：等价 Java 侧
+	// SysJobServiceImpl 里的 @PostConstruct init()（L44-49）——
+	// 应用启动时把 sys_job 里 status='0' 的任务灌进 quartz。
+	// 这里同样在监听端口之前启动，失败只记日志不阻断启动
+	// （任务表不可用时页面仍应能查列表）。
+	scheduler.Start(repository.JobScheduleRepo{})
+	defer scheduler.Stop()
 
 	gin.SetMode(config.C.Server.Mode)
 	r := router.New()

@@ -88,6 +88,8 @@ var scopeFiles = map[string]bool{
 	"SysRegisterController.java":   true,
 	"CacheController.java":         true,
 	"ServerController.java":        true,
+	"SysJobLogController.java":     true,
+	"SysJobController.java":        true,
 }
 
 // deferPathKeywords 本期明确不做的路径（Excel 导入导出，见 commit message 遗留项）。
@@ -102,6 +104,8 @@ var deferPathKeywords = []string{"export", "importData", "importTemplate"}
 var undeferScope = map[string]bool{
 	"SysLogininforController.java|/monitor/logininfor/export": true,
 	"SysOperlogController.java|/monitor/operlog/export":       true,
+	"SysJobController.java|/monitor/job/export":               true,
+	"SysJobLogController.java|/monitor/jobLog/export":         true,
 }
 
 // isDeferred 该端点是否属于"本期明确不做"。

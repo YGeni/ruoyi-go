@@ -115,6 +115,45 @@ type SysLogininfor struct {
 // TableName 表名。
 func (SysLogininfor) TableName() string { return "sys_logininfor" }
 
+// SysJob 定时任务调度表 sys_job。
+//
+// 该表没有 del_flag（删除是真删），create_time / update_time 是普通列，
+// 与 BaseModel 的语义一致，因此照常嵌入。
+type SysJob struct {
+	model.BaseModel
+	JobID          int64  `gorm:"column:job_id;primaryKey;autoIncrement" json:"jobId"`
+	JobName        string `gorm:"column:job_name" json:"jobName"`
+	JobGroup       string `gorm:"column:job_group" json:"jobGroup"`
+	InvokeTarget   string `gorm:"column:invoke_target" json:"invokeTarget"`
+	CronExpression string `gorm:"column:cron_expression" json:"cronExpression"`
+	MisfirePolicy  string `gorm:"column:misfire_policy" json:"misfirePolicy"`
+	Concurrent     string `gorm:"column:concurrent" json:"concurrent"`
+	Status         string `gorm:"column:status" json:"status"`
+}
+
+// TableName 表名。
+func (SysJob) TableName() string { return "sys_job" }
+
+// SysJobLog 定时任务调度日志表 sys_job_log。
+//
+// 与 SysJob 不同：这张表**只有 create_time、没有 update_time**，
+// 所以不嵌 BaseModel（否则 GORM 会去写不存在的 update_time 列）。
+type SysJobLog struct {
+	JobLogID      int64      `gorm:"column:job_log_id;primaryKey;autoIncrement" json:"jobLogId"`
+	JobName       string     `gorm:"column:job_name" json:"jobName"`
+	JobGroup      string     `gorm:"column:job_group" json:"jobGroup"`
+	InvokeTarget  string     `gorm:"column:invoke_target" json:"invokeTarget"`
+	JobMessage    string     `gorm:"column:job_message" json:"jobMessage"`
+	Status        string     `gorm:"column:status" json:"status"`
+	ExceptionInfo string     `gorm:"column:exception_info" json:"exceptionInfo"`
+	StartTime     *time.Time `gorm:"column:start_time" json:"startTime"`
+	EndTime       *time.Time `gorm:"column:end_time" json:"endTime"`
+	CreateTime    *time.Time `gorm:"column:create_time" json:"createTime"`
+}
+
+// TableName 表名。
+func (SysJobLog) TableName() string { return "sys_job_log" }
+
 // SysOperLog 操作日志记录 sys_oper_log。
 //
 // 与 SysLogininfor 同理：该表没有 create_time / update_time，只有 oper_time，

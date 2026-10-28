@@ -6,8 +6,8 @@
 | 项 | 数量 |
 |---|---|
 | Java 端点总数（admin+generator+quartz） | 147 |
-| 1b 范围内端点 | 104 |
-| 二期延后端点 | 43 |
+| 1b 范围内端点 | 117 |
+| 二期延后端点 | 30 |
 | 缺失（Java→Go） | 0 |
 | 多余（Go→Java） | 0 |
 
@@ -26,6 +26,9 @@
 | DELETE | `/monitor/cache/clearCacheAll` | monitor:cache:list | CacheController.java:114 |
 | DELETE | `/monitor/cache/clearCacheKey/:cacheKey` | monitor:cache:list | CacheController.java:106 |
 | DELETE | `/monitor/cache/clearCacheName/:cacheName` | monitor:cache:list | CacheController.java:97 |
+| DELETE | `/monitor/job/:jobIds` | monitor:job:remove | SysJobController.java:177 |
+| DELETE | `/monitor/jobLog/:jobLogIds` | monitor:job:remove | SysJobLogController.java:73 |
+| DELETE | `/monitor/jobLog/clean` | monitor:job:remove | SysJobLogController.java:84 |
 | DELETE | `/monitor/logininfor/:infoIds` | monitor:logininfor:remove | SysLogininforController.java:57 |
 | DELETE | `/monitor/logininfor/clean` | monitor:logininfor:remove | SysLogininforController.java:65 |
 | DELETE | `/monitor/online/:tokenId` | monitor:online:forceLogout | SysUserOnlineController.java:75 |
@@ -48,6 +51,10 @@
 | GET | `/monitor/cache/getKeys/:cacheName` | monitor:cache:list | CacheController.java:80 |
 | GET | `/monitor/cache/getNames` | monitor:cache:list | CacheController.java:73 |
 | GET | `/monitor/cache/getValue/:cacheName/:cacheKey` | monitor:cache:list | CacheController.java:88 |
+| GET | `/monitor/job/:jobId` | monitor:job:query | SysJobController.java:70 |
+| GET | `/monitor/job/list` | monitor:job:list | SysJobController.java:39 |
+| GET | `/monitor/jobLog/:jobLogId` | monitor:job:query | SysJobLogController.java:62 |
+| GET | `/monitor/jobLog/list` | monitor:job:list | SysJobLogController.java:31 |
 | GET | `/monitor/logininfor/list` | monitor:logininfor:list | SysLogininforController.java:32 |
 | GET | `/monitor/logininfor/unlock/:userName` | monitor:logininfor:unlock | SysLogininforController.java:74 |
 | GET | `/monitor/online/list` | monitor:online:list | SysUserOnlineController.java:35 |
@@ -90,6 +97,9 @@
 | GET | `/system/user/profile` | (仅需登录) | SysProfileController.java:38 |
 | POST | `/common/upload` | (仅需登录) | CommonController.java:74 |
 | POST | `/common/uploads` | (仅需登录) | CommonController.java:100 |
+| POST | `/monitor/job` | monitor:job:add | SysJobController.java:80 |
+| POST | `/monitor/job/export` | monitor:job:export | SysJobController.java:57 |
+| POST | `/monitor/jobLog/export` | monitor:job:export | SysJobLogController.java:49 |
 | POST | `/monitor/logininfor/export` | monitor:logininfor:export | SysLogininforController.java:47 |
 | POST | `/monitor/operlog/export` | monitor:operlog:export | SysOperlogController.java:43 |
 | POST | `/register` | (仅需登录) | SysRegisterController.java:22 |
@@ -106,6 +116,9 @@
 | POST | `/system/user` | system:user:add | SysUserController.java:122 |
 | POST | `/system/user/profile/avatar` | (仅需登录) | SysProfileController.java:124 |
 | POST | `/unlockscreen` | (仅需登录) | SysIndexController.java:43 |
+| PUT | `/monitor/job` | monitor:job:edit | SysJobController.java:116 |
+| PUT | `/monitor/job/changeStatus` | monitor:job:changeStatus | SysJobController.java:152 |
+| PUT | `/monitor/job/run` | monitor:job:changeStatus | SysJobController.java:165 |
 | PUT | `/system/config` | system:config:edit | SysConfigController.java:97 |
 | PUT | `/system/dept` | system:dept:edit | SysDeptController.java:91 |
 | PUT | `/system/dept/updateSort` | system:dept:edit | SysDeptController.java:117 |
@@ -132,16 +145,9 @@
 
 | Method | Path | 权限串 | Java 来源 |
 |---|---|---|---|
-| DELETE | `/monitor/job/:jobIds` | monitor:job:remove | SysJobController.java:177 |
-| DELETE | `/monitor/jobLog/:jobLogIds` | monitor:job:remove | SysJobLogController.java:73 |
-| DELETE | `/monitor/jobLog/clean` | monitor:job:remove | SysJobLogController.java:84 |
 | DELETE | `/test/user/:userId` | (仅需登录) | TestController.java:73 |
 | DELETE | `/tool/gen/:tableIds` | tool:gen:remove | GenController.java:178 |
 | GET | `/captchaImage` | (仅需登录) | CaptchaController.java:31 |
-| GET | `/monitor/job/:jobId` | monitor:job:query | SysJobController.java:70 |
-| GET | `/monitor/job/list` | monitor:job:list | SysJobController.java:39 |
-| GET | `/monitor/jobLog/:jobLogId` | monitor:job:query | SysJobLogController.java:62 |
-| GET | `/monitor/jobLog/list` | monitor:job:list | SysJobLogController.java:31 |
 | GET | `/test/user/:userId` | (仅需登录) | TestController.java:46 |
 | GET | `/test/user/list` | (仅需登录) | TestController.java:38 |
 | GET | `/tool/gen/:tableId` | tool:gen:query | GenController.java:70 |
@@ -156,9 +162,6 @@
 | GET | `getInfo` | (仅需登录) | SysLoginController.java:72 |
 | GET | `getRouters` | (仅需登录) | SysLoginController.java:101 |
 | POST | `/login` | (仅需登录) | SysLoginController.java:35 |
-| POST | `/monitor/job` | monitor:job:add | SysJobController.java:80 |
-| POST | `/monitor/job/export` | monitor:job:export | SysJobController.java:57 |
-| POST | `/monitor/jobLog/export` | monitor:job:export | SysJobLogController.java:49 |
 | POST | `/system/config/export` | system:config:export | SysConfigController.java:49 |
 | POST | `/system/dict/data/export` | system:dict:export | SysDictDataController.java:52 |
 | POST | `/system/dict/type/export` | system:dict:export | SysDictTypeController.java:46 |
@@ -170,8 +173,5 @@
 | POST | `/test/user/save` | (仅需登录) | TestController.java:61 |
 | POST | `/tool/gen/createTable` | (仅需登录) | GenController.java:128 |
 | POST | `/tool/gen/importTable` | tool:gen:import | GenController.java:113 |
-| PUT | `/monitor/job` | monitor:job:edit | SysJobController.java:116 |
-| PUT | `/monitor/job/changeStatus` | monitor:job:changeStatus | SysJobController.java:152 |
-| PUT | `/monitor/job/run` | monitor:job:changeStatus | SysJobController.java:165 |
 | PUT | `/test/user/update` | (仅需登录) | TestController.java:73 |
 | PUT | `/tool/gen` | tool:gen:edit | GenController.java:165 |

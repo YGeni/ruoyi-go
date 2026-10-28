@@ -157,8 +157,12 @@ const (
 
 // ---------- sys_config 配置键 ----------
 const (
-	ConfigCaptchaEnabled     = "sys.account.captchaEnabled"
-	ConfigRegisterUser       = "sys.account.registerUser"
+	ConfigCaptchaEnabled = "sys.account.captchaEnabled"
+	ConfigRegisterUser   = "sys.account.registerUser"
+
+	// JobWhitelistStr 定时任务允许调用的 bean 包前缀，
+	// 对应 Constants.JOB_WHITELIST_STR（Constants.java:166）。
+	JobWhitelistStr          = "com.ruoyi.quartz.task"
 	ConfigChrtype            = "sys.account.chrtype"
 	ConfigInitPasswordModify = "sys.account.initPasswordModify"
 	ConfigPasswordValidDays  = "sys.account.passwordValidateDays"
