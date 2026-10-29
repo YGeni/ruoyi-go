@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"go/format"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,6 +42,7 @@ const (
 	TypeInteger    = "Integer"
 	TypeDouble     = "Double"
 	TypeBigDecimal = "BigDecimal"
+	TypeBoolean    = "Boolean"
 )
 
 // 不参与编辑/列表/查询的列名。
@@ -388,6 +390,78 @@ func capJavaField(s string) string {
 	return strings.ToUpper(s[:1]) + s[1:]
 }
 
+// goModulePath 生成代码里 import 本模块用的路径。
+//
+// 与 go.mod 的 module 名保持一致（github.com/YGeni/ruoyi-go/server-go）。
+// 生成的 .go 是要放进本项目的，写死在模板里换仓库就全错，所以放这里。
+const goModulePath = "github.com/YGeni/ruoyi-go/server-go"
+
+// goType Java 类型 -> Go 类型。
+//
+// 来源是 gen_table_column.java_type（导入表结构时按 ColumnType 推出来的），
+// 所以这里按那几个枚举值映射；认不出来的退回 string 并在注释里说明，
+// 而不是猜错类型让生成的代码编译不过。
+func goType(javaType string) string {
+	switch javaType {
+	case TypeString:
+		return "string"
+	case TypeLong:
+		return "int64"
+	case TypeInteger:
+		return "int"
+	case TypeDouble, TypeBigDecimal:
+		return "float64"
+	case TypeDate:
+		return "*time.Time"
+	case TypeBoolean:
+		return "bool"
+	default:
+		return "string"
+	}
+}
+
+// goZero 该 Go 类型的零值字面量，用于"值不为空才拼条件/才更新"的判断。
+func goZero(javaType string) string {
+	switch goType(javaType) {
+	case "string":
+		return `""`
+	case "*time.Time":
+		return "nil"
+	case "bool":
+		return "false"
+	default:
+		return "0"
+	}
+}
+
+// toSnake 帕斯卡/驼峰 -> 蛇形（SysPost -> sys_post），用于输出文件名。
+func toSnake(s string) string {
+	var b strings.Builder
+	for i, r := range s {
+		if r >= 'A' && r <= 'Z' {
+			if i > 0 {
+				b.WriteByte('_')
+			}
+			b.WriteRune(r + ('a' - 'A'))
+			continue
+		}
+		b.WriteRune(r)
+	}
+	return b.String()
+}
+
+// classNameCap 权限常量里用的一段：SysPost -> Post。
+//
+// 直接拼 ClassName 会得到 PermSystemSysPostList（System 重复），
+// 去掉开头的 Sys / 系统前缀更接近现有常量的写法（PermSystemPostList）。
+func classNameCap(className string) string {
+	s := strings.TrimPrefix(className, "Sys")
+	if s == "" {
+		return className
+	}
+	return s
+}
+
 func b2s(b bool) string {
 	if b {
 		return "1"
@@ -422,25 +496,51 @@ type tplData struct {
 	ParentMenuId     string
 	PackageNamePath  string
 	ImportList       []string
-	Pk               *tplColumn
-	Columns          []tplColumn
-	QueryColumns     []tplColumn
-	InsertColumns    []tplColumn
-	UpdateColumns    []tplColumn
-	ColumnNameList   string
-	HasDateColumn    bool
-	HasCreateTime    bool
-	HasUpdateTime    bool
+	// GoModule 生成代码里 import 自己的模块路径。
+	//
+	// 生成的 .go 文件是要放进本项目的（internal/model/entity 等目录），
+	// 所以 import 前缀必须是本模块，写死在模板里换仓库就全错了。
+	GoModule string
+	// SnakeName 输出文件名用的蛇形名（SysPost -> sys_post）。
+	SnakeName string
+	// ClassNameCap 权限常量名里那段（SysPost -> Post，避免 PermSystemSysPostList 这种重复）。
+	ClassNameCap string
+	// ModuleNameCap 权限常量里的模块段（system -> System）。
+	//
+	// 现有常量是 PermSystemPostList 这种写法，直接用 module_name（小写）
+	// 会拼出 PermsystemPostList，跟既有风格不一致。
+	ModuleNameCap string
+	// PathPrefix HTTP 路径前缀，如 /system/post。
+	PathPrefix string
+	// HasTime 是否有 Date 类型的列（决定 entity 要不要 import "time"）。
+	HasTime        bool
+	Pk             *tplColumn
+	Columns        []tplColumn
+	QueryColumns   []tplColumn
+	InsertColumns  []tplColumn
+	UpdateColumns  []tplColumn
+	ColumnNameList string
+	HasDateColumn  bool
+	HasCreateTime  bool
+	HasUpdateTime  bool
 }
 
 type tplColumn struct {
-	ColumnName       string
-	ColumnComment    string
-	ExcelComment     string
-	ColumnType       string
-	JavaType         string
-	JavaField        string
-	CapJavaField     string
+	ColumnName    string
+	ColumnComment string
+	ExcelComment  string
+	ColumnType    string
+	JavaType      string
+	JavaField     string
+	CapJavaField  string
+	// GoField 导出的 Go 字段名（JavaField 的帕斯卡形，userId -> UserId）。
+	//
+	// 必须导出，否则 gorm 写不进去、encoding/json 也不认。
+	GoField string
+	// GoType 对应的 Go 类型（Long -> int64、Date -> *time.Time ...）。
+	GoType string
+	// GoZero 该类型的零值字面量，模板里用来判断"这一列要不要更新/查询"。
+	GoZero           string
 	IsPk             bool
 	IsIncrementBool  bool
 	IsRequired       bool
@@ -475,6 +575,11 @@ func buildTplData(t *entity.GenTable) *tplData {
 		PermissionPrefix: fmt.Sprintf("%s:%s", t.ModuleName, t.BusinessName),
 		ParentMenuId:     "3",
 		PackageNamePath:  strings.ReplaceAll(t.PackageName, ".", "/"),
+		GoModule:         goModulePath,
+		SnakeName:        toSnake(t.ClassName),
+		ClassNameCap:     classNameCap(t.ClassName),
+		ModuleNameCap:    capJavaField(t.ModuleName),
+		PathPrefix:       "/" + t.ModuleName + "/" + t.BusinessName,
 	}
 	importSet := map[string]bool{}
 	var names []string
@@ -487,6 +592,9 @@ func buildTplData(t *entity.GenTable) *tplData {
 			JavaType:         c.JavaType,
 			JavaField:        c.JavaField,
 			CapJavaField:     capJavaField(c.JavaField),
+			GoField:          capJavaField(c.JavaField),
+			GoType:           goType(c.JavaType),
+			GoZero:           goZero(c.JavaType),
 			IsPk:             c.IsPk == "1",
 			IsIncrementBool:  c.IsIncrement == "1",
 			IsRequired:       c.IsRequired == "1",
@@ -523,8 +631,11 @@ func buildTplData(t *entity.GenTable) *tplData {
 				names = append(names, imp)
 			}
 		}
-		if c.JavaType == TypeDate {
+		if c.JavaType == TypeDate && !tc.IsSuperColumn {
 			d.HasDateColumn = true
+			// entity.go 要不要 import "time" 取决于**除 BaseModel 之外**
+			// 有没有 Date 列：create_time/update_time 已被 BaseModel 带进来了。
+			d.HasTime = true
 		}
 		if c.JavaField == "createTime" {
 			d.HasCreateTime = true
@@ -616,7 +727,19 @@ func RenderAll(t *entity.GenTable) (map[string]string, error) {
 		if err := pt.Execute(&pbuf, data); err != nil {
 			return nil, err
 		}
-		out[pbuf.String()] = buf.String()
+		content := buf.String()
+		path := pbuf.String()
+		// 生成的是要放进本项目的 Go 代码，顺手格式化 + 语法校验：
+		// 模板里少一个花括号，用户下载到的就是编译不过的文件，
+		// 与其让人自己发现，不如在这里直接报错。
+		if strings.HasSuffix(path, ".go") {
+			formatted, err := format.Source([]byte(content))
+			if err != nil {
+				return nil, fmt.Errorf("模板 %s 生成的不是合法 Go 代码: %w", f.Tpl, err)
+			}
+			content = string(formatted)
+		}
+		out[path] = content
 	}
 	return out, nil
 }
