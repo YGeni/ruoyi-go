@@ -1,0 +1,8 @@
+# air 热重载的构建产物（.air.toml 里的 tmp_dir）
+tmp/
+
+# Makefile 的构建产物（make build）
+bin/
+
+# 运行时上传目录
+uploadPath/

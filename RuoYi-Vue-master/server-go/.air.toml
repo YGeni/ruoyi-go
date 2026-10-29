@@ -1,0 +1,42 @@
+# air 热重载配置（https://github.com/air-verse/air）
+#
+# 用法：在 server-go/ 下直接 `air`（或 `make dev`）。
+#
+# DIFF(dev) —— 为什么用 air 而不用 fresh：
+#
+# fresh 的构建是写死的 `go build -o <build_path> <root>`
+# （github.com/pilu/fresh runner/build.go:13），**root 既是监听目录又是
+# 构建目标，没有任何配置项能指定 main 包**。
+# 本项目的 main 在 ./cmd/server，而根目录没有 .go 文件，所以 fresh 在
+# 根目录跑必然报：
+#     no Go files in /Users/mac/Desktop/若依/RuoYi-Vue-master/server-go
+# 把 root 改成 ./cmd/server 确实能构建，但那样只监听 cmd/server 一个目录，
+# internal/ 和 pkg/ 的改动不会触发重建 —— 等于热重载失效。
+#
+# air 的 cmd / full_bin 可以分别指定"构建什么"和"怎么跑"，适合这种布局。
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# 要构建的包：main 在 ./cmd/server，不是根目录
+cmd = "go build -o ./tmp/server ./cmd/server"
+# 启动命令：必须带 -c config/config.yaml，否则后端读不到配置会启动失败
+# （用 full_bin 而不是 bin，因为要带参数）
+full_bin = "./tmp/server -c config/config.yaml"
+
+include_ext = ["go", "yaml", "html"]
+exclude_dir = ["assets", "tmp", "bin", "uploadPath", "scripts", "logs"]
+# 改测试文件不触发重启
+exclude_regex = ["_test\\.go"]
+
+delay = 1000        # 文件变更后等 1 秒再构建，避开编辑器连续写盘
+stop_on_error = true
+send_interrupt = true
+kill_delay = 500     # 留给旧进程 500ms 收尾（关连接池、退出调度器）
+
+[log]
+time = false
+
+[misc]
+clean_on_exit = true

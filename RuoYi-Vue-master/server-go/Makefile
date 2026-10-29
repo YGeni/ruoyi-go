@@ -5,7 +5,12 @@ GO ?= go
 BIN := bin/server
 CFG := config/config.yaml
 
-.PHONY: build vet test run clean
+.PHONY: build vet test run dev clean
+
+# 热重载。用 air 不是 fresh —— fresh 的构建写死成 `go build <root>`，
+# 没法指定 main 包（本项目的 main 在 ./cmd/server），详见 .air.toml 的注释。
+dev:
+	air
 
 build:
 	$(GO) build -o $(BIN) ./cmd/server
