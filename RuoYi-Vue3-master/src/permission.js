@@ -1,8 +1,7 @@
 import router from './router'
-import { ElMessage } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-import { getToken } from '@/utils/auth'
+import { getToken, removeToken } from '@/utils/auth'
 import { isHttp, isPathMatch } from '@/utils/validate'
 import { isRelogin } from '@/utils/request'
 import useUserStore from '@/store/modules/user'
@@ -54,9 +53,19 @@ router.beforeEach(async (to, from) => {
         // 重新导航到目标路由，确保动态路由已注册
         return { ...to, replace: true }
       } catch (err) {
-        await useUserStore().logOut()
-        ElMessage.error(err)
-        return { path: '/' }
+        // DIFF(review): 会话过期直接清本地登录态并去登录页，不再弹「无效的会话」。
+        //
+        // 原实现是 `await useUserStore().logOut()` —— logOut() 会先请求 /logout，
+        // token 已失效时该请求同样 401 并 reject，await 直接抛出，
+        // 这里再也走不到 return，**路由守卫挂死、顶部进度条一直转**（就是"卡着"）。
+        // 改成同步清本地状态后返回登录页。
+        isRelogin.show = false
+        const userStore = useUserStore()
+        userStore.token = ''
+        userStore.roles = []
+        userStore.permissions = []
+        removeToken()
+        return { path: '/login', query: { redirect: to.fullPath } }
       }
     }
     return true

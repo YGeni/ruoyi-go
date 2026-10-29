@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { ElNotification , ElMessageBox, ElMessage, ElLoading } from 'element-plus'
-import { getToken } from '@/utils/auth'
+import { ElNotification, ElMessage, ElLoading } from 'element-plus'
+import { getToken, removeToken } from '@/utils/auth'
 import errorCode from '@/utils/errorCode'
 import { tansParams, blobValidate } from '@/utils/ruoyi'
 import cache from '@/plugins/cache'
@@ -10,6 +10,18 @@ import useUserStore from '@/store/modules/user'
 let downloadLoadingInstance
 // 是否显示重新登录
 export let isRelogin = { show: false }
+
+// clearSession 只清本地登录态，**不发** /logout 请求。
+//
+// 会话已经过期时 /logout 必然也是 401，所以这里不能像 useUserStore().logOut()
+// 那样依赖后端返回（见下面 401 分支的注释）。
+function clearSession() {
+  const userStore = useUserStore()
+  userStore.token = ''
+  userStore.roles = []
+  userStore.permissions = []
+  removeToken()
+}
 
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
@@ -83,17 +95,19 @@ service.interceptors.response.use(res => {
       return res.data
     }
     if (code === 401) {
+      // DIFF(review): 会话过期直接登出并跳登录页，不再弹确认框。
+      //
+      // 原实现是 ElMessageBox.confirm + useUserStore().logOut().then(...)：
+      // logOut() 会**先请求 /logout**，而 token 已经失效 —— 那个请求同样返回 401，
+      // logOut() 走的是 reject 分支，.then() 永远不执行，于是点了「重新登录」
+      // 也毫无反应，页面就这么卡住（点「取消」也是继续卡着）。
+      // 这里改成不依赖后端返回：直接清本地登录态再跳 /login。
       if (!isRelogin.show) {
         isRelogin.show = true
-        ElMessageBox.confirm('登录状态已过期，您可以继续留在该页面，或者重新登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '取消', type: 'warning' }).then(() => {
-          isRelogin.show = false
-          useUserStore().logOut().then(() => {
-            location.href = '/index'
-          })
-      }).catch(() => {
-        isRelogin.show = false
-      })
-    }
+        clearSession()
+        // 整页跳转，顺带把内存里的路由/缓存一起清掉
+        location.href = '/login'
+      }
       return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
     } else if (code === 500) {
       ElMessage({ message: msg, type: 'error' })
