@@ -102,6 +102,13 @@ func New() *gin.Engine {
 	// Java 的 /druid/* 也不走 Shiro，是 druid 自己的登录页管的。
 	r.GET("/druid/login.html", monitor.DruidPage)
 	r.GET("/druid/index.html", monitor.DruidPage)
+	// "系统接口"菜单 iframe 的是 ${VITE_APP_BASE_API}/swagger-ui/index.html
+	// （src/views/tool/swagger/index.vue:11）。Java 侧由 springdoc-openapi 提供，
+	// Go 侧在 openapi.go / swagger_page.go 自建：/v3/api-docs 出 OpenAPI 3.0，
+	// /swagger-ui/index.html 出只读页面。同样不挂权限串。
+	r.GET("/v3/api-docs", OpenAPIDoc)
+	r.GET("/swagger-ui/index.html", SwaggerUI)
+	r.GET("/swagger-ui.html", SwaggerUI)
 
 	perm(r, "GET", "/monitor/online/list", monitor.OnlineList)
 	perm(r, "DELETE", "/monitor/online/:tokenId", monitor.ForceLogout)
@@ -250,6 +257,10 @@ func New() *gin.Engine {
 	perm(r, "POST", "/system/notice", notice.Add)
 	perm(r, "PUT", "/system/notice", notice.Edit)
 	perm(r, "DELETE", "/system/notice/:noticeIds", notice.Remove)
+
+	// 抓一份已注册路由的快照，供 /v3/api-docs 与"系统接口"页面标注
+	// 「已实现 / 二期延后」（见 openapi.go）。
+	snapshotRoutes(r)
 
 	return r
 }

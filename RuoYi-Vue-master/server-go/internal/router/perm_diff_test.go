@@ -444,6 +444,11 @@ func TestRegisteredRoutesHavePermEntry(t *testing.T) {
 		// Go 侧在 internal/handler/system/monitor_druid.go 自建对等页面。
 		"GET /druid/login.html": true,
 		"GET /druid/index.html": true,
+		// springdoc：Java 侧由 springdoc-openapi 的 webjar 提供，不是 Controller 的
+		// @RequestMapping，loadJavaEndpoints 扫不到。Go 侧见 openapi.go。
+		"GET /v3/api-docs":           true,
+		"GET /swagger-ui/index.html": true,
+		"GET /swagger-ui.html":       true,
 	}
 	registered := map[string]bool{}
 	for _, r := range New().Routes() {
