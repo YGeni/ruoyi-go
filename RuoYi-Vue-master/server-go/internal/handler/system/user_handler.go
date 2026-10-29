@@ -10,6 +10,7 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/internal/model/entity"
 	"github.com/YGeni/ruoyi-go/server-go/internal/model/query"
 	"github.com/YGeni/ruoyi-go/server-go/internal/service"
+	"github.com/YGeni/ruoyi-go/server-go/pkg/excelx"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/page"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/result"
 
@@ -285,4 +286,87 @@ func (UserHandler) DeptTree(c *gin.Context) {
 		rows = []entity.SysDept{}
 	}
 	result.OK(c, result.SuccessData(rows))
+}
+
+// UserExport POST /system/user/export
+//
+// 等价：ExcelUtil 导出，不分页；与列表接口一样受数据范围约束。
+func (UserHandler) UserExport(c *gin.Context) {
+	lu, ok := middleware.LoginUser(c)
+	if !ok {
+		result.Fail(c, result.ErrorCode(401, "认证失败，无法访问系统资源"))
+		return
+	}
+	var q query.UserList
+	if err := c.ShouldBind(&q); err != nil {
+		result.Fail(c, result.Error(err.Error()))
+		return
+	}
+	q.FillDateRange(c)
+	rows, _, err := service.SelectUserList(c, lu, &q, page.NoLimit())
+	if err != nil {
+		result.Fail(c, result.Error(err.Error()))
+		return
+	}
+	headers, data := service.UserExportRows(rows)
+	writeXlsx(c, "用户数据", headers, data)
+}
+
+// UserImportTemplate POST /system/user/importTemplate
+//
+// 只下表头不带数据行，用户填完再走 importData 上传。
+func (UserHandler) UserImportTemplate(c *gin.Context) {
+	if _, ok := middleware.LoginUser(c); !ok {
+		result.Fail(c, result.ErrorCode(401, "认证失败，无法访问系统资源"))
+		return
+	}
+	writeXlsx(c, "用户数据", service.ImportUserHeaders, nil)
+}
+
+// UserImportData POST /system/user/importData
+//
+// 等价 SysUserController.importData(MultipartFile file, boolean updateSupport)。
+//
+// 前端 src/views/system/user/index.vue 用 FormData 提交，字段名是 file；
+// updateSupport 是同表单里的一个字符串（"true"/"false"）。
+func (UserHandler) UserImportData(c *gin.Context) {
+	lu, ok := middleware.LoginUser(c)
+	if !ok {
+		result.Fail(c, result.ErrorCode(401, "认证失败，无法访问系统资源"))
+		return
+	}
+	fh, err := c.FormFile("file")
+	if err != nil {
+		result.Fail(c, result.Error("请选择要导入的文件"))
+		return
+	}
+	f, err := fh.Open()
+	if err != nil {
+		result.Fail(c, result.Error("读取上传文件失败"))
+		return
+	}
+	defer func() { _ = f.Close() }()
+
+	all, err := excelx.Read(f)
+	if err != nil {
+		result.Fail(c, result.Error("解析 Excel 失败："+err.Error()))
+		return
+	}
+	if len(all) < 2 {
+		result.Fail(c, result.Error("导入的数据为空"))
+		return
+	}
+	// 首行是表头，跳过；
+	updateSupport := c.PostForm("updateSupport") == "true" || c.PostForm("updateSupport") == "1"
+	res, err := service.ImportUsers(all[1:], updateSupport, lu.Username())
+	if err != nil {
+		result.Fail(c, result.Error(err.Error()))
+		return
+	}
+	if res.FailureNum > 0 {
+		// 对齐 Java：有失败项时抛 CustomException，前端把 msg 当错误提示展示
+		result.Fail(c, result.Warn(res.Msg))
+		return
+	}
+	result.OK(c, result.SuccessMsg(res.Msg))
 }

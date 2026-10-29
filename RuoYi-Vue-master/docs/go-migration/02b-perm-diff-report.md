@@ -6,8 +6,8 @@
 | 项 | 数量 |
 |---|---|
 | Java 端点总数（admin+generator+quartz） | 147 |
-| 1b 范围内端点 | 130 |
-| 二期延后端点 | 17 |
+| 1b 范围内端点 | 138 |
+| 二期延后端点 | 9 |
 | 缺失（Java→Go） | 0 |
 | 多余（Go→Java） | 0 |
 
@@ -114,16 +114,24 @@
 | POST | `/monitor/operlog/export` | monitor:operlog:export | SysOperlogController.java:43 |
 | POST | `/register` | (仅需登录) | SysRegisterController.java:22 |
 | POST | `/system/config` | system:config:add | SysConfigController.java:81 |
+| POST | `/system/config/export` | system:config:export | SysConfigController.java:49 |
 | POST | `/system/dept` | system:dept:add | SysDeptController.java:75 |
 | POST | `/system/dict/data` | system:dict:add | SysDictDataController.java:89 |
+| POST | `/system/dict/data/export` | system:dict:export | SysDictDataController.java:52 |
 | POST | `/system/dict/type` | system:dict:add | SysDictTypeController.java:69 |
+| POST | `/system/dict/type/export` | system:dict:export | SysDictTypeController.java:46 |
 | POST | `/system/menu` | system:menu:add | SysMenuController.java:84 |
 | POST | `/system/notice` | system:notice:add | SysNoticeController.java:65 |
 | POST | `/system/notice/markRead` | (仅需登录) | SysNoticeController.java:104 |
 | POST | `/system/notice/markReadAll` | (仅需登录) | SysNoticeController.java:116 |
 | POST | `/system/post` | system:post:add | SysPostController.java:72 |
+| POST | `/system/post/export` | system:post:export | SysPostController.java:49 |
 | POST | `/system/role` | system:role:add | SysRoleController.java:89 |
+| POST | `/system/role/export` | system:role:export | SysRoleController.java:65 |
 | POST | `/system/user` | system:user:add | SysUserController.java:122 |
+| POST | `/system/user/export` | system:user:export | SysUserController.java:68 |
+| POST | `/system/user/importData` | system:user:import | SysUserController.java:78 |
+| POST | `/system/user/importTemplate` | (仅需登录) | SysUserController.java:90 |
 | POST | `/system/user/profile/avatar` | (仅需登录) | SysProfileController.java:124 |
 | POST | `/tool/gen/createTable` | (仅需登录) | GenController.java:128 |
 | POST | `/tool/gen/importTable` | tool:gen:import | GenController.java:113 |
@@ -165,13 +173,5 @@
 | GET | `getInfo` | (仅需登录) | SysLoginController.java:72 |
 | GET | `getRouters` | (仅需登录) | SysLoginController.java:101 |
 | POST | `/login` | (仅需登录) | SysLoginController.java:35 |
-| POST | `/system/config/export` | system:config:export | SysConfigController.java:49 |
-| POST | `/system/dict/data/export` | system:dict:export | SysDictDataController.java:52 |
-| POST | `/system/dict/type/export` | system:dict:export | SysDictTypeController.java:46 |
-| POST | `/system/post/export` | system:post:export | SysPostController.java:49 |
-| POST | `/system/role/export` | system:role:export | SysRoleController.java:65 |
-| POST | `/system/user/export` | system:user:export | SysUserController.java:68 |
-| POST | `/system/user/importData` | system:user:import | SysUserController.java:78 |
-| POST | `/system/user/importTemplate` | (仅需登录) | SysUserController.java:90 |
 | POST | `/test/user/save` | (仅需登录) | TestController.java:61 |
 | PUT | `/test/user/update` | (仅需登录) | TestController.java:73 |

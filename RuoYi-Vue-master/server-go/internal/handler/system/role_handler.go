@@ -427,3 +427,26 @@ func (RoleHandler) AuthUserSelectAll(c *gin.Context) {
 	}
 	result.OK(c, result.Success())
 }
+
+// RoleExport POST /system/role/export
+//
+// 与列表接口一样走数据范围（SelectRoleList 带 lu），导出的只能是本角色可见的数据。
+func (RoleHandler) RoleExport(c *gin.Context) {
+	lu, ok := loginUser(c)
+	if !ok {
+		return
+	}
+	var q query.RoleList
+	if err := c.ShouldBind(&q); err != nil {
+		fail(c, err)
+		return
+	}
+	q.FillDateRange(c)
+	rows, _, err := service.SelectRoleList(c, lu, &q, page.NoLimit())
+	if err != nil {
+		fail(c, err)
+		return
+	}
+	headers, data := service.RoleExportRows(rows)
+	writeXlsx(c, "角色管理", headers, data)
+}

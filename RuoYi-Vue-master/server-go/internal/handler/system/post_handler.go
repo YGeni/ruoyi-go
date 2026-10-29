@@ -126,3 +126,22 @@ func (PostHandler) Remove(c *gin.Context) {
 	}
 	result.OK(c, result.Success())
 }
+
+// PostExport POST /system/post/export
+func (PostHandler) PostExport(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	var q query.PostList
+	if err := c.ShouldBind(&q); err != nil {
+		fail(c, err)
+		return
+	}
+	rows, _, err := service.SelectPostList(&q, page.NoLimit())
+	if err != nil {
+		fail(c, err)
+		return
+	}
+	headers, data := service.PostExportRows(rows)
+	writeXlsx(c, "岗位管理", headers, data)
+}

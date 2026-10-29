@@ -250,3 +250,41 @@ func (DictHandler) DataRemove(c *gin.Context) {
 	}
 	result.OK(c, result.Success())
 }
+
+// TypeExport POST /system/dict/type/export
+func (DictHandler) TypeExport(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	var q query.DictTypeList
+	if err := c.ShouldBind(&q); err != nil {
+		fail(c, err)
+		return
+	}
+	rows, _, err := service.SelectDictTypeList(&q, page.NoLimit())
+	if err != nil {
+		fail(c, err)
+		return
+	}
+	headers, data := service.DictTypeExportRows(rows)
+	writeXlsx(c, "字典类型", headers, data)
+}
+
+// DataExport POST /system/dict/data/export
+func (DictHandler) DataExport(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	var q query.DictDataList
+	if err := c.ShouldBind(&q); err != nil {
+		fail(c, err)
+		return
+	}
+	rows, _, err := service.SelectDictDataList(&q, page.NoLimit())
+	if err != nil {
+		fail(c, err)
+		return
+	}
+	headers, data := service.DictDataExportRows(rows)
+	writeXlsx(c, "字典数据", headers, data)
+}

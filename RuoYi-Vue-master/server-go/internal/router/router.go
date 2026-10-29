@@ -189,6 +189,11 @@ func New() *gin.Engine {
 	perm(r, "POST", "/system/user", user.Add)
 	perm(r, "PUT", "/system/user", user.Edit)
 	perm(r, "DELETE", "/system/user/:userIds", user.Remove)
+	perm(r, "POST", "/system/user/export", user.UserExport)
+	perm(r, "POST", "/system/user/importTemplate", user.UserImportTemplate)
+	// 导入是文件上传：limitBody 必须套上，超限要回 JSON 错误体，
+	// 前端才能把 Blob 还原成提示（见 common.Upload 的注释）。
+	perm(r, "POST", "/system/user/importData", limitBody(), user.UserImportData)
 
 	// ------------------------------------------------------------ 系统管理 - 角色
 	perm(r, "GET", "/system/role/list", role.List)
@@ -205,6 +210,7 @@ func New() *gin.Engine {
 	perm(r, "POST", "/system/role", role.Add)
 	perm(r, "PUT", "/system/role", role.Edit)
 	perm(r, "DELETE", "/system/role/:roleIds", role.Remove)
+	perm(r, "POST", "/system/role/export", role.RoleExport)
 
 	// ------------------------------------------------------------ 系统管理 - 部门
 	perm(r, "GET", "/system/dept/list", dept.List)
@@ -222,6 +228,7 @@ func New() *gin.Engine {
 	perm(r, "POST", "/system/post", post.Add)
 	perm(r, "PUT", "/system/post", post.Edit)
 	perm(r, "DELETE", "/system/post/:postIds", post.Remove)
+	perm(r, "POST", "/system/post/export", post.PostExport)
 
 	// ------------------------------------------------------------ 系统管理 - 字典
 	perm(r, "GET", "/system/dict/type/list", dict.TypeList)
@@ -231,6 +238,7 @@ func New() *gin.Engine {
 	perm(r, "POST", "/system/dict/type", dict.TypeAdd)
 	perm(r, "PUT", "/system/dict/type", dict.TypeEdit)
 	perm(r, "DELETE", "/system/dict/type/:dictIds", dict.TypeRemove)
+	perm(r, "POST", "/system/dict/type/export", dict.TypeExport)
 
 	perm(r, "GET", "/system/dict/data/list", dict.DataList)
 	perm(r, "GET", "/system/dict/data/type/:dictType", dict.DataByType)
@@ -238,6 +246,7 @@ func New() *gin.Engine {
 	perm(r, "POST", "/system/dict/data", dict.DataAdd)
 	perm(r, "PUT", "/system/dict/data", dict.DataEdit)
 	perm(r, "DELETE", "/system/dict/data/:dictCodes", dict.DataRemove)
+	perm(r, "POST", "/system/dict/data/export", dict.DataExport)
 
 	// ------------------------------------------------------------ 系统管理 - 参数
 	perm(r, "GET", "/system/config/list", cfg.List)
@@ -247,6 +256,7 @@ func New() *gin.Engine {
 	perm(r, "POST", "/system/config", cfg.Add)
 	perm(r, "PUT", "/system/config", cfg.Edit)
 	perm(r, "DELETE", "/system/config/:configIds", cfg.Remove)
+	perm(r, "POST", "/system/config/export", cfg.ConfigExport)
 
 	// ------------------------------------------------------------ 系统管理 - 通知公告
 	//

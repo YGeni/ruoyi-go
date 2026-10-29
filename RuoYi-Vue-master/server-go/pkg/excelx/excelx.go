@@ -1,7 +1,8 @@
-// Package excelx 导出 xlsx，等价 ruoyi-common 的 ExcelUtil.exportExcel。
+// Package excelx 导入导出 xlsx，等价 ruoyi-common 的 ExcelUtil
+// （exportExcel / importExcel 两个方向）。
 //
-// Java 侧是 POI 直接写 HttpServletResponse
-// Go 侧用 excelize 生成字节流，由 handler 设好响应头后写回。
+// Java 侧是 POI：导出直接写 HttpServletResponse，导入读 MultipartFile 的流。
+// Go 侧用 excelize 生成/解析字节流。
 //
 // 前端 download（request.js:127-151）以 responseType: 'blob' 接收，
 // blobValidate（ruoyi.js:226-228）的判定是 **type !== 'application/json'**，
@@ -9,6 +10,7 @@
 package excelx
 
 import (
+	"errors"
 	"io"
 
 	"github.com/xuri/excelize/v2"
@@ -68,4 +70,21 @@ func Write(w io.Writer, sheet string, headers []string, rows [][]any) error {
 		}
 	}
 	return f.Write(w)
+}
+
+// Read 读第一个工作表的全部行，等价 ExcelUtil.importExcel 的读文件部分。
+//
+// 返回的每行按**列**对齐：excelize 的 GetRows 会跳过行尾空单元格，
+// 所以短行要按调用方期望的列数自行补空（导入时按表头长度补）。
+func Read(r io.Reader) ([][]string, error) {
+	f, err := excelize.OpenReader(r)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+	sheets := f.GetSheetList()
+	if len(sheets) == 0 {
+		return nil, errors.New("Excel 里没有工作表")
+	}
+	return f.GetRows(sheets[0])
 }

@@ -121,6 +121,15 @@ var undeferScope = map[string]bool{
 	"SysOperlogController.java|/monitor/operlog/export":       true,
 	"SysJobController.java|/monitor/job/export":               true,
 	"SysJobLogController.java|/monitor/jobLog/export":         true,
+	// 本批补齐：系统管理六个模块的导出 + 用户导入（原本随 deferPathKeywords 一起延后）
+	"SysConfigController.java|/system/config/export":      true,
+	"SysDictDataController.java|/system/dict/data/export": true,
+	"SysDictTypeController.java|/system/dict/type/export": true,
+	"SysPostController.java|/system/post/export":          true,
+	"SysRoleController.java|/system/role/export":          true,
+	"SysUserController.java|/system/user/export":          true,
+	"SysUserController.java|/system/user/importData":      true,
+	"SysUserController.java|/system/user/importTemplate":  true,
 }
 
 // isDeferred 该端点是否属于"本期明确不做"。
@@ -619,5 +628,42 @@ func writePermDiffReport(t *testing.T, all, inScope, deferred []javaEndpoint, mi
 	}
 	if err := os.WriteFile(filepath.Join(dir, "02b-perm-diff-report.md"), []byte(b.String()), 0o644); err != nil {
 		t.Logf("写入报告失败: %v", err)
+	}
+}
+
+// TestAllPermRoutesRegistered perm_table 里登记的每条路由，router.go 里必须真的绑了。
+//
+// 补导入导出时踩到过：perm_table 加了一条，router.go 忘了注册，
+// 接口直接 404 —— 而对账测试只比 perm_table 与 Java 快照，**不管有没有绑定**，
+// 于是漏网。这道用例补的就是这个洞。
+//
+// 判定方式：在 router.go 源码里找下面两种注册形式之一：
+//
+//	perm(r, "POST", "/system/user/importData"        —— 带权限中间件
+//	r.POST("/register", ...                          —— 直接注册（无需权限串的端点）
+//
+// 带额外中间件（如 limitBody()）的注册同样匹配，因为前缀一致。
+func TestAllPermRoutesRegistered(t *testing.T) {
+	raw, err := os.ReadFile("router.go")
+	if err != nil {
+		t.Fatalf("读 router.go 失败: %v", err)
+	}
+	src := string(raw)
+	var missing []string
+	for _, rp := range permRoutes {
+		if strings.Contains(src, `perm(r, "`+rp.Method+`", "`+rp.Path+`"`) {
+			continue
+		}
+		if strings.Contains(src, `r.`+rp.Method+`("`+rp.Path+`"`) {
+			continue
+		}
+		missing = append(missing, rp.Method+" "+rp.Path)
+	}
+	if len(missing) > 0 {
+		sort.Strings(missing)
+		t.Errorf("perm_table 登记了但 router.go 没注册（会 404），共 %d 条:", len(missing))
+		for _, m := range missing {
+			t.Errorf("  %s", m)
+		}
 	}
 }

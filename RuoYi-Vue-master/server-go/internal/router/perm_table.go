@@ -245,9 +245,19 @@ var permRoutes = []RoutePerm{
 	{"PUT", "/system/user/resetPwd", PermSystemUserResetPwd, "SysUserController"},
 	{"DELETE", "/system/user/:userIds", PermSystemUserRemove, "SysUserController"},
 	{"GET", "/system/user/:userId", PermSystemUserQuery, "SysUserController"},
+
+	// ---------- 导入导出（原二期清单，现补齐）----------
+	{"POST", "/system/config/export", PermSystemConfigExport, "SysConfigController"},
+	{"POST", "/system/dict/data/export", PermSystemDictExport, "SysDictDataController"},
+	{"POST", "/system/dict/type/export", PermSystemDictExport, "SysDictTypeController"},
+	{"POST", "/system/post/export", PermSystemPostExport, "SysPostController"},
+	{"POST", "/system/role/export", PermSystemRoleExport, "SysRoleController"},
+	{"POST", "/system/user/export", PermSystemUserExport, "SysUserController"},
+	{"POST", "/system/user/importData", PermSystemUserImport, "SysUserController"},
+	{"POST", "/system/user/importTemplate", "", "SysUserController"},
 }
 
-// permRoutesPhase2 二期延后端点清单（17 条）。
+// permRoutesPhase2 二期延后端点清单（9 条）。
 //
 // **本表不参与路由绑定**，仅作为交接清单存在：
 //   - 唯一事实来源是 internal/router/perm_diff_test.go 的 scopeFiles /
@@ -257,23 +267,15 @@ var permRoutes = []RoutePerm{
 //   - 未翻入 permRoutes 的条目在 diff 测试里计入「二期延后」，不判失败，
 //     即当前是"不实现也绿"，交接时必须逐条 grep -n "TODO(phase2)" 过一遍。
 var permRoutesPhase2 = []RoutePerm{
-	{"GET", "/captchaImage", "", "CaptchaController"},                                   // TODO(phase2)
-	{"POST", "/system/config/export", PermSystemConfigExport, "SysConfigController"},    // TODO(phase2)
-	{"POST", "/system/dict/data/export", PermSystemDictExport, "SysDictDataController"}, // TODO(phase2)
-	{"POST", "/system/dict/type/export", PermSystemDictExport, "SysDictTypeController"}, // TODO(phase2)
-	{"GET", "getInfo", "", "SysLoginController"},                                        // TODO(phase2)
-	{"GET", "getRouters", "", "SysLoginController"},                                     // TODO(phase2)
-	{"POST", "/login", "", "SysLoginController"},                                        // TODO(phase2)
-	{"POST", "/system/post/export", PermSystemPostExport, "SysPostController"},          // TODO(phase2)
-	{"POST", "/system/role/export", PermSystemRoleExport, "SysRoleController"},          // TODO(phase2)
-	{"POST", "/system/user/export", PermSystemUserExport, "SysUserController"},          // TODO(phase2)
-	{"POST", "/system/user/importData", PermSystemUserImport, "SysUserController"},      // TODO(phase2)
-	{"POST", "/system/user/importTemplate", "", "SysUserController"},                    // TODO(phase2)
-	{"DELETE", "/test/user/:userId", "", "TestController"},                              // TODO(phase2)
-	{"GET", "/test/user/:userId", "", "TestController"},                                 // TODO(phase2)
-	{"GET", "/test/user/list", "", "TestController"},                                    // TODO(phase2)
-	{"POST", "/test/user/save", "", "TestController"},                                   // TODO(phase2)
-	{"PUT", "/test/user/update", "", "TestController"},                                  // TODO(phase2)
+	{"GET", "/captchaImage", "", "CaptchaController"},      // TODO(phase2)
+	{"GET", "getInfo", "", "SysLoginController"},           // TODO(phase2)
+	{"GET", "getRouters", "", "SysLoginController"},        // TODO(phase2)
+	{"POST", "/login", "", "SysLoginController"},           // TODO(phase2)
+	{"DELETE", "/test/user/:userId", "", "TestController"}, // TODO(phase2)
+	{"GET", "/test/user/:userId", "", "TestController"},    // TODO(phase2)
+	{"GET", "/test/user/list", "", "TestController"},       // TODO(phase2)
+	{"POST", "/test/user/save", "", "TestController"},      // TODO(phase2)
+	{"PUT", "/test/user/update", "", "TestController"},     // TODO(phase2)
 }
 
 // PermOf 按 method + gin 路径查登记的权限串。

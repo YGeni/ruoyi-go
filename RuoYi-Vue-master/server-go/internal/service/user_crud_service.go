@@ -2,12 +2,21 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/YGeni/ruoyi-go/server-go/config"
 	"github.com/YGeni/ruoyi-go/server-go/internal/model/entity"
 	"github.com/YGeni/ruoyi-go/server-go/internal/repository"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/securityx"
 )
+
+// ImportUserHeaders 导入模板的表头，也是 importData 认的列顺序。
+//
+// 取 Java 用户导入模板的列（登录名称/用户名称/用户邮箱/手机号码/用户性别/
+// 帐号状态）；导出模板用 UserExportHeaders，两者**刻意不同**——导出的表头
+// 带"用户序号"等只读列，导入不需要。
+var ImportUserHeaders = []string{"登录名称", "用户名称", "用户邮箱", "手机号码", "用户性别", "帐号状态"}
 
 // SelectUserByID 按主键查用户（含 dept/roles），等价 SysUserServiceImpl.selectUserById。
 func SelectUserByID(userID int64) (*entity.SysUser, error) {
@@ -149,6 +158,133 @@ func UpdateUser(u *entity.SysUser, roleIDs []int64) error {
 // UpdateUserStatus 修改用户状态，等价 SysUserServiceImpl.updateUserStatus(L225-236)。
 func UpdateUserStatus(userID int64, status string) error {
 	return repository.UpdateUserStatus(userID, status)
+}
+
+// ImportResult 导入用户的结果，用于拼消息。
+type ImportResult struct {
+	SuccessNum int
+	FailureNum int
+	Msg        string
+}
+
+// ImportUsers 批量导入用户，等价 SysUserServiceImpl.importUser。
+//
+// rows 是 Excel 的数据行（**不含表头**），列顺序见 ImportUserHeaders。
+//
+// 与 Java 一致的几条规则：
+//   - 登录名已存在时：updateSupport=true 就更新，否则算一条失败
+//   - 新用户的初始密码取 sys_config 的 sys.user.initPassword（Java 同样读配置，
+//     不是写死的常量），读不到才退回 123456
+//   - 逐条处理，单条出错**不中断**，记进失败明细
+//   - 有失败就返回带明细的消息，由 handler 以错误形式回给前端
+//     （Java 是抛 CustomException，同样落到 msg 里）
+//
+// DIFF(review): Java 的 ExcelUtil 靠 @Excel 注解按**表头名**匹配列，
+// 这里是按固定列序取值 —— 表头名变了不会报错，因此导入前先校验列数。
+func ImportUsers(rows [][]string, updateSupport bool, operName string) (*ImportResult, error) {
+	initPwd := "123456"
+	if v, ok, err := SelectConfigValueByKey("sys.user.initPassword"); err == nil && ok && v != "" {
+		initPwd = v
+	}
+
+	var successMsg, failureMsg strings.Builder
+	successNum, failureNum := 0, 0
+	for i, row := range rows {
+		u, err := importUserRow(row)
+		if err != nil {
+			failureNum++
+			failureMsg.WriteString(fmt.Sprintf("<br/>%d、第 %d 行：%s", failureNum, i+2, err.Error()))
+			continue
+		}
+		old, err := repository.SelectUserByUserName(u.UserName)
+		if err != nil {
+			failureNum++
+			failureMsg.WriteString(fmt.Sprintf("<br/>%d、第 %d 行：查询账号失败", failureNum, i+2))
+			continue
+		}
+		if old == nil {
+			u.Password = initPwd
+			u.CreateBy = operName
+			if err := InsertUser(u, nil); err != nil {
+				failureNum++
+				failureMsg.WriteString(fmt.Sprintf("<br/>%d、账号 %s 导入失败：%s", failureNum, u.UserName, err.Error()))
+				continue
+			}
+			successNum++
+			successMsg.WriteString(fmt.Sprintf("<br/>%d、账号 %s 导入成功", successNum, u.UserName))
+			continue
+		}
+		if !updateSupport {
+			failureNum++
+			failureMsg.WriteString(fmt.Sprintf("<br/>%d、账号 %s 已存在", failureNum, u.UserName))
+			continue
+		}
+		u.UserID = old.UserID
+		u.UpdateBy = operName
+		if err := UpdateUser(u, nil); err != nil {
+			failureNum++
+			failureMsg.WriteString(fmt.Sprintf("<br/>%d、账号 %s 更新失败：%s", failureNum, u.UserName, err.Error()))
+			continue
+		}
+		successNum++
+		successMsg.WriteString(fmt.Sprintf("<br/>%d、账号 %s 更新成功", successNum, u.UserName))
+	}
+
+	if failureNum > 0 {
+		failureMsg.WriteString("</br>数据导入失败，请检查导入数据")
+		return &ImportResult{FailureNum: failureNum,
+			Msg: fmt.Sprintf("很抱歉，导入失败！共 %d 条数据格式不正确，错误如下：%s", failureNum, failureMsg.String())}, nil
+	}
+	return &ImportResult{SuccessNum: successNum,
+		Msg: fmt.Sprintf("恭喜您，数据已全部导入成功！共 %d 条，数据如下：%s", successNum, successMsg.String())}, nil
+}
+
+// importUserRow 把一行 Excel 转成用户，并翻译字典值（性别/状态）。
+func importUserRow(row []string) (*entity.SysUser, error) {
+	if len(row) < len(ImportUserHeaders) {
+		return nil, fmt.Errorf("列数不足，应为 %d 列", len(ImportUserHeaders))
+	}
+	// 单元格可能被 excelize 截断成短行，缺的当空串
+	for len(row) < len(ImportUserHeaders) {
+		row = append(row, "")
+	}
+	u := &entity.SysUser{
+		UserName:    strings.TrimSpace(row[0]),
+		NickName:    strings.TrimSpace(row[1]),
+		Email:       strings.TrimSpace(row[2]),
+		Phonenumber: strings.TrimSpace(row[3]),
+	}
+	if u.UserName == "" {
+		return nil, errors.New("登录名称不能为空")
+	}
+	if u.NickName == "" {
+		u.NickName = u.UserName
+	}
+	u.Sex = parseSex(strings.TrimSpace(row[4]))
+	u.Status = parseStatus(strings.TrimSpace(row[5]))
+	return u, nil
+}
+
+// parseSex 导入时的性别：接受"男/女"这种中文，也接受 '0'/'1'。
+//
+// 导出时写的是中文（sexText），导入要能读回自己导出的文件。
+func parseSex(s string) string {
+	switch s {
+	case "男", "0":
+		return "0"
+	case "女", "1":
+		return "1"
+	default:
+		return "2"
+	}
+}
+
+// parseStatus 导入时的状态：正常/停用，或 '0'/'1'。
+func parseStatus(s string) string {
+	if s == "停用" || s == config.Disable {
+		return config.Disable
+	}
+	return config.Normal
 }
 
 // ResetUserPwd 重置密码，等价 SysUserServiceImpl.resetPwd(L243-256)。

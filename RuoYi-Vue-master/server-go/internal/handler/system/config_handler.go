@@ -140,3 +140,27 @@ func (ConfigHandler) RefreshCache(c *gin.Context) {
 	}
 	result.OK(c, result.Success())
 }
+
+// ConfigExport POST /system/config/export
+//
+// 等价：ExcelUtil 导出，不分页。
+//
+// 参数**不在 query 里**：前端 download（request.js:127-133）用 tansParams
+// 把条件塞进 form-urlencoded 请求体，所以用 ShouldBind 而非 ShouldBindQuery。
+func (ConfigHandler) ConfigExport(c *gin.Context) {
+	if _, ok := loginUser(c); !ok {
+		return
+	}
+	var q query.ConfigList
+	if err := c.ShouldBind(&q); err != nil {
+		fail(c, err)
+		return
+	}
+	rows, _, err := service.SelectConfigList(&q, page.NoLimit())
+	if err != nil {
+		fail(c, err)
+		return
+	}
+	headers, data := service.ConfigExportRows(rows)
+	writeXlsx(c, "参数配置", headers, data)
+}
