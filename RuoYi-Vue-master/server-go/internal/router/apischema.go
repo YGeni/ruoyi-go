@@ -40,6 +40,11 @@ type apiSchema struct {
 	// 而是 Java 侧 @NotNull/@NotBlank/@Xss 的校验注解，逐个抄过来。
 	// 留空表示全部可选。
 	Required []string
+	// Resp 响应里的主要数据，用于展开响应体 schema：
+	// 列表接口是 rows 里每一项的实体，详情接口是 data 指向的实体。
+	//
+	// 同样只写实体、字段由反射出，不手写响应 JSON。
+	Resp any
 	// Extra 结构体之外、接口确实还接收的字段。
 	//
 	// 典型是 password：SysUser 上它是 json:"-"（绝不从详情接口泄漏散列），
@@ -197,6 +202,102 @@ var apiSchemas = map[string]apiSchema{
 		Summary:  "修改菜单",
 	},
 	"GET /system/menu/list": {QueryStr: query.MenuList{}, Summary: "查询菜单列表"},
+	// ---------------------------------------------------------------- 详情
+	// 详情接口没有请求体，只把响应里的 data 指向实体
+	"GET /system/user/:userId":     {Resp: entity.SysUser{}, Summary: "查询用户详情"},
+	"GET /system/role/:roleId":     {Resp: entity.SysRole{}, Summary: "查询角色详情"},
+	"GET /system/dept/:deptId":     {Resp: entity.SysDept{}, Summary: "查询部门详情"},
+	"GET /system/post/:postId":     {Resp: entity.SysPost{}, Summary: "查询岗位详情"},
+	"GET /system/menu/:menuId":     {Resp: entity.SysMenu{}, Summary: "查询菜单详情"},
+	"GET /system/config/:configId": {Resp: entity.SysConfig{}, Summary: "查询参数详情"},
+	"GET /system/notice/:noticeId": {Resp: entity.SysNotice{}, Summary: "查询通知详情"},
+	"GET /system/dict/data/:dictCode": {
+		Resp: entity.SysDictData{}, Summary: "查询字典数据详情",
+	},
+	// ---------------------------------------------------------------- 日志
+	"GET /monitor/operlog/list":    {QueryStr: query.OperLogList{}, Resp: entity.SysOperLog{}, Summary: "查询操作日志"},
+	"GET /monitor/logininfor/list": {QueryStr: query.LogininforList{}, Resp: entity.SysLogininfor{}, Summary: "查询登录日志"},
+	"GET /monitor/jobLog/list":     {QueryStr: query.JobLogList{}, Resp: entity.SysJobLog{}, Summary: "查询定时任务日志"},
+	// ---------------------------------------------------------------- 定时任务
+	"POST /monitor/job": {
+		Body: entity.SysJob{}, Required: []string{"jobName", "invokeTarget", "cronExpression"},
+		Resp: entity.SysJob{}, Summary: "新增定时任务",
+	},
+	"PUT /monitor/job": {
+		Body: entity.SysJob{}, Required: []string{"jobId", "jobName", "invokeTarget", "cronExpression"},
+		Resp: entity.SysJob{}, Summary: "修改定时任务",
+	},
+	"GET /monitor/job/list": {QueryStr: query.JobList{}, Resp: entity.SysJob{}, Summary: "查询定时任务列表"},
+	"PUT /monitor/job/changeStatus": {
+		Required: []string{"jobId", "status"},
+		Extra: []extraField{
+			{Name: "jobId", Type: "integer", Desc: "任务ID"},
+			{Name: "status", Type: "string", Desc: "状态：0 正常、1 暂停"},
+		},
+		Summary: "修改定时任务状态",
+	},
+	"PUT /monitor/job/run": {
+		Required: []string{"jobId"},
+		Extra:    []extraField{{Name: "jobId", Type: "integer", Desc: "任务ID"}},
+		Summary:  "立即执行一次定时任务",
+	},
+	// ---------------------------------------------------------------- 代码生成
+	"GET /tool/gen/list":    {QueryStr: query.GenTableList{}, Resp: entity.GenTable{}, Summary: "查询代码生成列表"},
+	"GET /tool/gen/db/list": {QueryStr: query.GenTableList{}, Summary: "查询数据库表列表"},
+	"PUT /tool/gen": {
+		Body: entity.GenTable{}, Resp: entity.GenTable{}, Summary: "修改生成配置",
+	},
+	"POST /tool/gen/importTable": {
+		Required: []string{"tables"},
+		Extra: []extraField{
+			{Name: "tables", Type: "string", Desc: "要导入的表名，多个用逗号分隔"},
+		},
+		Summary: "导入表结构",
+	},
+	"POST /tool/gen/createTable": {
+		Required: []string{"sql"},
+		Extra: []extraField{
+			{Name: "sql", Type: "string", Desc: "建表语句"},
+		},
+		Summary: "按建表语句建表",
+	},
+	// ---------------------------------------------------------------- 角色授权
+	"GET /system/role/authUser/allocatedList": {
+		QueryStr: query.AuthUserList{}, Resp: entity.SysUser{}, Summary: "查询已分配用户列表",
+	},
+	"GET /system/role/authUser/unallocatedList": {
+		QueryStr: query.AuthUserList{}, Resp: entity.SysUser{}, Summary: "查询未分配用户列表",
+	},
+	"PUT /system/role/authUser/selectAll": {
+		Required: []string{"roleId", "userIds"},
+		Extra: []extraField{
+			{Name: "roleId", Type: "integer", Desc: "角色ID"},
+			{Name: "userIds", Type: "string", Desc: "要授权的用户ID，多个用逗号分隔"},
+		},
+		Summary: "批量授予用户该角色",
+	},
+	"PUT /system/role/authUser/cancelAll": {
+		Required: []string{"roleId", "userIds"},
+		Extra: []extraField{
+			{Name: "roleId", Type: "integer", Desc: "角色ID"},
+			{Name: "userIds", Type: "string", Desc: "要取消授权的用户ID，多个用逗号分隔"},
+		},
+		Summary: "批量取消用户该角色",
+	},
+	"PUT /system/role/authUser/cancel": {
+		Required: []string{"userId", "roleId"},
+		Extra: []extraField{
+			{Name: "userId", Type: "integer", Desc: "用户ID"},
+			{Name: "roleId", Type: "integer", Desc: "角色ID"},
+		},
+		Summary: "取消用户的该角色",
+	},
+	// ---------------------------------------------------------------- 个人中心
+	"PUT /system/user/profile": {
+		Body:     entity.SysUser{},
+		Required: []string{"nickName", "phonenumber", "email"},
+		Summary:  "修改个人资料",
+	},
 }
 
 // modelTables 结构体 -> 表名，用于取列注释。
@@ -359,17 +460,21 @@ func columnComments(table string) map[string]string {
 func buildComponents() map[string]any {
 	out := map[string]any{}
 	seen := map[string]bool{}
+	// 请求体用到的实体和响应体用到的实体都要建组件，
+	// 否则响应里的 $ref 指向一个不存在的 schema。
 	for _, s := range apiSchemas {
-		if s.Body == nil {
-			continue
+		for _, sample := range []any{s.Body, s.Resp} {
+			if sample == nil {
+				continue
+			}
+			t := indirect(reflect.TypeOf(sample))
+			name := schemaName(t)
+			if name == "" || seen[name] {
+				continue
+			}
+			seen[name] = true
+			out[name] = structSchema(t)
 		}
-		t := indirect(reflect.TypeOf(s.Body))
-		name := schemaName(t)
-		if name == "" || seen[name] {
-			continue
-		}
-		seen[name] = true
-		out[name] = structSchema(t)
 	}
 	// 统一的响应包装，与 pkg/result 的返回结构一致
 	out["AjaxResult"] = map[string]any{
@@ -504,25 +609,48 @@ func applySchema(op map[string]any, method, path string) bool {
 			op["parameters"] = append(asSlice(op["parameters"]), params...)
 		}
 	}
-	// 响应：列表接口给 TableResult，其余给 AjaxResult
-	if _, ok := op["requestBody"]; ok {
-		op["responses"].(map[string]any)["200"] = map[string]any{
-			"description": "成功",
-			"content": map[string]any{
-				"application/json": map[string]any{
-					"schema": map[string]any{"$ref": "#/components/schemas/AjaxResult"},
+	// 响应：写操作与未知接口给统一包装；列表/详情按 Resp 把数据展开到实体。
+	responses, _ := op["responses"].(map[string]any)
+	if responses == nil {
+		responses = map[string]any{}
+		op["responses"] = responses
+	}
+	var dataSchema map[string]any
+	switch {
+	case s.Resp != nil:
+		ref := map[string]any{"$ref": "#/components/schemas/" + schemaName(indirect(reflect.TypeOf(s.Resp)))}
+		if s.QueryStr != nil {
+			// 列表：rows 是实体数组
+			dataSchema = map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"code":  map[string]any{"type": "integer"},
+					"msg":   map[string]any{"type": "string"},
+					"rows":  map[string]any{"type": "array", "items": ref},
+					"total": map[string]any{"type": "integer", "description": "总记录数"},
 				},
-			},
-		}
-	} else if method == "GET" {
-		op["responses"].(map[string]any)["200"] = map[string]any{
-			"description": "成功",
-			"content": map[string]any{
-				"application/json": map[string]any{
-					"schema": map[string]any{"$ref": "#/components/schemas/TableResult"},
+			}
+		} else {
+			// 详情：data 指向单个实体
+			dataSchema = map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"code": map[string]any{"type": "integer"},
+					"msg":  map[string]any{"type": "string"},
+					"data": ref,
 				},
-			},
+			}
 		}
+	case method == "GET":
+		dataSchema = map[string]any{"$ref": "#/components/schemas/TableResult"}
+	default:
+		dataSchema = map[string]any{"$ref": "#/components/schemas/AjaxResult"}
+	}
+	responses["200"] = map[string]any{
+		"description": "成功",
+		"content": map[string]any{
+			"application/json": map[string]any{"schema": dataSchema},
+		},
 	}
 	return true
 }

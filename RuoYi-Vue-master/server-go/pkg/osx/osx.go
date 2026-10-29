@@ -3,7 +3,11 @@
 //
 // Java 用的是 OSHI（跨平台的系统信息库）+ Runtime 的 JVM 指标；
 // Go 侧用 gopsutil 取系统指标，JVM 那部分**没有对应物**，用 Go runtime 的
-// 堆指标代替并明确标注 DIFF（详见 Jvm 的注释）。
+// 堆指标代替并明确标注 DIFF（详见 Runtime 的注释）。
+//
+// 字段名叫 runtime 不叫 jvm：这一块装的是 Go 运行时的指标，
+// 沿用 Java 的名字会让页面显示成"Java虚拟机信息 / Java名称：Go Runtime"，
+// 前后矛盾（前端标签已同步改成 Go 运行时）。
 package osx
 
 import (
@@ -23,11 +27,14 @@ import (
 // Server 服务监控总览，等价 Server.java。
 //
 // JSON 字段名与 src/views/monitor/server/index.vue 的绑定一一对应
-// （server.cpu.* / server.mem.* / server.jvm.* / server.sys.* / server.sysFiles）。
+// （server.cpu.* / server.mem.* / server.runtime.* / server.sys.* / server.sysFiles）。
+//
+// DIFF(review): 第三块在 Java 侧叫 jvm，这里改叫 runtime —— 装的是 Go 运行时
+// 指标，不是 JVM。前端标签与这个 key 一起改的。
 type Server struct {
 	Cpu      Cpu       `json:"cpu"`
 	Mem      Mem       `json:"mem"`
-	Jvm      Jvm       `json:"jvm"`
+	Runtime  Runtime   `json:"runtime"`
 	Sys      Sys       `json:"sys"`
 	SysFiles []SysFile `json:"sysFiles"`
 }
@@ -50,7 +57,7 @@ type Mem struct {
 	Usage float64 `json:"usage"`
 }
 
-// Jvm 运行时指标，等价 Jvm.java。
+// Runtime Go 运行时指标，对应 Java 侧的 Jvm.java。
 //
 // DIFF(review): Go 没有 JVM。这里用 **Go runtime 的堆指标**代替，语义最接近：
 //
@@ -62,7 +69,9 @@ type Mem struct {
 //
 // name / version 给的是 Go 运行时而不是 JVM；
 // home 是 GOROOT 而不是 JAVA_HOME；startTime 是进程启动时刻。
-type Jvm struct {
+//
+// 类型名与 JSON key 都叫 runtime 而不叫 jvm（见 Server 的注释）。
+type Runtime struct {
 	Name      string  `json:"name"`
 	Version   string  `json:"version"`
 	Home      string  `json:"home"`
@@ -115,7 +124,7 @@ func Collect() (*Server, error) {
 	if err := s.setMemInfo(); err != nil {
 		return nil, err
 	}
-	s.setJvmInfo()
+	s.setRuntimeInfo()
 	if err := s.setSysInfo(); err != nil {
 		return nil, err
 	}
@@ -178,8 +187,8 @@ func (s *Server) setMemInfo() error {
 	return nil
 }
 
-// setJvmInfo 等价 Server.setJvmInfo(L176-187)，见 Jvm 的 DIFF 说明。
-func (s *Server) setJvmInfo() {
+// setRuntimeInfo 等价 Server.setJvmInfo(L176-187)，见 Runtime 的 DIFF 说明。
+func (s *Server) setRuntimeInfo() {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	total := float64(m.HeapSys) / mb
@@ -193,7 +202,7 @@ func (s *Server) setJvmInfo() {
 		usage = used / total * 100
 	}
 	runTime := time.Since(bootTime)
-	s.Jvm = Jvm{
+	s.Runtime = Runtime{
 		Name:      "Go Runtime",
 		Version:   runtime.Version(),
 		Home:      runtime.GOROOT(),
