@@ -1,0 +1,1 @@
+(cd /Users/mac/Desktop/若依/RuoYi-Vue-master/server-go && go run ./cmd/server -c config/config.yaml > /tmp/be.log 2>&1 &) ; (cd /Users/mac/Desktop/若依/RuoYi-Vue3-master && npm run dev > /tmp/fe.log 2>&1 &)

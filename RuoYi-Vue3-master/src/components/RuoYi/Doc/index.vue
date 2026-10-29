@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-const url = ref('http://doc.ruoyi.vip/ruoyi-vue')
+const url = ref('https://github.com/YGeni/ruoyi-go')
 
 function goto() {
   window.open(url.value)

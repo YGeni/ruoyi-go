@@ -2,9 +2,9 @@
   <div class="app-container home">
     <el-row :gutter="20">
       <el-col :sm="24" :lg="12" style="padding-left: 20px">
-        <h2>若依后台管理框架</h2>
+        <h2>天才后台管理框架</h2>
         <p>
-          一直想做一款后台管理系统，看了很多优秀的开源项目但是发现没有合适自己的。于是利用空闲休息时间开始自己写一套后台系统。如此有了若依管理系统，她可以用于所有的Web应用程序，如网站管理后台，网站会员中心，CMS，CRM，OA等等，当然，您也可以对她进行深度定制，以做出更强系统。所有前端后台代码封装过后十分精简易上手，出错概率低。同时支持移动客户端访问。系统会陆续更新一些实用功能。
+          一直想做一款后台管理系统，看了很多优秀的开源项目但是发现没有合适自己的。于是利用空闲休息时间开始自己写一套后台系统。如此有了天才管理系统，她可以用于所有的Web应用程序，如网站管理后台，网站会员中心，CMS，CRM，OA等等，当然，您也可以对她进行深度定制，以做出更强系统。所有前端后台代码封装过后十分精简易上手，出错概率低。同时支持移动客户端访问。系统会陆续更新一些实用功能。
         </p>
         <p>
           <b>当前版本:</b> <span>v{{ version }}</span>
@@ -17,13 +17,13 @@
             type="primary"
             icon="Cloudy"
             plain
-            @click="goTarget('https://gitee.com/y_project/RuoYi-Vue')"
-            >访问码云</el-button
+            @click="goTarget('https://github.com/YGeni/ruoyi-go')"
+            >访问 GitHub</el-button
           >
           <el-button
             icon="HomeFilled"
             plain
-            @click="goTarget('http://ruoyi.vip')"
+            @click="goTarget('https://github.com/YGeni/ruoyi-go')"
             >访问主页</el-button
           >
         </p>
@@ -75,9 +75,9 @@
           <div class="body">
             <p>
               <i class="el-icon-s-promotion"></i> 官网：<el-link
-                href="http://www.ruoyi.vip"
+                href="https://github.com/YGeni/ruoyi-go"
                 target="_blank"
-                >http://www.ruoyi.vip</el-link
+                >https://github.com/YGeni/ruoyi-go</el-link
               >
             </p>
             <p>
@@ -93,14 +93,14 @@
             <p>
               <i class="el-icon-chat-dot-round"></i> 微信：<a
                 href="javascript:;"
-                >/ *若依</a
+                >/ *天才</a
               >
             </p>
             <p>
               <i class="el-icon-money"></i> 支付宝：<a
                 href="javascript:;"
                 class="支付宝信息"
-                >/ *若依</a
+                >/ *天才</a
               >
             </p>
           </div>
@@ -1100,7 +1100,7 @@
             </el-collapse-item>
             <el-collapse-item title="v1.0.0 - 2019-10-08">
               <ol>
-                <li>若依前后端分离系统正式发布</li>
+                <li>天才前后端分离系统正式发布</li>
               </ol>
             </el-collapse-item>
           </el-collapse>

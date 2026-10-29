@@ -289,7 +289,7 @@ func buildOpenAPI() map[string]any {
 	return map[string]any{
 		"openapi": "3.0.3",
 		"info": map[string]any{
-			"title":   "RuoYi-Go API",
+			"title":   "天才管理系统 API",
 			"version": "1.0.0",
 			"description": "由 Go 后端从路由表生成。路径/方法/权限串与 Java 控制器注解对齐；" +
 				"增删改查接口的请求体 schema 从 Go 结构体反射而来，字段说明取自 MySQL 列注释" +

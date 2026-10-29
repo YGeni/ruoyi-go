@@ -30,7 +30,7 @@ const swaggerUIIndex = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>系统接口 - RuoYi-Go</title>
+<title>系统接口 - 天才管理系统</title>
 <link rel="stylesheet" href="./swagger-ui.css">
 <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16">
