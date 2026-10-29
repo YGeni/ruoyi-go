@@ -107,8 +107,12 @@ func New() *gin.Engine {
 	// Go 侧在 openapi.go / swagger_page.go 自建：/v3/api-docs 出 OpenAPI 3.0，
 	// /swagger-ui/index.html 出只读页面。同样不挂权限串。
 	r.GET("/v3/api-docs", OpenAPIDoc)
-	r.GET("/swagger-ui/index.html", SwaggerUI)
-	r.GET("/swagger-ui.html", SwaggerUI)
+	// /swagger-ui/* 一个通配路由包住：index.html（真 Swagger UI）、
+	// progress.html（自绘迁移进度视图）、以及 css/js 静态资源。
+	// 不能各注册一条 —— gin 不允许同一位置既有静态段又有通配段。
+	r.GET("/swagger-ui/*filepath", SwaggerUIResource)
+	// springdoc 在 application.yml 里配的 path（/swagger-ui.html）
+	r.GET("/swagger-ui.html", SwaggerUIResource)
 
 	perm(r, "GET", "/monitor/online/list", monitor.OnlineList)
 	perm(r, "DELETE", "/monitor/online/:tokenId", monitor.ForceLogout)

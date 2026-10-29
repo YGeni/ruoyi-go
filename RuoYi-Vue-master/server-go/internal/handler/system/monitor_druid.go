@@ -13,6 +13,7 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/pkg/db"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/jwtx"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/redisx"
+	"github.com/YGeni/ruoyi-go/server-go/pkg/sqlstats"
 
 	"github.com/gin-gonic/gin"
 )
@@ -70,11 +71,13 @@ type druidKV struct {
 }
 
 type druidData struct {
-	Title    string
-	Updated  string
-	Uptime   string
-	Sections []druidSection
-	Note     string
+	Title     string
+	Updated   string
+	Uptime    string
+	SQLTotal  int64 // SQL 累计执行次数
+	SQLErrors int64 // 其中失败次数
+	Sections  []druidSection
+	Note      string
 }
 
 type druidSection struct {
@@ -87,10 +90,52 @@ func buildDruidData() druidData {
 		Title:   "数据监控",
 		Updated: time.Now().Format("2006-01-02 15:04:05"),
 		Uptime:  time.Since(startAt).Truncate(time.Second).String(),
-		Note:    "本页面由 Go 后端提供，非 druid。druid 的 SQL 执行统计依赖 JDBC 驱动层拦截，Go 侧（database/sql + gorm）没有这一层，无法提供。",
+		Note: "本页面由 Go 后端提供，非 druid。SQL 监控是用 gorm 回调自己打点做的" +
+			"（见 pkg/sqlstats），与 druid 在 JDBC 驱动层的实现不同：没有 SQL 防火墙、" +
+			"没有慢 SQL 阈值配置、SELECT 的读取行数记为 0（gorm 拿不到）。",
 	}
-	d.Sections = append(d.Sections, dataSourceSection(), redisSection(), runtimeSection())
+	// SQL 监控放最前：这才是 druid 的核心，也是上一版缺的东西。
+	d.Sections = append(d.Sections, sqlSection(), dataSourceSection(), redisSection(), runtimeSection())
+	d.SQLTotal, d.SQLErrors = sqlstats.Total()
 	return d
+}
+
+// sqlSection SQL 监控：druid 那张最核心的表。
+//
+// 数据来源 pkg/sqlstats（gorm 回调打点），按**归一化后的 SQL 模板**聚合，
+// 展示执行次数 / 累计耗时 / 平均 / 最慢 / 错误数 / 最后执行时间。
+func sqlSection() druidSection {
+	name := fmt.Sprintf("SQL 监控（按累计耗时降序，最多保留 %d 条，页面显示前 30）", sqlstats.MaxEntries)
+	s := druidSection{Name: name}
+	rows := sqlstats.Snapshot()
+	if len(rows) == 0 {
+		s.Rows = append(s.Rows, druidKV{"状态", "暂无数据（还没有 SQL 经过）"})
+		return s
+	}
+	for _, st := range rows {
+		if len(s.Rows) >= 30 {
+			break
+		}
+		s.Rows = append(s.Rows, druidKV{truncate(st.SQL, 160),
+			fmt.Sprintf("次数 %d · 累计 %v · 平均 %v · 最慢 %v · 错误 %d · 行数 %d · 最后 %s",
+				st.Count, truncDur(st.Total), truncDur(st.Avg()), truncDur(st.Max),
+				st.Errors, st.Rows, st.LastAt.Format("15:04:05"))})
+	}
+	return s
+}
+
+func truncate(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n] + " ..."
+}
+
+func truncDur(d time.Duration) time.Duration {
+	if d > time.Millisecond {
+		return d.Truncate(100 * time.Microsecond)
+	}
+	return d.Truncate(time.Microsecond)
 }
 
 // dataSourceSection 数据库 + 连接池，对应 druid 的"数据源"页。

@@ -29,7 +29,7 @@ var druidTpl = template.Must(template.New("druid").Parse(`<!DOCTYPE html>
 </head>
 <body>
 <h1>{{.Title}}</h1>
-<div class="meta">更新于 {{.Updated}} · 已运行 {{.Uptime}} · 每 10 秒自动刷新</div>
+<div class="meta">更新于 {{.Updated}} · 已运行 {{.Uptime}} · SQL 累计 {{.SQLTotal}} 次（失败 {{.SQLErrors}}） · 每 10 秒自动刷新</div>
 <div class="note">{{.Note}}</div>
 {{range .Sections}}
 <div class="card">

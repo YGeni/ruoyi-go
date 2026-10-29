@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/YGeni/ruoyi-go/server-go/config"
+	"github.com/YGeni/ruoyi-go/server-go/pkg/sqlstats"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -45,5 +46,8 @@ func Init(cfg config.DBConfig) error {
 	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
 	sqlDB.SetConnMaxLifetime(15 * time.Minute)
 	DB = gormDB
+	// 装 SQL 执行统计（druid "SQL 监控" 的 Go 侧替代，见 pkg/sqlstats）。
+	// 必须在任何业务查询之前，所以放在 Init 里而不是 main。
+	sqlstats.Install(gormDB)
 	return nil
 }

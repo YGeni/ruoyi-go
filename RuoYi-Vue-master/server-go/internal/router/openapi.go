@@ -75,8 +75,28 @@ func OpenAPIDoc(c *gin.Context) {
 
 // ---------------------------------------------------------------- Swagger UI
 
-// SwaggerUI GET /swagger-ui/index.html
-func SwaggerUI(c *gin.Context) {
+// SwaggerUIResource /swagger-ui/* 的统一入口。
+//
+// gin 的路由树不允许同一个位置既有静态段又有通配段，
+// 所以 index.html、progress.html 和 css/js 全部走这一个 handler 分发，
+// 而不是各注册一条路由。
+func SwaggerUIResource(c *gin.Context) {
+	switch c.Param("filepath") {
+	case "", "/", "/index.html":
+		serveSwaggerUI(c) // 真 Swagger UI（swagger-ui-dist）
+		return
+	case "/progress.html":
+		serveSwaggerProgress(c) // 自绘清单，含"已实现 / 二期延后"
+		return
+	}
+	serveSwaggerAsset(c, strings.TrimPrefix(c.Param("filepath"), "/"))
+}
+
+// serveSwaggerProgress 迁移进度视图。
+//
+// 真 Swagger UI 只认 OpenAPI 标准字段，看不出哪些端点在 Go 侧已实现，
+// 所以自绘那份清单保留在 /swagger-ui/progress.html —— 它同时是迁移进度表。
+func serveSwaggerProgress(c *gin.Context) {
 	if !authForIframe(c) {
 		return
 	}
@@ -254,7 +274,17 @@ func buildOpenAPI() map[string]any {
 			}
 			op["parameters"] = params
 		}
+		// 挂上请求体 / 查询参数（见 apischema.go 的注册表）
+		applySchema(op, e.Method, e.Path)
 		item[strings.ToLower(e.Method)] = op
+	}
+	components := buildComponents()
+	components["securitySchemes"] = map[string]any{
+		"BearerAuth": map[string]any{
+			"type":         "http",
+			"scheme":       "bearer",
+			"bearerFormat": "JWT",
+		},
 	}
 	return map[string]any{
 		"openapi": "3.0.3",
@@ -262,18 +292,11 @@ func buildOpenAPI() map[string]any {
 			"title":   "RuoYi-Go API",
 			"version": "1.0.0",
 			"description": "由 Go 后端从路由表生成。路径/方法/权限串与 Java 控制器注解对齐；" +
-				"请求体与响应体的字段级 schema 未提供（无 springdoc 注解源）。",
+				"增删改查接口的请求体 schema 从 Go 结构体反射而来，字段说明取自 MySQL 列注释" +
+				"（见 apischema.go）。未登记的接口没有字段级 schema。",
 		},
-		"components": map[string]any{
-			"securitySchemes": map[string]any{
-				"BearerAuth": map[string]any{
-					"type":         "http",
-					"scheme":       "bearer",
-					"bearerFormat": "JWT",
-				},
-			},
-		},
-		"paths": paths,
+		"components": components,
+		"paths":      paths,
 	}
 }
 
