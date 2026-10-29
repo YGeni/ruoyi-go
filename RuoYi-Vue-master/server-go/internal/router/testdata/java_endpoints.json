@@ -1,0 +1,1031 @@
+[
+  {
+    "File": "CacheController.java",
+    "Line": 48,
+    "Method": "GET",
+    "Path": "/monitor/cache",
+    "Perm": "monitor:cache:list"
+  },
+  {
+    "File": "CacheController.java",
+    "Line": 73,
+    "Method": "GET",
+    "Path": "/monitor/cache/getNames",
+    "Perm": "monitor:cache:list"
+  },
+  {
+    "File": "CacheController.java",
+    "Line": 80,
+    "Method": "GET",
+    "Path": "/monitor/cache/getKeys/:cacheName",
+    "Perm": "monitor:cache:list"
+  },
+  {
+    "File": "CacheController.java",
+    "Line": 88,
+    "Method": "GET",
+    "Path": "/monitor/cache/getValue/:cacheName/:cacheKey",
+    "Perm": "monitor:cache:list"
+  },
+  {
+    "File": "CacheController.java",
+    "Line": 97,
+    "Method": "DELETE",
+    "Path": "/monitor/cache/clearCacheName/:cacheName",
+    "Perm": "monitor:cache:list"
+  },
+  {
+    "File": "CacheController.java",
+    "Line": 106,
+    "Method": "DELETE",
+    "Path": "/monitor/cache/clearCacheKey/:cacheKey",
+    "Perm": "monitor:cache:list"
+  },
+  {
+    "File": "CacheController.java",
+    "Line": 114,
+    "Method": "DELETE",
+    "Path": "/monitor/cache/clearCacheAll",
+    "Perm": "monitor:cache:list"
+  },
+  {
+    "File": "CaptchaController.java",
+    "Line": 31,
+    "Method": "GET",
+    "Path": "/captchaImage",
+    "Perm": ""
+  },
+  {
+    "File": "CommonController.java",
+    "Line": 34,
+    "Method": "GET",
+    "Path": "/common/download",
+    "Perm": ""
+  },
+  {
+    "File": "CommonController.java",
+    "Line": 74,
+    "Method": "POST",
+    "Path": "/common/upload",
+    "Perm": ""
+  },
+  {
+    "File": "CommonController.java",
+    "Line": 100,
+    "Method": "POST",
+    "Path": "/common/uploads",
+    "Perm": ""
+  },
+  {
+    "File": "CommonController.java",
+    "Line": 137,
+    "Method": "GET",
+    "Path": "/common/download/resource",
+    "Perm": ""
+  },
+  {
+    "File": "GenController.java",
+    "Line": 49,
+    "Method": "GET",
+    "Path": "/tool/gen/list",
+    "Perm": "tool:gen:list"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 70,
+    "Method": "GET",
+    "Path": "/tool/gen/:tableId",
+    "Perm": "tool:gen:query"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 87,
+    "Method": "GET",
+    "Path": "/tool/gen/db/list",
+    "Perm": "tool:gen:list"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 99,
+    "Method": "GET",
+    "Path": "/tool/gen/column/:tableId",
+    "Perm": "tool:gen:list"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 113,
+    "Method": "POST",
+    "Path": "/tool/gen/importTable",
+    "Perm": "tool:gen:import"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 128,
+    "Method": "POST",
+    "Path": "/tool/gen/createTable",
+    "Perm": ""
+  },
+  {
+    "File": "GenController.java",
+    "Line": 165,
+    "Method": "PUT",
+    "Path": "/tool/gen",
+    "Perm": "tool:gen:edit"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 178,
+    "Method": "DELETE",
+    "Path": "/tool/gen/:tableIds",
+    "Perm": "tool:gen:remove"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 190,
+    "Method": "GET",
+    "Path": "/tool/gen/preview/:tableId",
+    "Perm": "tool:gen:preview"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 201,
+    "Method": "GET",
+    "Path": "/tool/gen/download/:tableName",
+    "Perm": "tool:gen:code"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 213,
+    "Method": "GET",
+    "Path": "/tool/gen/genCode/:tableName",
+    "Perm": "tool:gen:code"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 229,
+    "Method": "GET",
+    "Path": "/tool/gen/synchDb/:tableName",
+    "Perm": "tool:gen:edit"
+  },
+  {
+    "File": "GenController.java",
+    "Line": 241,
+    "Method": "GET",
+    "Path": "/tool/gen/batchGenCode",
+    "Perm": "tool:gen:code"
+  },
+  {
+    "File": "ServerController.java",
+    "Line": 19,
+    "Method": "GET",
+    "Path": "/monitor/server",
+    "Perm": "monitor:server:list"
+  },
+  {
+    "File": "SysConfigController.java",
+    "Line": 34,
+    "Method": "GET",
+    "Path": "/system/config/list",
+    "Perm": "system:config:list"
+  },
+  {
+    "File": "SysConfigController.java",
+    "Line": 49,
+    "Method": "POST",
+    "Path": "/system/config/export",
+    "Perm": "system:config:export"
+  },
+  {
+    "File": "SysConfigController.java",
+    "Line": 62,
+    "Method": "GET",
+    "Path": "/system/config/:configId",
+    "Perm": "system:config:query"
+  },
+  {
+    "File": "SysConfigController.java",
+    "Line": 72,
+    "Method": "GET",
+    "Path": "/system/config/configKey/:configKey",
+    "Perm": ""
+  },
+  {
+    "File": "SysConfigController.java",
+    "Line": 81,
+    "Method": "POST",
+    "Path": "/system/config",
+    "Perm": "system:config:add"
+  },
+  {
+    "File": "SysConfigController.java",
+    "Line": 97,
+    "Method": "PUT",
+    "Path": "/system/config",
+    "Perm": "system:config:edit"
+  },
+  {
+    "File": "SysConfigController.java",
+    "Line": 113,
+    "Method": "DELETE",
+    "Path": "/system/config/:configIds",
+    "Perm": "system:config:remove"
+  },
+  {
+    "File": "SysConfigController.java",
+    "Line": 125,
+    "Method": "DELETE",
+    "Path": "/system/config/refreshCache",
+    "Perm": "system:config:remove"
+  },
+  {
+    "File": "SysDeptController.java",
+    "Line": 35,
+    "Method": "GET",
+    "Path": "/system/dept/list",
+    "Perm": "system:dept:list"
+  },
+  {
+    "File": "SysDeptController.java",
+    "Line": 52,
+    "Method": "GET",
+    "Path": "/system/dept/list/exclude/:deptId",
+    "Perm": "system:dept:list"
+  },
+  {
+    "File": "SysDeptController.java",
+    "Line": 64,
+    "Method": "GET",
+    "Path": "/system/dept/:deptId",
+    "Perm": "system:dept:query"
+  },
+  {
+    "File": "SysDeptController.java",
+    "Line": 75,
+    "Method": "POST",
+    "Path": "/system/dept",
+    "Perm": "system:dept:add"
+  },
+  {
+    "File": "SysDeptController.java",
+    "Line": 91,
+    "Method": "PUT",
+    "Path": "/system/dept",
+    "Perm": "system:dept:edit"
+  },
+  {
+    "File": "SysDeptController.java",
+    "Line": 117,
+    "Method": "PUT",
+    "Path": "/system/dept/updateSort",
+    "Perm": "system:dept:edit"
+  },
+  {
+    "File": "SysDeptController.java",
+    "Line": 131,
+    "Method": "DELETE",
+    "Path": "/system/dept/:deptId",
+    "Perm": "system:dept:remove"
+  },
+  {
+    "File": "SysDictDataController.java",
+    "Line": 37,
+    "Method": "GET",
+    "Path": "/system/dict/data/list",
+    "Perm": "system:dict:list"
+  },
+  {
+    "File": "SysDictDataController.java",
+    "Line": 52,
+    "Method": "POST",
+    "Path": "/system/dict/data/export",
+    "Perm": "system:dict:export"
+  },
+  {
+    "File": "SysDictDataController.java",
+    "Line": 65,
+    "Method": "GET",
+    "Path": "/system/dict/data/:dictCode",
+    "Perm": "system:dict:query"
+  },
+  {
+    "File": "SysDictDataController.java",
+    "Line": 75,
+    "Method": "GET",
+    "Path": "/system/dict/data/type/:dictType",
+    "Perm": ""
+  },
+  {
+    "File": "SysDictDataController.java",
+    "Line": 89,
+    "Method": "POST",
+    "Path": "/system/dict/data",
+    "Perm": "system:dict:add"
+  },
+  {
+    "File": "SysDictDataController.java",
+    "Line": 101,
+    "Method": "PUT",
+    "Path": "/system/dict/data",
+    "Perm": "system:dict:edit"
+  },
+  {
+    "File": "SysDictDataController.java",
+    "Line": 113,
+    "Method": "DELETE",
+    "Path": "/system/dict/data/:dictCodes",
+    "Perm": "system:dict:remove"
+  },
+  {
+    "File": "SysDictTypeController.java",
+    "Line": 34,
+    "Method": "GET",
+    "Path": "/system/dict/type/list",
+    "Perm": "system:dict:list"
+  },
+  {
+    "File": "SysDictTypeController.java",
+    "Line": 46,
+    "Method": "POST",
+    "Path": "/system/dict/type/export",
+    "Perm": "system:dict:export"
+  },
+  {
+    "File": "SysDictTypeController.java",
+    "Line": 59,
+    "Method": "GET",
+    "Path": "/system/dict/type/:dictId",
+    "Perm": "system:dict:query"
+  },
+  {
+    "File": "SysDictTypeController.java",
+    "Line": 69,
+    "Method": "POST",
+    "Path": "/system/dict/type",
+    "Perm": "system:dict:add"
+  },
+  {
+    "File": "SysDictTypeController.java",
+    "Line": 85,
+    "Method": "PUT",
+    "Path": "/system/dict/type",
+    "Perm": "system:dict:edit"
+  },
+  {
+    "File": "SysDictTypeController.java",
+    "Line": 101,
+    "Method": "DELETE",
+    "Path": "/system/dict/type/:dictIds",
+    "Perm": "system:dict:remove"
+  },
+  {
+    "File": "SysDictTypeController.java",
+    "Line": 113,
+    "Method": "DELETE",
+    "Path": "/system/dict/type/refreshCache",
+    "Perm": "system:dict:remove"
+  },
+  {
+    "File": "SysDictTypeController.java",
+    "Line": 125,
+    "Method": "GET",
+    "Path": "/system/dict/type/optionselect",
+    "Perm": ""
+  },
+  {
+    "File": "SysIndexController.java",
+    "Line": 43,
+    "Method": "POST",
+    "Path": "/unlockscreen",
+    "Perm": ""
+  },
+  {
+    "File": "SysJobController.java",
+    "Line": 39,
+    "Method": "GET",
+    "Path": "/monitor/job/list",
+    "Perm": "monitor:job:list"
+  },
+  {
+    "File": "SysJobController.java",
+    "Line": 57,
+    "Method": "POST",
+    "Path": "/monitor/job/export",
+    "Perm": "monitor:job:export"
+  },
+  {
+    "File": "SysJobController.java",
+    "Line": 70,
+    "Method": "GET",
+    "Path": "/monitor/job/:jobId",
+    "Perm": "monitor:job:query"
+  },
+  {
+    "File": "SysJobController.java",
+    "Line": 80,
+    "Method": "POST",
+    "Path": "/monitor/job",
+    "Perm": "monitor:job:add"
+  },
+  {
+    "File": "SysJobController.java",
+    "Line": 116,
+    "Method": "PUT",
+    "Path": "/monitor/job",
+    "Perm": "monitor:job:edit"
+  },
+  {
+    "File": "SysJobController.java",
+    "Line": 152,
+    "Method": "PUT",
+    "Path": "/monitor/job/changeStatus",
+    "Perm": "monitor:job:changeStatus"
+  },
+  {
+    "File": "SysJobController.java",
+    "Line": 165,
+    "Method": "PUT",
+    "Path": "/monitor/job/run",
+    "Perm": "monitor:job:changeStatus"
+  },
+  {
+    "File": "SysJobController.java",
+    "Line": 177,
+    "Method": "DELETE",
+    "Path": "/monitor/job/:jobIds",
+    "Perm": "monitor:job:remove"
+  },
+  {
+    "File": "SysJobLogController.java",
+    "Line": 31,
+    "Method": "GET",
+    "Path": "/monitor/jobLog/list",
+    "Perm": "monitor:job:list"
+  },
+  {
+    "File": "SysJobLogController.java",
+    "Line": 49,
+    "Method": "POST",
+    "Path": "/monitor/jobLog/export",
+    "Perm": "monitor:job:export"
+  },
+  {
+    "File": "SysJobLogController.java",
+    "Line": 62,
+    "Method": "GET",
+    "Path": "/monitor/jobLog/:jobLogId",
+    "Perm": "monitor:job:query"
+  },
+  {
+    "File": "SysJobLogController.java",
+    "Line": 73,
+    "Method": "DELETE",
+    "Path": "/monitor/jobLog/:jobLogIds",
+    "Perm": "monitor:job:remove"
+  },
+  {
+    "File": "SysJobLogController.java",
+    "Line": 84,
+    "Method": "DELETE",
+    "Path": "/monitor/jobLog/clean",
+    "Perm": "monitor:job:remove"
+  },
+  {
+    "File": "SysLoginController.java",
+    "Line": 35,
+    "Method": "POST",
+    "Path": "/login",
+    "Perm": ""
+  },
+  {
+    "File": "SysLoginController.java",
+    "Line": 72,
+    "Method": "GET",
+    "Path": "getInfo",
+    "Perm": ""
+  },
+  {
+    "File": "SysLoginController.java",
+    "Line": 101,
+    "Method": "GET",
+    "Path": "getRouters",
+    "Perm": ""
+  },
+  {
+    "File": "SysLogininforController.java",
+    "Line": 32,
+    "Method": "GET",
+    "Path": "/monitor/logininfor/list",
+    "Perm": "monitor:logininfor:list"
+  },
+  {
+    "File": "SysLogininforController.java",
+    "Line": 47,
+    "Method": "POST",
+    "Path": "/monitor/logininfor/export",
+    "Perm": "monitor:logininfor:export"
+  },
+  {
+    "File": "SysLogininforController.java",
+    "Line": 57,
+    "Method": "DELETE",
+    "Path": "/monitor/logininfor/:infoIds",
+    "Perm": "monitor:logininfor:remove"
+  },
+  {
+    "File": "SysLogininforController.java",
+    "Line": 65,
+    "Method": "DELETE",
+    "Path": "/monitor/logininfor/clean",
+    "Perm": "monitor:logininfor:remove"
+  },
+  {
+    "File": "SysLogininforController.java",
+    "Line": 74,
+    "Method": "GET",
+    "Path": "/monitor/logininfor/unlock/:userName",
+    "Perm": "monitor:logininfor:unlock"
+  },
+  {
+    "File": "SysMenuController.java",
+    "Line": 34,
+    "Method": "GET",
+    "Path": "/system/menu/list",
+    "Perm": "system:menu:list"
+  },
+  {
+    "File": "SysMenuController.java",
+    "Line": 51,
+    "Method": "GET",
+    "Path": "/system/menu/:menuId",
+    "Perm": "system:menu:query"
+  },
+  {
+    "File": "SysMenuController.java",
+    "Line": 61,
+    "Method": "GET",
+    "Path": "/system/menu/treeselect",
+    "Perm": ""
+  },
+  {
+    "File": "SysMenuController.java",
+    "Line": 71,
+    "Method": "GET",
+    "Path": "/system/menu/roleMenuTreeselect/:roleId",
+    "Perm": ""
+  },
+  {
+    "File": "SysMenuController.java",
+    "Line": 84,
+    "Method": "POST",
+    "Path": "/system/menu",
+    "Perm": "system:menu:add"
+  },
+  {
+    "File": "SysMenuController.java",
+    "Line": 108,
+    "Method": "PUT",
+    "Path": "/system/menu",
+    "Perm": "system:menu:edit"
+  },
+  {
+    "File": "SysMenuController.java",
+    "Line": 136,
+    "Method": "PUT",
+    "Path": "/system/menu/updateSort",
+    "Perm": "system:menu:edit"
+  },
+  {
+    "File": "SysMenuController.java",
+    "Line": 150,
+    "Method": "DELETE",
+    "Path": "/system/menu/:menuId",
+    "Perm": "system:menu:remove"
+  },
+  {
+    "File": "SysNoticeController.java",
+    "Line": 35,
+    "Method": "GET",
+    "Path": "/system/notice/list",
+    "Perm": "system:notice:list"
+  },
+  {
+    "File": "SysNoticeController.java",
+    "Line": 56,
+    "Method": "GET",
+    "Path": "/system/notice/:noticeId",
+    "Perm": ""
+  },
+  {
+    "File": "SysNoticeController.java",
+    "Line": 65,
+    "Method": "POST",
+    "Path": "/system/notice",
+    "Perm": "system:notice:add"
+  },
+  {
+    "File": "SysNoticeController.java",
+    "Line": 77,
+    "Method": "PUT",
+    "Path": "/system/notice",
+    "Perm": "system:notice:edit"
+  },
+  {
+    "File": "SysNoticeController.java",
+    "Line": 89,
+    "Method": "GET",
+    "Path": "/system/notice/listTop",
+    "Perm": ""
+  },
+  {
+    "File": "SysNoticeController.java",
+    "Line": 104,
+    "Method": "POST",
+    "Path": "/system/notice/markRead",
+    "Perm": ""
+  },
+  {
+    "File": "SysNoticeController.java",
+    "Line": 116,
+    "Method": "POST",
+    "Path": "/system/notice/markReadAll",
+    "Perm": ""
+  },
+  {
+    "File": "SysNoticeController.java",
+    "Line": 129,
+    "Method": "GET",
+    "Path": "/system/notice/readUsers/list",
+    "Perm": "system:notice:list"
+  },
+  {
+    "File": "SysNoticeController.java",
+    "Line": 142,
+    "Method": "DELETE",
+    "Path": "/system/notice/:noticeIds",
+    "Perm": "system:notice:remove"
+  },
+  {
+    "File": "SysOperlogController.java",
+    "Line": 31,
+    "Method": "GET",
+    "Path": "/monitor/operlog/list",
+    "Perm": "monitor:operlog:list"
+  },
+  {
+    "File": "SysOperlogController.java",
+    "Line": 43,
+    "Method": "POST",
+    "Path": "/monitor/operlog/export",
+    "Perm": "monitor:operlog:export"
+  },
+  {
+    "File": "SysOperlogController.java",
+    "Line": 53,
+    "Method": "DELETE",
+    "Path": "/monitor/operlog/:operIds",
+    "Perm": "monitor:operlog:remove"
+  },
+  {
+    "File": "SysOperlogController.java",
+    "Line": 61,
+    "Method": "DELETE",
+    "Path": "/monitor/operlog/clean",
+    "Perm": "monitor:operlog:remove"
+  },
+  {
+    "File": "SysPostController.java",
+    "Line": 34,
+    "Method": "GET",
+    "Path": "/system/post/list",
+    "Perm": "system:post:list"
+  },
+  {
+    "File": "SysPostController.java",
+    "Line": 49,
+    "Method": "POST",
+    "Path": "/system/post/export",
+    "Perm": "system:post:export"
+  },
+  {
+    "File": "SysPostController.java",
+    "Line": 62,
+    "Method": "GET",
+    "Path": "/system/post/:postId",
+    "Perm": "system:post:query"
+  },
+  {
+    "File": "SysPostController.java",
+    "Line": 72,
+    "Method": "POST",
+    "Path": "/system/post",
+    "Perm": "system:post:add"
+  },
+  {
+    "File": "SysPostController.java",
+    "Line": 92,
+    "Method": "PUT",
+    "Path": "/system/post",
+    "Perm": "system:post:edit"
+  },
+  {
+    "File": "SysPostController.java",
+    "Line": 112,
+    "Method": "DELETE",
+    "Path": "/system/post/:postIds",
+    "Perm": "system:post:remove"
+  },
+  {
+    "File": "SysPostController.java",
+    "Line": 123,
+    "Method": "GET",
+    "Path": "/system/post/optionselect",
+    "Perm": ""
+  },
+  {
+    "File": "SysProfileController.java",
+    "Line": 38,
+    "Method": "GET",
+    "Path": "/system/user/profile",
+    "Perm": ""
+  },
+  {
+    "File": "SysProfileController.java",
+    "Line": 61,
+    "Method": "PUT",
+    "Path": "/system/user/profile",
+    "Perm": ""
+  },
+  {
+    "File": "SysProfileController.java",
+    "Line": 91,
+    "Method": "PUT",
+    "Path": "/system/user/profile/updatePwd",
+    "Perm": ""
+  },
+  {
+    "File": "SysProfileController.java",
+    "Line": 124,
+    "Method": "POST",
+    "Path": "/system/user/profile/avatar",
+    "Perm": ""
+  },
+  {
+    "File": "SysRegisterController.java",
+    "Line": 22,
+    "Method": "POST",
+    "Path": "/register",
+    "Perm": ""
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 41,
+    "Method": "GET",
+    "Path": "/system/role/list",
+    "Perm": "system:role:list"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 65,
+    "Method": "POST",
+    "Path": "/system/role/export",
+    "Perm": "system:role:export"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 78,
+    "Method": "GET",
+    "Path": "/system/role/:roleId",
+    "Perm": "system:role:query"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 89,
+    "Method": "POST",
+    "Path": "/system/role",
+    "Perm": "system:role:add"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 110,
+    "Method": "PUT",
+    "Path": "/system/role",
+    "Perm": "system:role:edit"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 139,
+    "Method": "PUT",
+    "Path": "/system/role/dataScope",
+    "Perm": "system:role:edit"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 152,
+    "Method": "PUT",
+    "Path": "/system/role/changeStatus",
+    "Perm": "system:role:edit"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 166,
+    "Method": "DELETE",
+    "Path": "/system/role/:roleIds",
+    "Perm": "system:role:remove"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 177,
+    "Method": "GET",
+    "Path": "/system/role/optionselect",
+    "Perm": "system:role:query"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 187,
+    "Method": "GET",
+    "Path": "/system/role/authUser/allocatedList",
+    "Perm": "system:role:list"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 199,
+    "Method": "GET",
+    "Path": "/system/role/authUser/unallocatedList",
+    "Perm": "system:role:list"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 211,
+    "Method": "PUT",
+    "Path": "/system/role/authUser/cancel",
+    "Perm": "system:role:edit"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 222,
+    "Method": "PUT",
+    "Path": "/system/role/authUser/cancelAll",
+    "Perm": "system:role:edit"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 233,
+    "Method": "PUT",
+    "Path": "/system/role/authUser/selectAll",
+    "Perm": "system:role:edit"
+  },
+  {
+    "File": "SysRoleController.java",
+    "Line": 245,
+    "Method": "GET",
+    "Path": "/system/role/deptTree/:roleId",
+    "Perm": "system:role:query"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 44,
+    "Method": "GET",
+    "Path": "/system/user/list",
+    "Perm": "system:user:list"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 68,
+    "Method": "POST",
+    "Path": "/system/user/export",
+    "Perm": "system:user:export"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 78,
+    "Method": "POST",
+    "Path": "/system/user/importData",
+    "Perm": "system:user:import"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 90,
+    "Method": "POST",
+    "Path": "/system/user/importTemplate",
+    "Perm": ""
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 100,
+    "Method": "GET",
+    "Path": "/system/user/",
+    "Perm": "system:user:query"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 100,
+    "Method": "GET",
+    "Path": "/system/user/:userId",
+    "Perm": "system:user:query"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 122,
+    "Method": "POST",
+    "Path": "/system/user",
+    "Perm": "system:user:add"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 149,
+    "Method": "PUT",
+    "Path": "/system/user",
+    "Perm": "system:user:edit"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 177,
+    "Method": "DELETE",
+    "Path": "/system/user/:userIds",
+    "Perm": "system:user:remove"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 192,
+    "Method": "PUT",
+    "Path": "/system/user/resetPwd",
+    "Perm": "system:user:resetPwd"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 207,
+    "Method": "PUT",
+    "Path": "/system/user/changeStatus",
+    "Perm": "system:user:edit"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 221,
+    "Method": "GET",
+    "Path": "/system/user/authRole/:userId",
+    "Perm": "system:user:query"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 236,
+    "Method": "PUT",
+    "Path": "/system/user/authRole",
+    "Perm": "system:user:edit"
+  },
+  {
+    "File": "SysUserController.java",
+    "Line": 250,
+    "Method": "GET",
+    "Path": "/system/user/deptTree",
+    "Perm": "system:user:list"
+  },
+  {
+    "File": "SysUserOnlineController.java",
+    "Line": 35,
+    "Method": "GET",
+    "Path": "/monitor/online/list",
+    "Perm": "monitor:online:list"
+  },
+  {
+    "File": "SysUserOnlineController.java",
+    "Line": 75,
+    "Method": "DELETE",
+    "Path": "/monitor/online/:tokenId",
+    "Perm": "monitor:online:forceLogout"
+  },
+  {
+    "File": "TestController.java",
+    "Line": 38,
+    "Method": "GET",
+    "Path": "/test/user/list",
+    "Perm": ""
+  },
+  {
+    "File": "TestController.java",
+    "Line": 46,
+    "Method": "GET",
+    "Path": "/test/user/:userId",
+    "Perm": ""
+  },
+  {
+    "File": "TestController.java",
+    "Line": 61,
+    "Method": "POST",
+    "Path": "/test/user/save",
+    "Perm": ""
+  },
+  {
+    "File": "TestController.java",
+    "Line": 73,
+    "Method": "DELETE",
+    "Path": "/test/user/:userId",
+    "Perm": ""
+  },
+  {
+    "File": "TestController.java",
+    "Line": 73,
+    "Method": "PUT",
+    "Path": "/test/user/update",
+    "Perm": ""
+  }
+]

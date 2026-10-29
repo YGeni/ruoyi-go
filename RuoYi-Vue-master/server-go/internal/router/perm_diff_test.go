@@ -11,8 +11,21 @@ package router
 //	二期延后：Java 有、但本轮不实现路由 -> 只登记到报告，不算失败
 //
 // 报告落盘 docs/go-migration/02b-perm-diff-report.md，可直接作为评审/回归凭据。
+//
+// 数据源的演变（重要）：
+//
+//	最初：运行时直接解析 Java 控制器源码（ruoyi-admin / generator / quartz）
+//	现在：Java 模块已从仓库删除（后端 100% 是 Go），改为对**落盘快照**
+//	      testdata/java_endpoints.json 做 diff —— 删源码不能把这道守护一起删掉。
+//
+// 快照怎么重新生成（只有需要重新对齐 Java 时才做）：
+//
+//	git checkout <删除前的提交> -- ruoyi-admin ruoyi-generator ruoyi-quartz
+//	RUOYI_DUMP_JAVA=1 go test ./internal/router/ -run TestDumpJavaSnapshot
+//	（生成后删掉临时恢复的 Java 目录即可）
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -33,8 +46,9 @@ var javaRootSuffixes = []string{
 	"ruoyi-quartz/src/main/java/com/ruoyi/quartz/controller",
 }
 
-// repoRoot 从 internal/router 向上找仓库根（以存在 ruoyi-admin 目录为标志）。
+// repoRoot 从 internal/router 向上找仓库根（以存在 server-go 目录为标志）。
 //
+// 标志原本是 ruoyi-admin，Java 模块删除后不能再以它为标志，改成 server-go。
 // 不写死 "../../../" 是为了让 `go test ./...`（工作目录是包目录）与
 // 直接 gofmt/IDE 运行都能正确定位。
 func repoRoot(t *testing.T) string {
@@ -44,7 +58,7 @@ func repoRoot(t *testing.T) string {
 		t.Fatalf("获取工作目录失败: %v", err)
 	}
 	for i := 0; i < 8; i++ {
-		if _, err := os.Stat(filepath.Join(dir, "ruoyi-admin")); err == nil {
+		if _, err := os.Stat(filepath.Join(dir, "server-go")); err == nil {
 			return dir
 		}
 		parent := filepath.Dir(dir)
@@ -53,7 +67,7 @@ func repoRoot(t *testing.T) string {
 		}
 		dir = parent
 	}
-	t.Fatalf("未能定位仓库根（向上 8 层未找到 ruoyi-admin 目录）")
+	t.Fatalf("未能定位仓库根（向上 8 层未找到 server-go 目录）")
 	return ""
 }
 
@@ -244,7 +258,43 @@ func parseJavaController(path string) ([]javaEndpoint, error) {
 	return out, nil
 }
 
+// javaSnapshotFile Java 端点快照（相对本包目录）。
+//
+// Java 源码删除后，双向 diff 的基准就是它。字段名与 javaEndpoint 一致，
+// 由 TestDumpJavaSnapshot 生成。
+const javaSnapshotFile = "testdata/java_endpoints.json"
+
+// loadJavaEndpoints 取"Java 侧"端点清单。
+//
+// 优先读落盘快照（正常路径）；快照缺失时才退回扫 Java 源码，
+// 这样从 git 历史恢复 Java 重新生成快照时，diff 用例本身仍然能跑。
 func loadJavaEndpoints(t *testing.T) []javaEndpoint {
+	t.Helper()
+	if eps, ok := loadJavaSnapshot(t); ok {
+		return eps
+	}
+	return loadJavaEndpointsFromSource(t)
+}
+
+// loadJavaSnapshot 读快照；文件不存在返回 false（不是错误）。
+func loadJavaSnapshot(t *testing.T) ([]javaEndpoint, bool) {
+	t.Helper()
+	raw, err := os.ReadFile(javaSnapshotFile)
+	if err != nil {
+		return nil, false
+	}
+	var eps []javaEndpoint
+	if err := json.Unmarshal(raw, &eps); err != nil {
+		t.Fatalf("解析 Java 端点快照失败 %s: %v", javaSnapshotFile, err)
+	}
+	if len(eps) == 0 {
+		t.Fatalf("快照 %s 是空的", javaSnapshotFile)
+	}
+	return eps, true
+}
+
+// loadJavaEndpointsFromSource 直接扫 Java 控制器目录（快照生成/源码在场时用）。
+func loadJavaEndpointsFromSource(t *testing.T) []javaEndpoint {
 	t.Helper()
 	var all []javaEndpoint
 	for _, root := range javaRoots(t) {
@@ -478,6 +528,41 @@ func orEmpty(s string) string {
 		return "(仅需登录)"
 	}
 	return s
+}
+
+// TestDumpJavaSnapshot 重新生成 Java 端点快照。
+//
+// 平时不跑（会 Skip）：需要 Java 源码在场，且必须显式给环境变量 ——
+// 避免误操作把快照覆盖成空、让双向 diff 静默失效。
+//
+//	RUOYI_DUMP_JAVA=1 go test ./internal/router/ -run TestDumpJavaSnapshot
+//
+// Java 模块已删除，生成前要先从 git 历史把 ruoyi-admin/ruoyi-generator/
+// ruoyi-quartz 三个目录恢复出来。
+func TestDumpJavaSnapshot(t *testing.T) {
+	if os.Getenv("RUOYI_DUMP_JAVA") != "1" {
+		t.Skip("未设置 RUOYI_DUMP_JAVA=1，不重新生成快照")
+	}
+	eps := loadJavaEndpointsFromSource(t)
+	// 稳定排序，避免生成顺序受文件系统影响、产生无意义的 diff
+	sort.Slice(eps, func(i, j int) bool {
+		if eps[i].File != eps[j].File {
+			return eps[i].File < eps[j].File
+		}
+		return eps[i].Line < eps[j].Line
+	})
+	if err := os.MkdirAll(filepath.Dir(javaSnapshotFile), 0o755); err != nil {
+		t.Fatalf("创建 testdata 目录失败: %v", err)
+	}
+	raw, err := json.MarshalIndent(eps, "", "  ")
+	if err != nil {
+		t.Fatalf("序列化快照失败: %v", err)
+	}
+	raw = append(raw, '\n')
+	if err := os.WriteFile(javaSnapshotFile, raw, 0o644); err != nil {
+		t.Fatalf("写快照失败: %v", err)
+	}
+	t.Logf("已写入 %s（%d 个端点）", javaSnapshotFile, len(eps))
 }
 
 // writePermDiffReport 落盘差异报告。
