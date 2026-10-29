@@ -1,11 +1,13 @@
 // Package captcha 复刻 CaptchaController 的验证码生成与校验。
 //
 // 对应实现：
-//   - ruoyi-admin/src/main/java/com/ruoyi/web/controller/common/CaptchaController.java:45-93
-//     Redis key = captcha_codes:<uuid>（L57-58），TTL = CAPTCHA_EXPIRATION = 2 分钟（L78），
-//     math 型生成串形如 "3+5=?@8"，@ 前为展示串、@ 后为答案（L67-69），
-//     返回体字段 captchaEnabled / uuid / img（L90-91），img 为裸 base64（不含 data URI 前缀）。
-//   - ruoyi-framework/src/main/java/com/ruoyi/framework/config/CaptchaConfig.java:18-82
+// -ruoyi-
+//
+//	Redis key = captcha_codes:<uuid>（L57-58），TTL = CAPTCHA_EXPIRATION = 2 分钟（L78），
+//	math 型生成串形如 "3+5=?@8"，@ 前为展示串、@ 后为答案（L67-69），
+//	返回体字段 captchaEnabled / uuid / img（L90-91），img 为裸 base64（不含 data URI 前缀）。
+//
+// -ruoyi-
 package captcha
 
 import (
@@ -60,10 +62,10 @@ func newStore() *redisStore {
 // 传 nil 时库内部会回退到内置字体（driver_math.go:39-51）。
 func driver() base64Captcha.Driver {
 	white := &color.RGBA{R: 255, G: 255, B: 255, A: 255}
-	// Java 画布为 160x60（CaptchaConfig.java:22-24）
+	// Java 画布为 160x60
 	const height, width = 60, 160
 	if config.C.RuoYi.CaptchaType == "char" {
-		// char 型对应 4 位字符验证码（CaptchaConfig.java:26 长度 4）
+		// char 型对应 4 位字符验证码长度 4）
 		return base64Captcha.NewDriverString(height, width, 0, 0, 4,
 			base64Captcha.TxtNumbers+base64Captcha.TxtAlphabet, white, nil, nil)
 	}

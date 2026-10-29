@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// DictHandler 字典管理，对应 SysDictTypeController.java + SysDictDataController.java。
+// DictHandler 字典管理，对应+。
 //
 // 字典**不在 DataScope 五个落点内**（两个 ServiceImpl 的 selectXxxList 均无注解）。
 type DictHandler struct{}
@@ -128,7 +128,7 @@ func (DictHandler) TypeRemove(c *gin.Context) {
 
 // TypeRefreshCache DELETE /system/dict/type/refreshCache
 //
-// 等价 SysDictTypeController.java 的同名接口。
+// 等价的同名接口。
 // 必须在 /system/dict/type/:dictIds **之前**注册。
 func (DictHandler) TypeRefreshCache(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -184,7 +184,6 @@ func (DictHandler) DataGetInfo(c *gin.Context) {
 
 // DataByType GET /system/dict/data/type/:dictType
 //
-// 等价 SysDictDataController.java:66-73。
 // 必须在 /system/dict/data/:dictCode **之前**注册。
 func (DictHandler) DataByType(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {

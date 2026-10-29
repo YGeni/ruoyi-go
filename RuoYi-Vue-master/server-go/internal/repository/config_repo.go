@@ -155,7 +155,7 @@ func RefreshConfigCache() error {
 // selectConfigByKey。缓存键为 sys_config:<configKey>（与 Java 一致）。
 //
 // DIFF(review): Java 在启动时用 @PostConstruct 把全部配置灌进 Redis，并只缓存
-// status=0 的记录（SysConfigServiceImpl.java:35-77）；Go 侧改为按需加载并缓存，
+// status=0 的记录；Go 侧改为按需加载并缓存
 // 首次读库后写入相同 key，后续与 Java 端命中同一份缓存。
 func SelectConfigValueByKey(key string) (string, bool, error) {
 	if v, ok, err := redisx.Get(config.SysConfigKey + key); err == nil && ok {

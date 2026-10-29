@@ -1,10 +1,12 @@
 // Package securityx 复刻密码校验与登录失败计数。
 //
 // 对应实现：
-//   - ruoyi-framework/src/main/java/com/ruoyi/framework/web/service/SysPasswordService.java
-//     计数键 pwd_err_cnt:<username>（L39-42），达到 maxRetryCount(5) 直接拒绝（L57-60），
-//     失败则自增并设 lockTime(10 分钟) 过期（L62-67），成功则清除计数（L79-85）
-//   - ruoyi-common/src/main/java/com/ruoyi/common/utils/SecurityUtils.java:92-115 BCrypt
+// -ruoyi-
+//
+//	计数键 pwd_err_cnt:<username>（L39-42），达到 maxRetryCount(5) 直接拒绝（L57-60），
+//	失败则自增并设 lockTime(10 分钟) 过期（L62-67），成功则清除计数（L79-85）
+//
+// -ruoyi-BCrypt
 package securityx
 
 import (

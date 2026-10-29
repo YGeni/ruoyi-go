@@ -1,5 +1,5 @@
 // Package osx 采集服务器运行指标，等价 ruoyi-framework 的
-// Server.copyTo()（Server.java:60-80）。
+// Server.copyTo。
 //
 // Java 用的是 OSHI（跨平台的系统信息库）+ Runtime 的 JVM 指标；
 // Go 侧用 gopsutil 取系统指标，JVM 那部分**没有对应物**，用 Go runtime 的
@@ -24,7 +24,7 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 )
 
-// Server 服务监控总览，等价 Server.java。
+// Server 服务监控总览，等价。
 //
 // JSON 字段名与 src/views/monitor/server/index.vue 的绑定一一对应
 // （server.cpu.* / server.mem.* / server.runtime.* / server.sys.* / server.sysFiles）。
@@ -39,7 +39,7 @@ type Server struct {
 	SysFiles []SysFile `json:"sysFiles"`
 }
 
-// Cpu CPU 指标，等价 Cpu.java。
+// Cpu CPU 指标，等价。
 type Cpu struct {
 	CpuNum int     `json:"cpuNum"`
 	Total  float64 `json:"total"`
@@ -49,7 +49,7 @@ type Cpu struct {
 	Free   float64 `json:"free"`
 }
 
-// Mem 内存指标，等价 Mem.java。单位是 GB（Java 的 setMemInfo 全部 /G）。
+// Mem 内存指标，等价。单位是 GB（setMemInfo 全部 /G）。
 type Mem struct {
 	Total float64 `json:"total"`
 	Used  float64 `json:"used"`
@@ -57,7 +57,7 @@ type Mem struct {
 	Usage float64 `json:"usage"`
 }
 
-// Runtime Go 运行时指标，对应 Java 侧的 Jvm.java。
+// Runtime Go 运行时指标，对应 Java 侧的。
 //
 // DIFF(review): Go 没有 JVM。这里用 **Go runtime 的堆指标**代替，语义最接近：
 //
@@ -85,7 +85,7 @@ type Runtime struct {
 	Usage     float64 `json:"usage"`
 }
 
-// Sys 系统信息，等价 Sys.java。
+// Sys 系统信息，等价。
 type Sys struct {
 	ComputerName string `json:"computerName"`
 	ComputerIp   string `json:"computerIp"`
@@ -94,7 +94,7 @@ type Sys struct {
 	OsArch       string `json:"osArch"`
 }
 
-// SysFile 磁盘分区，等价 SysFile.java。total/free/used 是**带单位的字符串**。
+// SysFile 磁盘分区，等价。total/free/used 是**带单位的字符串**。
 type SysFile struct {
 	DirName     string  `json:"dirName"`
 	SysTypeName string  `json:"sysTypeName"`
@@ -105,7 +105,7 @@ type SysFile struct {
 	Usage       float64 `json:"usage"`
 }
 
-// MB / GB 换算基数。Java 的 Server.java 用的是 1024 进制（div(1024*1024*1024)）。
+// MB / GB 换算基数。Java 的用的是 1024 进制（div(1024*1024*1024)）。
 const (
 	kb = 1024.0
 	mb = kb * 1024

@@ -12,12 +12,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// MenuHandler 菜单管理，对应 SysMenuController.java。
+// MenuHandler 菜单管理，对应。
 type MenuHandler struct{}
 
 // List GET /system/menu/list
 //
-// 等价 SysMenuController.java:41-46。**不分页**（Java 的 list() 没有 startPage()），
+// 等价。**不分页**（list 没有 startPage）
 // 返回体是 {code,msg,data:[...]}，前端 src/views/system/menu/index.vue:346
 // 直接 handleTree(response.data, "menuId") 自己构树。
 func (MenuHandler) List(c *gin.Context) {
@@ -42,8 +42,6 @@ func (MenuHandler) List(c *gin.Context) {
 }
 
 // GetInfo GET /system/menu/:menuId
-//
-// 等价 SysMenuController.java:52-56。
 func (MenuHandler) GetInfo(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -63,7 +61,7 @@ func (MenuHandler) GetInfo(c *gin.Context) {
 
 // TreeSelect GET /system/menu/treeselect
 //
-// 等价 SysMenuController.java:61-66：selectMenuList + buildMenuTreeSelect，
+// 等价：selectMenuList + buildMenuTreeSelect
 // 返回 data 是 TreeSelect 数组（{id,label,children}）。
 func (MenuHandler) TreeSelect(c *gin.Context) {
 	lu, ok := loginUser(c)
@@ -89,7 +87,7 @@ func (MenuHandler) TreeSelect(c *gin.Context) {
 
 // RoleMenuTreeSelect GET /system/menu/roleMenuTreeselect/:roleId
 //
-// 等价 SysMenuController.java:71-79：返回 {menus, checkedKeys}。
+// 等价：返回 {menus, checkedKeys}。
 // 前端 src/views/system/role/index.vue:452-453 读 response.menus，
 // 树用 node-key="id" + props {label:'label'}.
 func (MenuHandler) RoleMenuTreeSelect(c *gin.Context) {
@@ -121,8 +119,6 @@ func (MenuHandler) RoleMenuTreeSelect(c *gin.Context) {
 }
 
 // Add POST /system/menu
-//
-// 等价 SysMenuController.java:87-103。
 func (MenuHandler) Add(c *gin.Context) {
 	lu, ok := loginUser(c)
 	if !ok {
@@ -141,8 +137,6 @@ func (MenuHandler) Add(c *gin.Context) {
 }
 
 // Edit PUT /system/menu
-//
-// 等价 SysMenuController.java:111-131。
 func (MenuHandler) Edit(c *gin.Context) {
 	lu, ok := loginUser(c)
 	if !ok {
@@ -162,7 +156,7 @@ func (MenuHandler) Edit(c *gin.Context) {
 
 // UpdateSort PUT /system/menu/updateSort
 //
-// 等价 SysMenuController.java:139-145：body 是 Map<String,String>，
+// 等价：body 是 Map<String,String>
 // menuIds 与 orderNums 都是**逗号分隔字符串**（不是数组）。
 func (MenuHandler) UpdateSort(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -188,7 +182,7 @@ func (MenuHandler) UpdateSort(c *gin.Context) {
 
 // Remove DELETE /system/menu/:menuId
 //
-// 等价 SysMenuController.java:153-164：有子菜单 / 已分配角色都返回 warn。
+// 等价：有子菜单 / 已分配角色都返回 warn。
 func (MenuHandler) Remove(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return

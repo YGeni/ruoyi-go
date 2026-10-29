@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// NoticeHandler 通知公告，对应 SysNoticeController.java（含 3.9 新增的五个端点）。
+// NoticeHandler 通知公告，对应（含 3.9 新增的五个端点）。
 //
 // 公告**不在 DataScope 五个落点内**（SysNoticeServiceImpl.selectNoticeList 无注解）。
 type NoticeHandler struct{}
@@ -41,7 +41,7 @@ func (NoticeHandler) List(c *gin.Context) {
 
 // GetInfo GET /system/notice/:noticeId
 //
-// 等价 SysNoticeController.java:55-60：**无 @PreAuthorize**，仅需登录态。
+// 等价：**无 @PreAuthorize**，仅需登录态。
 func (NoticeHandler) GetInfo(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -118,7 +118,7 @@ func (NoticeHandler) Remove(c *gin.Context) {
 
 // ListTop GET /system/notice/listTop
 //
-// 等价 SysNoticeController.java:89-97：返回最多 5 条正常公告（带当前用户已读标记），
+// 等价：返回最多 5 条正常公告（带当前用户已读标记）
 // 并额外带上 unreadCount。
 //
 // 返回体：AjaxResult{code, msg, data: <公告列表>, unreadCount: <未读数>}。
@@ -144,7 +144,7 @@ func (NoticeHandler) ListTop(c *gin.Context) {
 
 // MarkRead POST /system/notice/markRead
 //
-// 等价 SysNoticeController.java:102-108：noticeId 来自 query 或 form。
+// 等价：noticeId 来自 query 或 form。
 func (NoticeHandler) MarkRead(c *gin.Context) {
 	lu, ok := loginUser(c)
 	if !ok {
@@ -160,7 +160,7 @@ func (NoticeHandler) MarkRead(c *gin.Context) {
 
 // MarkReadAll POST /system/notice/markReadAll
 //
-// 等价 SysNoticeController.java:113-120：ids 是逗号分隔的字符串
+// 等价：ids 是逗号分隔的字符串
 // （Java 用 Convert.toLongArray(ids) 解析，见 add 说明）。
 func (NoticeHandler) MarkReadAll(c *gin.Context) {
 	lu, ok := loginUser(c)
@@ -177,7 +177,7 @@ func (NoticeHandler) MarkReadAll(c *gin.Context) {
 
 // ReadUsers GET /system/notice/readUsers/list
 //
-// 等价 SysNoticeController.java:126-133：分页返回已读该公告的用户。
+// 等价：分页返回已读该公告的用户。
 // 必须在 /system/notice/:noticeId **之前**注册。
 func (NoticeHandler) ReadUsers(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {

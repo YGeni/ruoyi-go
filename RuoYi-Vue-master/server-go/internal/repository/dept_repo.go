@@ -23,8 +23,8 @@ import (
 //	${params.dataScope}
 //	order by d.parent_id, d.order_num
 //
-// 别名 d 是硬约束：SysDeptServiceImpl.java:45 的 @DataScope(deptAlias = "d")
-// 生成的条件引用 d.dept_id。userAlias 取注解默认值 ""（DataScope.java:36），
+// 别名 d 是硬约束：的 @DataScope(deptAlias = "d")
+// 生成的条件引用 d.dept_id。userAlias 取注解默认值 ""
 // 故数据范围 5（仅本人）在这里退化为 d.dept_id = 0。
 func deptListQuery(q *query.DeptList, scope func(*gorm.DB) *gorm.DB) *gorm.DB {
 	tx := db.DB.Table("sys_dept d").
@@ -48,7 +48,7 @@ func deptListQuery(q *query.DeptList, scope func(*gorm.DB) *gorm.DB) *gorm.DB {
 	return tx
 }
 
-// SelectDeptList 分页查询部门，等价 SysDeptServiceImpl.java:45 的
+// SelectDeptList 分页查询部门，等价
 // @DataScope(deptAlias = "d") + SysDeptMapper.xml:35-49。
 //
 // 排序固定 d.parent_id, d.order_num（Java 写死在 SQL 末尾）。

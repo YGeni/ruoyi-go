@@ -15,15 +15,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// JobHandler 定时任务 + 调度日志，对应 SysJobController.java 与
-// SysJobLogController.java（都在 ruoyi-quartz 模块下）。
+// JobHandler 定时任务 + 调度日志，对应与
+// （都在 ruoyi-quartz 模块下）。
 type JobHandler struct{}
 
-// ---------- 定时任务：对应 SysJobController.java ----------
+// ---------- 定时任务：对应----------
 
 // JobList GET /monitor/job/list
 //
-// 等价 SysJobController.java:37-44：startPage() + getDataTable。
+// 等价：startPage + getDataTable。
 // 前端 src/views/monitor/job/index.vue:285-286 读 response.rows / response.total。
 func (JobHandler) JobList(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -127,7 +127,7 @@ func (JobHandler) JobEdit(c *gin.Context) {
 
 // JobChangeStatus PUT /monitor/job/changeStatus
 //
-// 等价 SysJobController.java:150-160：先查库再改状态（Java 用 selectJobById
+// 等价：先查库再改状态（Java 用 selectJobById
 // 拿到 newJob 再 setStatus，避免前端少传字段把别的列冲掉）。
 func (JobHandler) JobChangeStatus(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -155,7 +155,7 @@ func (JobHandler) JobChangeStatus(c *gin.Context) {
 
 // JobRun PUT /monitor/job/run
 //
-// 等价 SysJobController.java:163-171：成功 success()，
+// 等价：成功 success
 // 任务不存在时 error("任务不存在或已过期！")。
 func (JobHandler) JobRun(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -187,7 +187,7 @@ func (JobHandler) JobRemove(c *gin.Context) {
 	result.OK(c, result.Success())
 }
 
-// ---------- 调度日志：对应 SysJobLogController.java ----------
+// ---------- 调度日志：对应----------
 
 // JobLogList GET /monitor/jobLog/list
 //

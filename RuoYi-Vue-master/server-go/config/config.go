@@ -201,7 +201,7 @@ func expandEnvDefault(s string) string {
 	})
 }
 
-// ---------- RuoYiConfig 的路径派生（ruoyi-common/.../config/RuoYiConfig.java:63-121）----------
+// ---------- RuoYiConfig 的路径派生（ruoyi-----------
 //
 // 四个派生目录一律以 getProfile() 为根，Java 侧是字符串拼接（含尾斜杠差异），
 // Go 侧逐字照搬，避免下载时路径对不上。
@@ -211,7 +211,7 @@ func (r RuoYiConfig) GetImportPath() string { return r.Profile + "/import" }
 func (r RuoYiConfig) GetAvatarPath() string { return r.Profile + "/avatar" }
 func (r RuoYiConfig) GetUploadPath() string { return r.Profile + "/upload" }
 
-// GetDownloadPath 注意 Java 侧带**尾斜杠**（RuoYiConfig.java:112），
+// GetDownloadPath 注意 Java 侧带**尾斜杠**
 // /common/download 的 filePath = getDownloadPath() + fileName，
 // 少了这个斜杠会拼出 "…/downloadtest.png"。
 func (r RuoYiConfig) GetDownloadPath() string { return r.Profile + "/download/" }

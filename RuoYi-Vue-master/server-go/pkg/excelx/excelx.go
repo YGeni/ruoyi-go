@@ -1,6 +1,6 @@
 // Package excelx 导出 xlsx，等价 ruoyi-common 的 ExcelUtil.exportExcel。
 //
-// Java 侧是 POI 直接写 HttpServletResponse（ExcelUtil.java:782-785），
+// Java 侧是 POI 直接写 HttpServletResponse
 // Go 侧用 excelize 生成字节流，由 handler 设好响应头后写回。
 //
 // 前端 download（request.js:127-151）以 responseType: 'blob' 接收，

@@ -5,7 +5,7 @@
 //   - AddressUtils.getRealAddressByIP（登录归属地）
 //   - IpUtils.internalIp（内网判定）
 //
-// 供 TokenService.setUserAgent（TokenService.java:163-171）在登录时写入 LoginUser，
+// 供 TokenService.setUserAgent在登录时写入 LoginUser
 // 最终显示在"系统监控 > 在线用户"页面。
 package uax
 
@@ -15,16 +15,16 @@ import (
 	"strings"
 )
 
-// UNKNOWN 未知地址，等价 AddressUtils.UNKNOWN（AddressUtils.java:25）。
+// UNKNOWN 未知地址，等价 AddressUtils.UNKNOWN。
 const UNKNOWN = "XX XX"
 
-// InternalIPLabel 内网地址文案，等价 AddressUtils 的内网分支（AddressUtils.java:31-34）。
+// InternalIPLabel 内网地址文案，等价 AddressUtils 的内网分支。
 const InternalIPLabel = "内网IP"
 
 // UnknownName UserAgentUtils 对无法识别的 UA 返回的名字。
 const UnknownName = "Unknown"
 
-// Location 等价 AddressUtils.getRealAddressByIP（AddressUtils.java:27-52）。
+// Location 等价 AddressUtils.getRealAddressByIP。
 //
 // **不做外网查询**：application.yml:12 的 ruoyi.addressEnabled 是 false，
 // Java 在关闭时直接返回 UNKNOWN，只有内网 IP 返回"内网IP"。
@@ -36,7 +36,7 @@ func Location(ip string) string {
 	return UNKNOWN
 }
 
-// InternalIP 等价 IpUtils.internalIp（IpUtils.java:77-81 + 私网三段判定）。
+// InternalIP 等价 IpUtils.internalIp+ 私网三段判定）。
 //
 // 非 IPv4（例如 ::1 或主机名）一律视为内网：
 // Java 的 textToNumericFormatV4 对 IPv6 返回 null，这里避免空指针并给出更合理的结果。

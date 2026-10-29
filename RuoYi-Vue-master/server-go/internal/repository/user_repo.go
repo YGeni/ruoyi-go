@@ -43,7 +43,7 @@ func SelectUserByUserName(userName string) (*entity.SysUser, error) {
 //	where u.del_flag = '0' [and ...] ${params.dataScope}
 //
 // 别名 u / d 是硬约束：@DataScope(deptAlias="d", userAlias="u") 生成的条件
-// 直接引用 d.dept_id / u.user_id（SysUserServiceImpl.java:76/89/102）。
+// 直接引用 d.dept_id / u.user_id/89/102）。
 //
 // scope 为数据权限 Scope（admin 直通时不施加任何条件）；nil 表示不过滤。
 func userListQuery(q *query.UserList, scope func(*gorm.DB) *gorm.DB) *gorm.DB {
@@ -125,7 +125,7 @@ func attachDepts(users []entity.SysUser) error {
 	return nil
 }
 
-// SelectUserList 分页查询用户列表，等价于 SysUserServiceImpl.java:76 的
+// SelectUserList 分页查询用户列表，等价于
 // @DataScope(deptAlias="d", userAlias="u") + SysUserMapper.xml:59-83。
 func SelectUserList(q *query.UserList, p *page.PageDomain, scope func(*gorm.DB) *gorm.DB) ([]entity.SysUser, int64, error) {
 	var users []entity.SysUser
@@ -419,7 +419,7 @@ func UpdateLoginInfo(userID int64, ip string, loginTime time.Time) error {
 //
 // DIFF(review): Java 侧由 AsyncManager 延迟 10ms 异步提交，并调用
 // https://whois.pconline.com.cn/ipJson.jsp 解析归属地、用 UserAgentUtils 解析浏览器/系统
-// （AsyncFactory.java:37-99、TokenService.setUserAgent L163-171）；
+// 、TokenService.setUserAgent L163-171）；
 // 本期不引 UA 与归属地解析，相关字段留空，异步化与地址解析留到 1b。
 func InsertLogininfor(rec *entity.SysLogininfor) error {
 	return db.DB.Create(rec).Error

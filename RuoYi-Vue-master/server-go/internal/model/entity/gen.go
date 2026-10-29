@@ -8,7 +8,7 @@ import (
 
 // GenTable 代码生成业务表 gen_table。
 //
-// 字段与 ruoyi-generator/.../domain/GenTable.java 对齐。
+// 字段与 ruoyi-对齐。
 // 该表有 create_time / update_time，正常嵌入 BaseModel。
 type GenTable struct {
 	model.BaseModel
@@ -32,7 +32,7 @@ type GenTable struct {
 
 	// Columns 非持久化：子表列（gen_table_column 按 table_id 关联）。
 	Columns []GenTableColumn `gorm:"-" json:"columns"`
-	// PkColumn 非持久化：主键列，模板里 ${pkColumn.javaField} 会用到。
+	// PkColumn 非持久化：主键列，模板里 ${Field} 会用到。
 	PkColumn *GenTableColumn `gorm:"-" json:"pkColumn"`
 }
 

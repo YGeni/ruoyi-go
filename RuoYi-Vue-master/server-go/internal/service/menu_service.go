@@ -327,7 +327,7 @@ func checkRouteConfigUnique(m *entity.SysMenu) (bool, error) {
 	return true, nil
 }
 
-// menuNameUniqueErr 菜单名重复的文案（SysMenuController.java:91/115）。
+// menuNameUniqueErr 菜单名重复的文案/115）。
 func menuNameUniqueErr(verb, name string) error {
 	return fmt.Errorf("%s菜单'%s'失败，菜单名称已存在", verb, name)
 }

@@ -14,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SelectUserList 用户列表，等价于 SysUserServiceImpl.java:76 的
+// SelectUserList 用户列表，等价于
 //
 //	@DataScope(deptAlias = "d", userAlias = "u")
 //	public List<SysUser> selectUserList(SysUser user)
@@ -41,8 +41,8 @@ func GetRolePermission(user *entity.SysUser) ([]string, error) {
 // 每个角色的权限串可能形如 "a:b:c,d:e:f"，需按逗号拆分（SysMenuServiceImpl:100-108）。
 //
 // **关键副作用（1b 补齐）**：必须同时把每个角色的权限集回填到 role.Permissions
-// （SysPermissionService.java:77 的 role.setPermissions(rolePerms)）。
-// DataScopeAspect.java:69 的 containsAny(role.getPermissions(), permission) 依赖它：
+// 的 role.setPermissions(rolePerms)）。
+// 的 containsAny(role.getPermissions, permission) 依赖它
 // 若缺失，任何带 permission 的 @DataScope 调用都会判定"所有角色都未持有该权限"
 // -> conditions 为空 -> 落到 "OR d.dept_id = 0" 兜底 -> 列表静默返回 0 行。
 // 该副作用经由 LoginUser.User 一并写进 Redis login_tokens:<uuid>，

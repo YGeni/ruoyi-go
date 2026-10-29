@@ -8,7 +8,7 @@ import (
 )
 
 // noticeTopLimit 首页顶部公告条数上限，
-// 与 SysNoticeController.java:95 的硬编码 selectNoticeListWithReadStatus(userId, 5) 一致。
+// 与的硬编码 selectNoticeListWithReadStatus(userId, 5) 一致。
 const noticeTopLimit = 5
 
 // SelectNoticeList 公告列表，等价 SysNoticeServiceImpl.selectNoticeList。
@@ -43,7 +43,7 @@ func DeleteNoticeByIDs(ids []int64) error {
 // ---------------------------------------------------------------- 3.9 新增端点
 
 // SelectNoticeListTop 首页顶部公告（带已读标记），
-// 等价 SysNoticeController.java:89-97 的 listTop。
+// 等价的 listTop。
 //
 // Java 在 controller 里用 stream().filter(n -> !n.getIsRead()).count() 算未读数，
 // 再 result.put("unreadCount", unreadCount)；Go 侧在 service 里算好一并返回，
@@ -63,7 +63,7 @@ func SelectNoticeListTop(userID int64) ([]entity.SysNoticeWithRead, int64, error
 }
 
 // MarkNoticeRead 标记单条公告已读，
-// 等价 SysNoticeController.java:102-108 的 markRead。
+// 等价的 markRead。
 //
 // 幂等：sys_notice_read 有 uk_user_notice 唯一约束，重复标记不报错也不产生重复行。
 func MarkNoticeRead(noticeID, userID int64) error {
@@ -74,13 +74,13 @@ func MarkNoticeRead(noticeID, userID int64) error {
 }
 
 // MarkNoticeReadAll 批量标记已读，
-// 等价 SysNoticeController.java:113-120 的 markReadAll（ids 为逗号分隔字符串）。
+// 等价的 markReadAll（ids 为逗号分隔字符串）。
 func MarkNoticeReadAll(userID int64, noticeIDs []int64) error {
 	return repository.MarkReadBatch(userID, noticeIDs)
 }
 
 // SelectNoticeReadUsers 已读用户列表（/system/notice/readUsers/list），
-// 等价 SysNoticeController.java:126-133 + SysNoticeReadMapper.xml:73-95。
+// 等价+ SysNoticeReadMapper.xml:73-95。
 func SelectNoticeReadUsers(q *query.ReadUserList, p *page.PageDomain) ([]entity.NoticeReadUser, int64, error) {
 	return repository.SelectReadUsersByNoticeID(q.NoticeID, q.SearchValue, p)
 }

@@ -84,7 +84,7 @@ func Parse(expr string) (*Schedule, error) {
 	return s, nil
 }
 
-// IsValid 等价 CronUtils.isValid（ruoyi-quartz/.../util/CronUtils.java:29-42）：
+// IsValid 等价 CronUtils.isValid（ruoyi-
 // 只判"能不能被 quartz 解析"，不判下次触发时间。
 func IsValid(expr string) bool {
 	if strings.TrimSpace(expr) == "" {

@@ -11,7 +11,7 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/pkg/securityx"
 )
 
-// 注册接口的文案，对齐 SysRegisterService.java 与 SysIndexController.java 的原句。
+// 注册接口的文案，对齐与的原句。
 const (
 	MsgRegisterDisabled  = "当前系统没有开启注册功能！"
 	MsgUsernameEmpty     = "用户名不能为空"
@@ -50,7 +50,7 @@ func Register(body RegisterBody, ip, userAgent string) error {
 	if !on {
 		return errors.New(MsgRegisterDisabled)
 	}
-	// 验证码开关（SysRegisterService.java:46-50）
+	// 验证码开关
 	if enabled, err := captchaEnabled(); err != nil {
 		return err
 	} else if enabled {
@@ -82,9 +82,9 @@ func Register(body RegisterBody, ip, userAgent string) error {
 	now := time.Now()
 	if err := InsertUser(&entity.SysUser{
 		UserName:      body.Username,
-		NickName:      body.Username, // SysRegisterService.java:75 setNickName(username)
+		NickName:      body.Username, // setNickName(username)
 		Password:      hashed,
-		PwdUpdateDate: &now,          // SysRegisterService.java:76
+		PwdUpdateDate: &now,
 		Status:        config.Normal, // '0' 正常
 		DelFlag:       "0",
 	}, nil); err != nil {

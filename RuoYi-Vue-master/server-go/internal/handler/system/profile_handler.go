@@ -8,12 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ProfileHandler 个人信息，对应 SysProfileController.java。
+// ProfileHandler 个人信息，对应。
 type ProfileHandler struct{}
 
 // GetProfile GET /system/user/profile
-//
-// 等价 SysProfileController.java:47-56：
 //
 //	AjaxResult ajax = AjaxResult.success(user);      // user 落在 data 里
 //	ajax.put("roleGroup", ...);
@@ -43,8 +41,6 @@ func (ProfileHandler) GetProfile(c *gin.Context) {
 }
 
 // UpdateProfile PUT /system/user/profile
-//
-// 等价 SysProfileController.java:61-86。
 //
 // Java 接收整个 SysUser 但**只取四个字段**覆盖 LoginUser（L67-70），
 // 这里同样只绑这四个 —— 前端传别的字段（status / deptId / roleIds 等）一律忽略，
@@ -80,7 +76,7 @@ func (ProfileHandler) UpdateProfile(c *gin.Context) {
 
 // UpdatePwd PUT /system/user/profile/updatePwd
 //
-// 等价 SysProfileController.java:91-119：入参是 Map<String,String>，
+// 等价：入参是 Map<String,String>
 // 即 **oldPassword / newPassword 两个字段**，不是 JSON DTO。
 func (ProfileHandler) UpdatePwd(c *gin.Context) {
 	lu, ok := loginUser(c)
@@ -103,8 +99,6 @@ func (ProfileHandler) UpdatePwd(c *gin.Context) {
 }
 
 // Avatar POST /system/user/profile/avatar
-//
-// 等价 SysProfileController.java:124-148。
 //
 // 两处契约必须照做：
 //  1. 表单字段名是 **avatarfile**（不是 file），Java 是 @RequestParam("avatarfile")

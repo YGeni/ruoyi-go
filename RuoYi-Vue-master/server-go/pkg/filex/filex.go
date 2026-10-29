@@ -1,10 +1,10 @@
 // Package filex 复刻 RuoYi 的文件上传/下载工具链。
 //
 // 契约来源（逐行对齐，禁止凭直觉改写）：
-//   - ruoyi-common/.../utils/file/FileUploadUtils.java  上传校验、命名、路径映射
-//   - ruoyi-common/.../utils/file/FileUtils.java         下载白名单、删除、写出、名称处理
-//   - ruoyi-common/.../utils/file/MimeTypeUtils.java     扩展名白名单
-//   - ruoyi-common/.../utils/file/FileTypeUtils.java     取扩展名（小写）
+// -ruoyi-上传校验、命名、路径映射
+// -ruoyi-下载白名单、删除、写出、名称处理
+// -ruoyi-扩展名白名单
+// -ruoyi-取扩展名（小写）
 //
 // 之所以单独成包而不是散在 handler 里：/common/upload、/common/uploads、
 // /common/download、/common/download/resource、/system/user/profile/avatar
@@ -125,10 +125,10 @@ func AssertAllowed(fh *multipart.FileHeader, allowed []string) error {
 
 // ---------- 文件命名 ----------
 
-// uploadSeq 等价 Seq.uploadSeq（Seq.java:22），进程内自增。
+// uploadSeq 等价 Seq.uploadSeq，进程内自增。
 var uploadSeq int64 = 1
 
-// uploadSeqID 等价 Seq.getId(uploadSeq, 3)（Seq.java:45-49）：
+// uploadSeqID 等价 Seq.getId(uploadSeq, 3)
 // yyMMddHHmmss + 机器标识 "A" + 3 位左补零循环序号。
 //
 // DIFF(review): Java 的 machineCode 固定为 "A"（单实例），Go 侧同样固定，
@@ -138,7 +138,7 @@ func uploadSeqID() string {
 	return time.Now().Format("060102150405") + "A" + fmt.Sprintf("%03d", v%1000)
 }
 
-// DatePath 等价 DateUtils.datePath()（DateUtils.java:97-101）：yyyy/MM/dd。
+// DatePath 等价 DateUtils.datePath：yyyy/MM/dd。
 func DatePath() string { return time.Now().Format("2006/01/02") }
 
 // ExtractFilename 等价 FileUploadUtils.extractFilename(L144-147)：
@@ -153,7 +153,7 @@ func ExtractFilename(fh *multipart.FileHeader) string {
 // UUIDFilename 等价 FileUploadUtils.uuidFilename(L152-155)：
 // 日期目录 + UUID(无横线) + "." + 后缀。
 //
-// 用于头像上传（Java 的 SysProfileController.java:131 传 useCustomNaming=true）。
+// 用于头像上传（Java 的传 useCustomNaming=true）。
 //
 // DIFF(review): 头像**做**重命名（UUID），与 /common/upload 保留原名的策略不同 ——
 // 原因是头像 URL 直接暴露在 sys_user.avatar 与 getInfo 里，

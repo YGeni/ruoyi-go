@@ -14,15 +14,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// MonitorHandler 系统监控 - 在线用户，对应 SysUserOnlineController.java。
+// MonitorHandler 系统监控 - 在线用户，对应。
 //
 // Java 里该控制器在 com.ruoyi.web.controller.monitor 包下，
 // Go 侧暂挂在 system 包（复用 system/common.go 的 loginUser 取值辅助）。
 type MonitorHandler struct{}
 
 // OnlineList GET /monitor/online/list
-//
-// 等价 SysUserOnlineController.java:43-70。
 //
 // 返回体是 **getDataTable**（{code,msg,rows,total}），不是 {data}：
 // 前端 src/views/monitor/online/index.vue:80-81 读的是
@@ -48,7 +46,7 @@ func (MonitorHandler) OnlineList(c *gin.Context) {
 
 // ForceLogout DELETE /monitor/online/:tokenId
 //
-// 等价 SysUserOnlineController.java:78-82：删掉 login_tokens:<tokenId>。
+// 等价：删掉 login_tokens:<tokenId>。
 //
 // :tokenId 是 UUID 字符串（不是数字），强退后该 token 下一次请求会 401。
 func (MonitorHandler) ForceLogout(c *gin.Context) {
@@ -62,11 +60,11 @@ func (MonitorHandler) ForceLogout(c *gin.Context) {
 	result.OK(c, result.Success())
 }
 
-// ---------- 登录日志：对应 SysLogininforController.java ----------
+// ---------- 登录日志：对应----------
 
 // LogininforList GET /monitor/logininfor/list
 //
-// 等价 SysLogininforController.java:39-45：startPage() + getDataTable。
+// 等价：startPage + getDataTable。
 // 前端 logininfor/index.vue:159-160 读 response.rows / response.total。
 func (MonitorHandler) LogininforList(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -91,7 +89,7 @@ func (MonitorHandler) LogininforList(c *gin.Context) {
 
 // LogininforExport POST /monitor/logininfor/export
 //
-// 等价 SysLogininforController.java:49-55：ExcelUtil 导出，不分页。
+// 等价：ExcelUtil 导出，不分页。
 //
 // 参数**不在 query 里**：前端 download（request.js:127-133）用 tansParams
 // 把条件塞进了 form-urlencoded 请求体，因此用 ShouldBind 而非 ShouldBindQuery。
@@ -129,7 +127,7 @@ func (MonitorHandler) LogininforRemove(c *gin.Context) {
 
 // LogininforClean DELETE /monitor/logininfor/clean
 //
-// 等价 SysLogininforController.java:68-72：truncate sys_logininfor。
+// 等价：truncate sys_logininfor。
 func (MonitorHandler) LogininforClean(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -143,7 +141,7 @@ func (MonitorHandler) LogininforClean(c *gin.Context) {
 
 // LogininforUnlock GET /monitor/logininfor/unlock/:userName
 //
-// 等价 SysLogininforController.java:76-81：只清 Redis 的登录失败计数，
+// 等价：只清 Redis 的登录失败计数
 // 不改 sys_user.status。
 func (MonitorHandler) LogininforUnlock(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -156,11 +154,11 @@ func (MonitorHandler) LogininforUnlock(c *gin.Context) {
 	result.OK(c, result.Success())
 }
 
-// ---------- 操作日志：对应 SysOperlogController.java ----------
+// ---------- 操作日志：对应----------
 
 // OperLogList GET /monitor/operlog/list
 //
-// 等价 SysOperlogController.java:35-41：startPage() + getDataTable。
+// 等价：startPage + getDataTable。
 // 前端 operlog/index.vue:194-195 读 response.rows / response.total。
 func (MonitorHandler) OperLogList(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -243,11 +241,11 @@ func writeXlsx(c *gin.Context, sheet string, headers []string, rows [][]any) {
 	}
 }
 
-// ---------- 缓存监控：对应 CacheController.java ----------
+// ---------- 缓存监控：对应----------
 
 // CacheInfo GET /monitor/cache
 //
-// 等价 CacheController.java:52-70：success({info, dbSize, commandStats})。
+// 等价：success({info, dbSize, commandStats})。
 // 前端 index.vue:80 读 response.data，:95 用 response.data.commandStats 画饼图。
 func (MonitorHandler) CacheInfo(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -339,12 +337,12 @@ func (MonitorHandler) ClearCacheAll(c *gin.Context) {
 
 // ServerInfo GET /monitor/server
 //
-// 等价 ServerController.java:22-28：Server.copyTo() 后 success(server)。
+// 等价：Server.copyTo 后 success(server)。
 // 前端 src/views/monitor/server/index.vue 直接读 response.data 的
 // cpu / mem / jvm / sys / sysFiles 五个块。
 //
 // 注意该接口**有约 1 秒耗时**：CPU 占用率要两次采样取差值
-// （对齐 Java 的 OSHI_WAIT_SECOND，Server.java:31）。
+// （对齐 OSHI_WAIT_SECOND）。
 func (MonitorHandler) ServerInfo(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return

@@ -15,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SelectDeptList 部门列表，等价 SysDeptServiceImpl.java:43-47 的
+// SelectDeptList 部门列表，等价
 //
 //	@DataScope(deptAlias = "d")
 //	public List<SysDept> selectDeptList(SysDept dept)

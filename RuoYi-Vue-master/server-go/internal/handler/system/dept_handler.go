@@ -12,12 +12,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// DeptHandler 部门管理，对应 SysDeptController.java。
+// DeptHandler 部门管理，对应。
 type DeptHandler struct{}
 
 // List GET /system/dept/list
 //
-// 等价 SysDeptController.java:43-47：**没有 startPage()，直接 success(depts)**。
+// 等价：**没有 startPage，直接 success(depts)**。
 //
 // 返回体必须是 {code, msg, data:[...]}，不能是 getDataTable 的 {rows, total}。
 // 前端 src/views/system/dept/index.vue:193 写的是
@@ -52,7 +52,7 @@ func (DeptHandler) List(c *gin.Context) {
 
 // ListExclude GET /system/dept/list/exclude/:deptId
 //
-// 等价 SysDeptController.java:65-73：排除该部门及其子部门后返回剩余部门。
+// 等价：排除该部门及其子部门后返回剩余部门。
 //
 // DIFF(review): Java 在 service 层循环 remove 掉 deptId 与 ancestors 命中它的行；
 // Go 侧同样在内存里过滤，语义等价（部门数量有限）。
@@ -114,8 +114,6 @@ func splitComma(s string) []string {
 }
 
 // GetInfo GET /system/dept/:deptId
-//
-// 等价 SysDeptController.java:80-88。
 func (DeptHandler) GetInfo(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -139,7 +137,7 @@ func (DeptHandler) GetInfo(c *gin.Context) {
 
 // Add POST /system/dept
 //
-// 等价 SysDeptController.java:110-124：checkDeptNameUnique -> insertDept。
+// 等价：checkDeptNameUnique -> insertDept。
 func (DeptHandler) Add(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -166,8 +164,6 @@ func (DeptHandler) Add(c *gin.Context) {
 }
 
 // Edit PUT /system/dept
-//
-// 等价 SysDeptController.java:130-149。
 func (DeptHandler) Edit(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -199,7 +195,7 @@ func (DeptHandler) Edit(c *gin.Context) {
 
 // UpdateSort PUT /system/dept/updateSort
 //
-// 等价 SysDeptController.java:155-166：只改 order_num。
+// 等价：只改 order_num。
 func (DeptHandler) UpdateSort(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -218,7 +214,6 @@ func (DeptHandler) UpdateSort(c *gin.Context) {
 
 // Remove DELETE /system/dept/:deptId
 //
-// 等价 SysDeptController.java:172-185：
 // 存在下级部门 -> warn；部门存在用户 -> warn；否则删除。
 func (DeptHandler) Remove(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {

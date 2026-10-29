@@ -3,11 +3,13 @@
 //
 // 契约来源：
 //   - 分页参数（pageNum/pageSize/orderByColumn/isAsc/reasonable）**不在这里**，
-//     由 pkg/page.FromRequest 单独解析（TableSupport.java:16-49）。
+//
+// 由 pkg/page.FromRequest 单独解析。
 //   - 日期范围来自前端 addDateRange（F/src/utils/ruoyi.js:54-66）设置到
 //     search.params.beginTime / endTime，再经 tansParams 展平成
 //     query key 字面量 "params[beginTime]" / "params[endTime]"。
-//   - searchValue 来自 BaseEntity.searchValue（BaseEntity.java:22）。
+//
+// -searchValue 来自 BaseEntity.searchValue。
 package query
 
 import (

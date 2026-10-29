@@ -15,7 +15,7 @@ import (
 
 // SelectLogininforList 分页查询登录日志，等价 SysLogininforMapper.xml:26-45。
 //
-// 无 DataScope：SysLogininforController.java:40 的 selectLogininforList 不带
+// 无 DataScope：的 selectLogininforList 不带
 // @DataScope 注解，所有登录记录对有 monitor:logininfor:list 权限的人可见。
 func SelectLogininforList(q *query.LogininforList, p *page.PageDomain) ([]entity.SysLogininfor, int64, error) {
 	tx := db.DB.Table("sys_logininfor").Order("info_id desc")
@@ -60,7 +60,7 @@ func CleanLogininfor() error {
 
 // SelectOperLogList 分页查询操作日志，等价 SysOperLogMapper.xml selectOperLogList。
 //
-// 无 DataScope（SysOperlogController.java:36 的 selectOperLogList 不带 @DataScope）。
+// 无 DataScope的 selectOperLogList 不带 @DataScope）。
 func SelectOperLogList(q *query.OperLogList, p *page.PageDomain) ([]entity.SysOperLog, int64, error) {
 	tx := db.DB.Table("sys_oper_log").Order("oper_id desc")
 	if q.OperIp != "" {

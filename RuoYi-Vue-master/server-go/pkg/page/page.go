@@ -1,15 +1,20 @@
 // Package page 复刻 Java 侧 TableSupport + PageDomain + PageHelper 的分页契约。
 //
 // 契约来源（实测源码）：
-//   - ruoyi-common/src/main/java/com/ruoyi/common/core/page/TableSupport.java:16-49
-//     pageNum / pageSize / orderByColumn / isAsc / reasonable 五个参数，
-//     **只从 query string 或 form 取**（ServletUtils.getParameter），不读 JSON body。
-//   - ruoyi-common/src/main/java/com/ruoyi/common/core/page/PageDomain.java:66-99
-//     默认值 pageNum=1 / pageSize=10 / isAsc="asc" / reasonable=true；
-//     setIsAsc 把前端的 "ascending"/"descending" 归一为 "asc"/"desc"；
-//     getOrderBy() = StringUtils.toUnderScoreCase(orderByColumn) + " " + isAsc。
-//   - ruoyi-common/src/main/java/com/ruoyi/common/utils/PageUtils.java:18-26
-//     orderBy 先过 SqlUtil.escapeOrderBySql，再 PageHelper.startPage(...).setReasonable(...)。
+// -ruoyi-
+//
+//	pageNum / pageSize / orderByColumn / isAsc / reasonable 五个参数，
+//	**只从 query string 或 form 取**（ServletUtils.getParameter），不读 JSON body。
+//
+// -ruoyi-
+//
+//	默认值 pageNum=1 / pageSize=10 / isAsc="asc" / reasonable=true；
+//	setIsAsc 把前端的 "ascending"/"descending" 归一为 "asc"/"desc"；
+//	getOrderBy() = StringUtils.toUnderScoreCase(orderByColumn) + " " + isAsc。
+//
+// -ruoyi-
+//
+//	orderBy 先过 SqlUtil.escapeOrderBySql，再 PageHelper.startPage(...).setReasonable(...)。
 //
 // 返回体侧由 pkg/result.TableDataInfo 负责（{total,rows,code:200,msg:"查询成功"}）。
 package page
@@ -24,7 +29,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// 分页参数名，与 TableSupport.java:16-30 的常量字面量一致。
+// 分页参数名，与的常量字面量一致。
 const (
 	KeyPageNum       = "pageNum"
 	KeyPageSize      = "pageSize"
@@ -33,7 +38,7 @@ const (
 	KeyReasonable    = "reasonable"
 )
 
-// 默认值，与 PageDomain.java 字段初值 + Convert.toInt 的兜底一致。
+// 默认值，与字段初值 + Convert.toInt 的兜底一致。
 const (
 	DefaultPageNum    = 1
 	DefaultPageSize   = 10
@@ -50,7 +55,7 @@ type PageDomain struct {
 	Reasonable    bool
 }
 
-// sqlPattern 等价于 SqlUtil.SQL_PATTERN（ruoyi-common/.../utils/sql/SqlUtil.java:20）。
+// sqlPattern 等价于 SqlUtil.SQL_PATTERN（ruoyi-。
 //
 // Java 语义是「匹配到即非法，剔除排序」，因此这里同样用「命中即拒绝」。
 var sqlPattern = regexp.MustCompile(`(?:')|(?:--)|(/\*(?:.|[\n\r])*?\*/)|(\b(select|update|union|and|or|delete|insert|trancate|char|into|substr|ascii|declare|exec|master|drop|execute)\b)`)
@@ -76,13 +81,13 @@ func FromRequest(c *gin.Context) *PageDomain {
 	p.PageNum = toInt(param(c, KeyPageNum), DefaultPageNum)
 	p.PageSize = toInt(param(c, KeyPageSize), DefaultPageSize)
 	p.OrderByColumn = strings.TrimSpace(param(c, KeyOrderByColumn))
-	// setIsAsc 只在非空时赋值（PageDomain.java:83-91）
+	// setIsAsc 只在非空时赋值
 	if v := strings.TrimSpace(param(c, KeyIsAsc)); v != "" {
 		p.IsAsc = v
 	}
 	// setReasonable(ServletUtils.getParameterToBool(REASONABLE))：
 	// 参数缺失时 Convert.toBool(null) 返回 null，getReasonable() 再兜底为 TRUE
-	// （Convert.java:592-595 + PageDomain.java:93-99）。
+	// +。
 	if v := strings.TrimSpace(param(c, KeyReasonable)); v != "" {
 		p.Reasonable = strings.EqualFold(v, "true") || v == "1"
 	}
@@ -230,7 +235,7 @@ const NoLimitPageSize = 10000
 // NoLimit 返回一个不分页的 PageDomain。
 //
 // 用于对齐 Java 侧**没写 startPage()**、直接 success(list) 的端点，
-// 例如 SysDeptController.java:43-47 的 /system/dept/list。
+// 例如的 /system/dept/list。
 //
 // 注意**不能**直接传 &PageDomain{}：Paginate 末行是无条件的
 // q.Limit(p.PageSize)，PageSize=0 会拼出 LIMIT 0 -> 返回空列表。

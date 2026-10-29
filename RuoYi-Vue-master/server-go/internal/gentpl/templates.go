@@ -3,18 +3,21 @@
 //
 // DIFF(review) —— 移植范围与取舍，必须说清楚：
 //
-//  1. **只移植 Java 侧 7 个模板**：domain / mapper.java / service.java /
-//     serviceImpl.java / controller.java / mapper.xml / sql。
-//     前端那批 vue 模板（index.vue.vm 等）每个 500-660 行，且生成的是
-//     **前端代码**，对一个 Go 后端没有运行期价值，不移植。
-//  2. **只支持 tpl_category = crud**：Velocity 模板里到处是 `#if($table.sub)`
-//     与 `#elseif($table.tree)` 分支，移植它们等于把 sub-domain.java.vm
-//     （76 行）和树表那套 TreeEntity 语义也搬过来。
-//     crud 是 RuoYi 的默认类别，也是页面上绝大多数表用的类别；
-//     sub / tree 类别这里**按 crud 渲染并在 options 里注明**，不做静默降级。
-//  3. Velocity 的 `$column.javaField.length() > 2 && substring(1,2).matches("[A-Z]")`
-//     （用于 xXxx 这种"首字母本就小写、第二字母大写"的字段，如 xId）
-//     在 Go 侧用模板函数 capJavaField 统一处理，语义一致。
+// 1. **只移植 Java 侧 7 个模板**：domain ///
+// // mapper.xml / sql。
+//
+//	   前端那批 vue 模板（index.vue.vm 等）每个 500-660 行，且生成的是
+//	   **前端代码**，对一个 Go 后端没有运行期价值，不移植。
+//	2. **只支持 tpl_category = crud**：Velocity 模板里到处是 `#if($table.sub)`
+//
+// 与 `#elseif($table.tree)` 分支，移植它们等于把 sub-.vm
+//
+//		（76 行）和树表那套 TreeEntity 语义也搬过来。
+//		crud 是 RuoYi 的默认类别，也是页面上绝大多数表用的类别；
+//		sub / tree 类别这里**按 crud 渲染并在 options 里注明**，不做静默降级。
+//	 3. Velocity 的 `$Field.length > 2 && substring(1,2).matches("[A-Z]")`
+//	    （用于 xXxx 这种"首字母本就小写、第二字母大写"的字段，如 xId）
+//	    在 Go 侧用模板函数 capJavaField 统一处理，语义一致。
 package gentpl
 
 import (
@@ -24,7 +27,7 @@ import (
 
 // Files 模板文件名 -> 渲染出的文件路径（相对生成根目录）。
 //
-// 路径规则照抄 VelocityUtils.getFileName（VelocityUtils.java:78-120）。
+// 路径规则照抄 VelocityUtils.getFileName。
 var Files = []struct {
 	Tpl  string // 模板名
 	Path string // 输出路径模板（用同样的字段渲染）

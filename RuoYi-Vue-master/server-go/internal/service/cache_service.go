@@ -11,12 +11,12 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/pkg/redisx"
 )
 
-// ---------- 缓存监控：对应 CacheController.java ----------
+// ---------- 缓存监控：对应----------
 
 // ErrRedisNotReady Redis 未初始化。
 var ErrRedisNotReady = errors.New("Redis 未初始化")
 
-// SysCache 缓存项，等价 ruoyi-system/.../system/domain/SysCache.java。
+// SysCache 缓存项，等价 ruoyi-。
 //
 // JSON 字段与前端对齐：
 //   - list.vue:174 把 getNames 的结果直接当表格行（cacheName + remark）
@@ -28,7 +28,7 @@ type SysCache struct {
 	Remark     string `json:"remark"`
 }
 
-// cacheNames Java 的实例初始化块（CacheController.java:36-44）：
+// cacheNames Java 的实例初始化块
 // 七类缓存的 key 前缀与中文名。顺序照抄，前端表格就是这个顺序。
 var cacheNames = []SysCache{
 	{CacheName: config.LoginTokenKey, Remark: "用户信息"},
@@ -107,7 +107,6 @@ func parseInfo(raw string) map[string]string {
 //
 // 每行形如 `cmdstat_get:calls=1234,usec=56,usec_per_call=0.04,rejected_calls=0,failed_calls=0`；
 // Java 侧取 name = 去掉 "cmdstat_" 前缀，value = "calls=" 与 ",usec" 之间的串
-// （CacheController.java:64-69）。
 func parseCommandStats(raw string) []map[string]string {
 	var out []map[string]string
 	for _, line := range strings.Split(raw, "\n") {

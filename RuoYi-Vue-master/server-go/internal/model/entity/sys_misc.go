@@ -22,20 +22,20 @@ type SysRole struct {
 	Status            string `gorm:"column:status" json:"status"`
 	DelFlag           string `gorm:"column:del_flag" json:"delFlag"`
 
-	// Permissions 角色菜单权限集，等价于 SysRole.permissions（SysRole.java:65）。
+	// Permissions 角色菜单权限集，等价于 SysRole.permissions。
 	//
-	// 该字段**必须存在**：DataScopeAspect.java:69 的
+	// 该字段**必须存在**
 	// StringUtils.containsAny(role.getPermissions(), Convert.toStrArray(permission))
 	// 依赖它做角色级权限筛选。若缺失，任何带 permission 的 @DataScope 调用
 	// 都会把所有角色跳过 -> conditions 为空 -> 落到 "OR d.dept_id = 0" 兜底 -> 返回 0 行。
-	// 由 SysPermissionService.java:77（role.setPermissions）在登录时填充，
+	// 由（role.setPermissions）在登录时填充
 	// Go 侧对应 service.GetMenuPermission。
 	//
 	// DIFF(review): Java 侧该字段无 @JsonIgnore，未填充时会输出 "permissions":null；
 	// Go 侧用 omitempty，未填充时不下发该字段（前端不读 roles[].permissions）。
 	Permissions []string `gorm:"-" json:"permissions,omitempty"`
 
-	// MenuIds 非持久化字段，等价 SysRole.menuIds（SysRole.java:60 之后）：
+	// MenuIds 非持久化字段，等价 SysRole.menuIds之后）
 	// 前端新增/修改角色时用 menuIds 数组提交菜单授权，后端据此重写 sys_role_menu。
 	MenuIds []int64 `gorm:"-" json:"menuIds,omitempty"`
 }
@@ -47,7 +47,7 @@ func (SysRole) TableName() string { return "sys_role" }
 func (r *SysRole) IsAdmin() bool { return r != nil && r.RoleKey == "admin" }
 
 // HasPermission 等价于 StringUtils.containsAny(role.getPermissions(), perms...)
-// （StringUtils.java:456-473）：permission 为空时按 Java 语义由调用方短路，
+// ：permission 为空时按 Java 语义由调用方短路
 // 这里只负责"角色是否持有给定权限中的任意一个"。
 func (r *SysRole) HasPermission(perms ...string) bool {
 	if r == nil || len(r.Permissions) == 0 {

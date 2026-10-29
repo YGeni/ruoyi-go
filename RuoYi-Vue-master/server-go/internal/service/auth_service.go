@@ -66,7 +66,7 @@ func Login(body LoginBody, ip, userAgent string) (string, error) {
 	return createToken(user, ip, userAgent)
 }
 
-// Logout 退出登录，等价于 LogoutSuccessHandlerImpl.java:47-51：删除 Redis 登录态。
+// Logout 退出登录，等价于：删除 Redis 登录态。
 func Logout(token string) error {
 	u := jwtx.StripBearer(token)
 	if u == "" {
@@ -140,7 +140,7 @@ func loadUserByUsername(username, ip string) (*entity.SysUser, error) {
 	return user, nil
 }
 
-// ---------- 令牌：对应 TokenService.java ----------
+// ---------- 令牌：对应----------
 
 // createToken 等价于 TokenService.createToken(L115-126)。
 func createToken(user *entity.SysUser, ip, userAgent string) (string, error) {
@@ -216,7 +216,7 @@ func captchaEnabled() (bool, error) {
 }
 
 // recordLogin 同步写入 sys_logininfor，等价 AsyncFactory.recordLogininfor
-// （AsyncFactory.java:73-90）：用户名、IP、归属地、浏览器、操作系统、状态、消息、时间。
+// ：用户名、IP、归属地、浏览器、操作系统、状态、消息、时间。
 //
 // 这五个字段就是"系统监控 > 登录日志"页面渲染的列，
 // 与登录态快照（createToken 里写的那一份）取的是同一套 uax 解析结果。

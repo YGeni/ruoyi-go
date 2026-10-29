@@ -13,12 +13,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RoleHandler 角色管理，对应 SysRoleController.java。
+// RoleHandler 角色管理，对应。
 type RoleHandler struct{}
 
 // List GET /system/role/list
 //
-// 等价 SysRoleController.java:60-67：startPage() + selectRoleList + getDataTable。
+// 等价：startPage + selectRoleList + getDataTable。
 // 该接口是 **DataScope 五个落点之一**（@DataScope(deptAlias="d")，无 userAlias）。
 func (RoleHandler) List(c *gin.Context) {
 	lu, ok := loginUser(c)
@@ -44,7 +44,7 @@ func (RoleHandler) List(c *gin.Context) {
 
 // OptionSelect GET /system/role/optionselect
 //
-// 等价 SysRoleController.java:178-183：返回全部正常角色，不带分页。
+// 等价：返回全部正常角色，不带分页。
 func (RoleHandler) OptionSelect(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -62,7 +62,7 @@ func (RoleHandler) OptionSelect(c *gin.Context) {
 
 // GetInfo GET /system/role/:roleId
 //
-// 等价 SysRoleController.java:98-105：success(roleService.selectRoleById(roleId))。
+// 等价：success(roleService.selectRoleById(roleId))。
 func (RoleHandler) GetInfo(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -106,7 +106,6 @@ func roleByID(c *gin.Context) (*entity.SysRole, bool) {
 
 // Add POST /system/role
 //
-// 等价 SysRoleController.java:110-118：
 // 先 checkRoleAllowed/checkRoleNameUnique/checkRoleKeyUnique，再 insertRole + insertRoleMenu。
 func (RoleHandler) Add(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -131,7 +130,7 @@ func (RoleHandler) Add(c *gin.Context) {
 
 // Edit PUT /system/role
 //
-// 等价 SysRoleController.java:125-136：checkRoleAllowed + updateRole + insertRoleMenu。
+// 等价：checkRoleAllowed + updateRole + insertRoleMenu。
 func (RoleHandler) Edit(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -187,7 +186,7 @@ func roleForUpdate(c *gin.Context, roleID int64) (*entity.SysRole, bool) {
 
 // DataScope PUT /system/role/dataScope
 //
-// 等价 SysRoleController.java:142-151：authDataScope（写 data_scope + sys_role_dept）。
+// 等价：authDataScope（写 data_scope + sys_role_dept）。
 func (RoleHandler) DataScope(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -218,8 +217,6 @@ func (RoleHandler) DataScope(c *gin.Context) {
 }
 
 // ChangeStatus PUT /system/role/changeStatus
-//
-// 等价 SysRoleController.java:154-163。
 func (RoleHandler) ChangeStatus(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -246,7 +243,7 @@ func (RoleHandler) ChangeStatus(c *gin.Context) {
 
 // Remove DELETE /system/role/:roleIds
 //
-// 等价 SysRoleController.java:168-176：先 checkRoleAllowed 再 deleteRoleByIds。
+// 等价：先 checkRoleAllowed 再 deleteRoleByIds。
 func (RoleHandler) Remove(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -276,7 +273,7 @@ func (RoleHandler) Remove(c *gin.Context) {
 
 // DeptTree GET /system/role/deptTree/:roleId
 //
-// 等价 SysRoleController.java:246-253：返回该角色已授权的部门 ID 列表。
+// 等价：返回该角色已授权的部门 ID 列表。
 func (RoleHandler) DeptTree(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -294,7 +291,7 @@ func (RoleHandler) DeptTree(c *gin.Context) {
 	if ids == nil {
 		ids = []int64{}
 	}
-	// Java 的 SysRoleController.java:250-251 会 put 两个键：checkedKeys 与 depts。
+	// Java 的会 put 两个键：checkedKeys 与 depts。
 	// 前端 src/views/system/role/index.vue:458 读的是 response.depts，
 	// 只回 checkedKeys 会让"数据权限" Tab 的部门树一片空白。
 	lu := mustLoginUser(c)
@@ -314,7 +311,7 @@ func (RoleHandler) DeptTree(c *gin.Context) {
 
 // AllocatedList GET /system/role/authUser/allocatedList
 //
-// 等价 SysRoleController.java:188-198。该接口是 **DataScope 五个落点之一**
+// 等价。该接口是 **DataScope 五个落点之一**
 // （@DataScope(deptAlias="d", userAlias="u")，与 selectUserList 同别名组合）。
 func (RoleHandler) AllocatedList(c *gin.Context) {
 	lu, ok := loginUser(c)
@@ -347,7 +344,7 @@ func (RoleHandler) AllocatedList(c *gin.Context) {
 
 // UnallocatedList GET /system/role/authUser/unallocatedList
 //
-// 等价 SysRoleController.java:200-211。同样是 **DataScope 五个落点之一**。
+// 等价。同样是 **DataScope 五个落点之一**。
 func (RoleHandler) UnallocatedList(c *gin.Context) {
 	lu, ok := loginUser(c)
 	if !ok {
@@ -379,7 +376,7 @@ func (RoleHandler) UnallocatedList(c *gin.Context) {
 
 // AuthUserCancel PUT /system/role/authUser/cancel
 //
-// 等价 SysRoleController.java:213-222：deleteAuthUser(userId, roleId)。
+// 等价：deleteAuthUser(userId, roleId)。
 func (RoleHandler) AuthUserCancel(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -401,7 +398,7 @@ func (RoleHandler) AuthUserCancel(c *gin.Context) {
 
 // AuthUserCancelAll PUT /system/role/authUser/cancelAll
 //
-// 等价 SysRoleController.java:224-233。前端以 ?roleId=1&userIds=1,2,3 形式提交。
+// 等价。前端以 ?roleId=1&userIds=1,2,3 形式提交。
 func (RoleHandler) AuthUserCancelAll(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -417,7 +414,7 @@ func (RoleHandler) AuthUserCancelAll(c *gin.Context) {
 
 // AuthUserSelectAll PUT /system/role/authUser/selectAll
 //
-// 等价 SysRoleController.java:235-244。前端以 ?roleId=1&userIds=1,2,3 形式提交。
+// 等价。前端以 ?roleId=1&userIds=1,2,3 形式提交。
 func (RoleHandler) AuthUserSelectAll(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return

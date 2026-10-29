@@ -17,12 +17,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CommonHandler 通用上传下载，对应 CommonController.java。
+// CommonHandler 通用上传下载，对应。
 type CommonHandler struct{}
 
 // Upload POST /common/upload
 //
-// 等价 CommonController.java:74-95：单文件上传到 RuoYiConfig.getUploadPath()。
+// 等价：单文件上传到 RuoYiConfig.getUploadPath。
 //
 // 返回体四个键（url / fileName / newFileName / originalFilename）逐个对齐，
 // **fileName 必须有**（用户契约第 5 条），后续 /common/download 与
@@ -55,7 +55,7 @@ func (CommonHandler) Upload(c *gin.Context) {
 
 // Uploads POST /common/uploads
 //
-// 等价 CommonController.java:100-132：多文件上传，四个键都是 **逗号连接的字符串**
+// 等价：多文件上传，四个键都是 **逗号连接的字符串**
 // （StringUtils.join(list, ",")，FILE_DELIMITER = ","，见 L37）。
 //
 // DIFF(review): Java 的方法参数是 List<MultipartFile> files，Spring 绑定的表单字段名
@@ -114,14 +114,12 @@ func (CommonHandler) Uploads(c *gin.Context) {
 
 // Download GET /common/download?fileName=&delete=
 //
-// 等价 CommonController.java:45-69。
-//
 // 两道校验（缺一不可）：
 //  1. FileUtils.checkAllowDownload：拒绝含 ".." 的文件名 + 扩展名白名单
 //  2. filex.SafeJoin：真正拼路径时再拦一次目录穿越
 //
-// fileName 是**相对于 profile/download/ 的相对名**（Java 的
-// getDownloadPath() 自带尾斜杠，见 config.go 的注释），不是完整路径。
+// fileName 是**相对于 profile/download/ 的相对名**（getDownloadPath()
+// 自带尾斜杠，见 config.go 的注释），不是完整路径。
 //
 // 下载名 realFileName = 当前毫秒 + fileName 中第一个 "_" 之后的内容（L54）；
 // 没有 "_" 时 Java 的 indexOf 返回 -1、substring(0) 取整串，这里同样处理。
@@ -156,7 +154,7 @@ func (CommonHandler) Download(c *gin.Context) {
 
 // ResourceDownload GET /common/download/resource?resource=
 //
-// 等价 CommonController.java:137-161：下载 profile 目录下的任意资源。
+// 等价：下载 profile 目录下的任意资源。
 //
 // resource 形如 "/profile/upload/2026/10/28/xxx.png"（即 /common/upload 返回的 fileName），
 // 先用 StripPrefix 去掉 "/profile" 再拼根目录（L150）。
@@ -200,7 +198,7 @@ func failFile(c *gin.Context, err error) {
 	fail(c, err)
 }
 
-// downloadName 等价 CommonController.java:54 的 realFileName 计算。
+// downloadName 等价的 realFileName 计算。
 func downloadName(fileName string) string {
 	rest := fileName
 	if i := strings.Index(fileName, "_"); i >= 0 {

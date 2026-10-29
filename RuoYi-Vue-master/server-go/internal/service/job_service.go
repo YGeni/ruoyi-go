@@ -15,7 +15,7 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/pkg/page"
 )
 
-// 校验失败文案，逐字照抄 SysJobController.java:83-112 / 118-147。
+// 校验失败文案，逐字照抄/ 118-147。
 const (
 	MsgCronInvalid     = "Cron表达式不正确"
 	MsgNoRMI           = "目标字符串不允许'rmi'调用"
@@ -27,19 +27,19 @@ const (
 	MsgJobLogCleanDone = "清除成功"
 )
 
-// ---------- 定时任务：对应 SysJobServiceImpl.java ----------
+// ---------- 定时任务：对应----------
 
-// SelectJobList 分页查询，等价 SysJobServiceImpl.java:57-61。
+// SelectJobList 分页查询，等价。
 func SelectJobList(q *query.JobList, p *page.PageDomain) ([]entity.SysJob, int64, error) {
 	return repository.SelectJobList(q, p)
 }
 
-// SelectJobByID 详情，等价 SysJobServiceImpl.java:69-73。
+// SelectJobByID 详情，等价。
 func SelectJobByID(jobID int64) (*entity.SysJob, error) {
 	return repository.SelectJobByID(jobID)
 }
 
-// InsertJob 新增，等价 SysJobServiceImpl.java:81-93。
+// InsertJob 新增，等价。
 //
 // 校验链照抄 SysJobController.add(L82-112)，返回 error 由 handler 转成 error(msg)。
 func InsertJob(j *entity.SysJob) error {
@@ -55,7 +55,7 @@ func InsertJob(j *entity.SysJob) error {
 	return scheduler.Reload()
 }
 
-// UpdateJob 修改，等价 SysJobServiceImpl.java:100-113。
+// UpdateJob 修改，等价。
 func UpdateJob(j *entity.SysJob) error {
 	if err := validateJob(j, "修改"); err != nil {
 		return err
@@ -66,7 +66,7 @@ func UpdateJob(j *entity.SysJob) error {
 	return scheduler.Reload()
 }
 
-// ChangeStatus 启停，等价 SysJobServiceImpl.java:121-131。
+// ChangeStatus 启停，等价。
 //
 // Java 侧是 `newJob.setStatus(job.getStatus())` 后整体 updateJob；
 // Go 侧只改 status 一个字段（quartz 的 resume/pause 也只动状态）。
@@ -77,7 +77,7 @@ func ChangeStatus(j *entity.SysJob) error {
 	return scheduler.Refresh(j.JobID)
 }
 
-// Run 立即执行一次，等价 SysJobServiceImpl.java:139-155。
+// Run 立即执行一次，等价。
 //
 // Java 是 `scheduler.triggerJob(...)`，任务不存在时抛 TaskException，
 // Controller 捕获后返回 error("任务不存在或已过期！")。
@@ -112,7 +112,7 @@ func Run(j *entity.SysJob) error {
 	return repository.InsertJobLog(l)
 }
 
-// DeleteJobByIDs 批量删除，等价 SysJobServiceImpl.java:163-178。
+// DeleteJobByIDs 批量删除，等价。
 func DeleteJobByIDs(jobIDs []int64) error {
 	if _, err := repository.DeleteJobByIDs(jobIDs); err != nil {
 		return err
@@ -155,7 +155,7 @@ func validateJob(j *entity.SysJob, op string) error {
 	return nil
 }
 
-// jobErrorStr 对应 Constants.JOB_ERROR_STR（Constants.java:171-174）。
+// jobErrorStr 对应 Constants.JOB_ERROR_STR。
 var jobErrorStr = []string{
 	"java.net.URL", "javax.naming.InitialContext", "org.yaml.snakeyaml",
 	"org.springframework", "com.sun.org.apache.", "java.lang.Runtime",
@@ -164,7 +164,7 @@ var jobErrorStr = []string{
 	"groovy.lang.", "java.io.File", "java.nio.file.", "sun.misc.",
 }
 
-// whiteList 等价 ScheduleUtils.whiteList（ScheduleUtils.java:151-167）。
+// whiteList 等价 ScheduleUtils.whiteList。
 //
 // Java 的逻辑是：invokeTarget 里 "(" 之前的包名含超过 1 个点时，
 // 必须以前缀常量开头；否则取 bean 名查 Spring 容器再判包名。
@@ -205,24 +205,24 @@ func stringOrDefault(v, def string) string {
 	return v
 }
 
-// ---------- 调度日志：对应 SysJobLogServiceImpl.java ----------
+// ---------- 调度日志：对应----------
 
-// SelectJobLogList 分页查询，等价 SysJobLogServiceImpl.java:44-48。
+// SelectJobLogList 分页查询，等价。
 func SelectJobLogList(q *query.JobLogList, p *page.PageDomain) ([]entity.SysJobLog, int64, error) {
 	return repository.SelectJobLogList(q, p)
 }
 
-// SelectJobLogByID 详情，等价 SysJobLogServiceImpl.java:56-60。
+// SelectJobLogByID 详情，等价。
 func SelectJobLogByID(id int64) (*entity.SysJobLog, error) {
 	return repository.SelectJobLogByID(id)
 }
 
-// DeleteJobLogByIDs 批量删除，等价 SysJobLogServiceImpl.java:78-82。
+// DeleteJobLogByIDs 批量删除，等价。
 func DeleteJobLogByIDs(ids []int64) (int64, error) {
 	return repository.DeleteJobLogByIDs(ids)
 }
 
-// CleanJobLog 清空，等价 SysJobLogServiceImpl.java:90-93。
+// CleanJobLog 清空，等价。
 func CleanJobLog() error {
 	return repository.CleanJobLog()
 }

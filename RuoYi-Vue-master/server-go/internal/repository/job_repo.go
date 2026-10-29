@@ -13,7 +13,7 @@ import (
 
 // ---------- sys_job ----------
 
-// SelectJobList 分页查询，等价 SysJobServiceImpl.java:57-61。
+// SelectJobList 分页查询，等价。
 func SelectJobList(q *query.JobList, p *page.PageDomain) ([]entity.SysJob, int64, error) {
 	qb := db.DB.Model(&entity.SysJob{})
 	if q != nil {
@@ -35,7 +35,7 @@ func SelectJobList(q *query.JobList, p *page.PageDomain) ([]entity.SysJob, int64
 	return rows, total, err
 }
 
-// SelectJobByID 按主键查，等价 SysJobServiceImpl.java:69-73。
+// SelectJobByID 按主键查，等价。
 func SelectJobByID(jobID int64) (*entity.SysJob, error) {
 	var j entity.SysJob
 	err := db.DB.Where("job_id = ?", jobID).First(&j).Error
@@ -48,7 +48,7 @@ func SelectJobByID(jobID int64) (*entity.SysJob, error) {
 	return &j, nil
 }
 
-// SelectJobAll 全量查询，给调度器加载用（SysJobServiceImpl.java:161-165 的
+// SelectJobAll 全量查询，给调度器加载用
 // selectJobAll 同样是不分页的）。
 func SelectJobAll() ([]entity.SysJob, error) {
 	var rows []entity.SysJob
@@ -56,14 +56,14 @@ func SelectJobAll() ([]entity.SysJob, error) {
 	return rows, err
 }
 
-// InsertJob 新增，等价 SysJobServiceImpl.java:81-93。
+// InsertJob 新增，等价。
 func InsertJob(j *entity.SysJob) error {
 	now := time.Now()
 	j.CreateTime = &now
 	return db.DB.Create(j).Error
 }
 
-// UpdateJob 修改，等价 SysJobServiceImpl.java:100-113。
+// UpdateJob 修改，等价。
 func UpdateJob(j *entity.SysJob) error {
 	now := time.Now()
 	j.UpdateTime = &now
@@ -73,7 +73,7 @@ func UpdateJob(j *entity.SysJob) error {
 		Updates(j).Error
 }
 
-// UpdateJobStatus 只改状态，等价 SysJobServiceImpl.java:121-131。
+// UpdateJobStatus 只改状态，等价。
 func UpdateJobStatus(j *entity.SysJob) error {
 	now := time.Now()
 	j.UpdateTime = &now
@@ -81,7 +81,7 @@ func UpdateJobStatus(j *entity.SysJob) error {
 		Updates(map[string]any{"status": j.Status, "update_by": j.UpdateBy, "update_time": now}).Error
 }
 
-// DeleteJobByIDs 批量删除，等价 SysJobServiceImpl.java:139-155。
+// DeleteJobByIDs 批量删除，等价。
 func DeleteJobByIDs(jobIDs []int64) (int64, error) {
 	if len(jobIDs) == 0 {
 		return 0, nil
@@ -92,7 +92,7 @@ func DeleteJobByIDs(jobIDs []int64) (int64, error) {
 
 // ---------- sys_job_log ----------
 
-// SelectJobLogList 分页查询，等价 SysJobLogServiceImpl.java:44-48。
+// SelectJobLogList 分页查询，等价。
 func SelectJobLogList(q *query.JobLogList, p *page.PageDomain) ([]entity.SysJobLog, int64, error) {
 	qb := db.DB.Model(&entity.SysJobLog{})
 	if q != nil {
@@ -120,7 +120,7 @@ func SelectJobLogList(q *query.JobLogList, p *page.PageDomain) ([]entity.SysJobL
 	return rows, total, err
 }
 
-// SelectJobLogByID 按主键查，等价 SysJobLogServiceImpl.java:56-60。
+// SelectJobLogByID 按主键查，等价。
 func SelectJobLogByID(id int64) (*entity.SysJobLog, error) {
 	var l entity.SysJobLog
 	err := db.DB.Where("job_log_id = ?", id).First(&l).Error
@@ -138,7 +138,7 @@ func InsertJobLog(l *entity.SysJobLog) error {
 	return db.DB.Create(l).Error
 }
 
-// DeleteJobLogByIDs 批量删除，等价 SysJobLogServiceImpl.java:78-82。
+// DeleteJobLogByIDs 批量删除，等价。
 func DeleteJobLogByIDs(ids []int64) (int64, error) {
 	if len(ids) == 0 {
 		return 0, nil
@@ -147,7 +147,7 @@ func DeleteJobLogByIDs(ids []int64) (int64, error) {
 	return tx.RowsAffected, tx.Error
 }
 
-// CleanJobLog 清空，等价 SysJobLogServiceImpl.java:90-93 的
+// CleanJobLog 清空，等价
 // jobLogMapper.cleanJobLog()（truncate 语义，用无条件删除实现）。
 func CleanJobLog() error {
 	return db.DB.Where("1 = 1").Delete(&entity.SysJobLog{}).Error

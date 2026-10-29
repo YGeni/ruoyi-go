@@ -1,6 +1,6 @@
 // Package jwtx 复刻 TokenService 的令牌签发 / 解析 / 刷新逻辑。
 //
-// 对应实现：ruoyi-framework/src/main/java/com/ruoyi/framework/web/service/TokenService.java
+// 对应实现：ruoyi-
 //   - createToken(L115-126)：uuid 作为 token 主键，claims = {login_user_key: uuid, sub: username}
 //   - createToken(L179-185)：HS512 签名，密钥取 token.secret
 //   - getToken(L219-227)：剥离 "Bearer " 前缀（前端恒定带前缀，见前端 request.js:32）
@@ -47,7 +47,7 @@ func Parse(tokenStr string) (uuid string, username string, err error) {
 
 // StripBearer 剥离 "Bearer " 前缀。
 //
-// DIFF(review): Java 用的是 replace(TOKEN_PREFIX, "")（TokenService.java:224），
+// DIFF(review): Java 用的是 replace(TOKEN_PREFIX, "")
 // 会替换字符串中所有匹配片段；Go 侧只剥离开头的 "Bearer "，语义更严格且更安全。
 func StripBearer(v string) string {
 	v = strings.TrimSpace(v)

@@ -1,9 +1,11 @@
 // Package result 复刻 Java 侧 AjaxResult / TableDataInfo 的返回体契约。
 //
 // 契约来源：
-//   - ruoyi-common/src/main/java/com/ruoyi/common/core/domain/AjaxResult.java
-//     AjaxResult extends HashMap，字段为 code / msg / data，data 为 null 时不输出。
-//   - ruoyi-common/src/main/java/com/ruoyi/common/core/page/TableDataInfo.java
+// -ruoyi-
+//
+//	AjaxResult extends HashMap，字段为 code / msg / data，data 为 null 时不输出。
+//
+// -ruoyi-
 //   - 前端 RuoYi-Vue3 src/utils/request.js:76-109 只认这些 code。
 //
 // 因此 AjaxResult 建模为 map（与 Java 的 HashMap 一致），可像 Java 的 put() 一样
@@ -44,7 +46,7 @@ func SuccessData(data any) AjaxResult {
 	return r
 }
 
-// ToAjaxRows 等价于 BaseController.toAjax(int rows)（BaseController.java:90-96）：
+// ToAjaxRows 等价于 BaseController.toAjax(int rows)
 //
 //	return rows > 0 ? AjaxResult.success() : AjaxResult.error();
 //

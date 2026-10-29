@@ -24,12 +24,12 @@ import (
 //	left join sys_dept d on u.dept_id = d.dept_id
 //	where r.del_flag = '0' ... ${params.dataScope} order by r.role_sort
 //
-// 别名 r/u/d 是硬约束：SysRoleServiceImpl.java:54 的 @DataScope(deptAlias = "d")
+// 别名 r/u/d 是硬约束：的 @DataScope(deptAlias = "d")
 // 生成的条件直接引用 d.dept_id。
 //
 // **注意 userAlias 为空**：@DataScope(deptAlias="d") 只写了 deptAlias，
-// userAlias 取注解默认值 ""（DataScope.java:36），因此数据范围 5（仅本人）
-// 在这里会退化成 d.dept_id = 0（DataScopeAspect.java:125）。
+// userAlias 取注解默认值 ""，因此数据范围 5（仅本人）
+// 在这里会退化成 d.dept_id = 0。
 func roleListQuery(q *query.RoleList, scope func(*gorm.DB) *gorm.DB) *gorm.DB {
 	tx := db.DB.Table("sys_role r").
 		Select("DISTINCT r.*").
@@ -61,7 +61,7 @@ func roleListQuery(q *query.RoleList, scope func(*gorm.DB) *gorm.DB) *gorm.DB {
 	return tx
 }
 
-// SelectRoleList 分页查询角色，等价 SysRoleServiceImpl.java:54 的
+// SelectRoleList 分页查询角色，等价
 // @DataScope(deptAlias = "d") + SysRoleMapper.xml:36-61。
 //
 // 排序固定 r.role_sort（Java 写死在 SQL 末尾，不接受前端 orderBy 覆盖），

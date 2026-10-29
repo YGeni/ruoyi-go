@@ -12,7 +12,7 @@ import (
 )
 
 // 本节替代 Java 的 @PreAuthorize("@ss.hasPermi(...)")，
-// 对应 ruoyi-framework/src/main/java/com/ruoyi/framework/web/service/PermissionService.java。
+// 对应 ruoyi-。
 //
 // Java 侧要点复刻：
 //   - hasPermi(L27-40)：空权限直接 false；命中判定见 hasPermissions(L155-158)
@@ -76,7 +76,6 @@ func HasAnyRoles(roleKeys []string, any string) bool {
 }
 
 // Permi 权限校验中间件：不通过时返回 403 + "没有权限，请联系管理员授权"
-// （对齐 GlobalExceptionHandler.java:35-41）。
 func Permi(permission string) gin.HandlerFunc {
 	return check(func(lu *entity.LoginUser) bool {
 		return HasPermi(lu.Permissions, permission)

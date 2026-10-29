@@ -147,7 +147,6 @@ var permRoutes = []RoutePerm{
 	{"POST", "/system/notice", PermSystemNoticeAdd, "SysNoticeController"},
 	{"PUT", "/system/notice", PermSystemNoticeEdit, "SysNoticeController"},
 	{"GET", "/system/notice/list", PermSystemNoticeList, "SysNoticeController"},
-	// SysMenuController.java
 	{"POST", "/system/menu", PermSystemMenuAdd, "SysMenuController"},
 	{"PUT", "/system/menu", PermSystemMenuEdit, "SysMenuController"},
 	{"GET", "/system/menu/list", PermSystemMenuList, "SysMenuController"},
@@ -156,7 +155,6 @@ var permRoutes = []RoutePerm{
 	{"PUT", "/system/menu/updateSort", PermSystemMenuEdit, "SysMenuController"},
 	{"DELETE", "/system/menu/:menuId", PermSystemMenuRemove, "SysMenuController"},
 	{"GET", "/system/menu/:menuId", PermSystemMenuQuery, "SysMenuController"},
-	// CacheController.java
 	{"GET", "/monitor/cache", PermMonitorCacheList, "CacheController"},
 	{"GET", "/monitor/cache/getNames", PermMonitorCacheList, "CacheController"},
 	{"GET", "/monitor/cache/getKeys/:cacheName", PermMonitorCacheList, "CacheController"},
@@ -164,9 +162,7 @@ var permRoutes = []RoutePerm{
 	{"DELETE", "/monitor/cache/clearCacheName/:cacheName", PermMonitorCacheList, "CacheController"},
 	{"DELETE", "/monitor/cache/clearCacheKey/:cacheKey", PermMonitorCacheList, "CacheController"},
 	{"DELETE", "/monitor/cache/clearCacheAll", PermMonitorCacheList, "CacheController"},
-	// ServerController.java
 	{"GET", "/monitor/server", PermMonitorServerList, "ServerController"},
-	// SysJobController.java
 	{"GET", "/monitor/job/list", PermMonitorJobList, "SysJobController"},
 	{"POST", "/monitor/job/export", PermMonitorJobExport, "SysJobController"},
 	{"GET", "/monitor/job/:jobId", PermMonitorJobQuery, "SysJobController"},
@@ -175,13 +171,11 @@ var permRoutes = []RoutePerm{
 	{"PUT", "/monitor/job/changeStatus", PermMonitorJobChangeStatus, "SysJobController"},
 	{"PUT", "/monitor/job/run", PermMonitorJobChangeStatus, "SysJobController"},
 	{"DELETE", "/monitor/job/:jobIds", PermMonitorJobRemove, "SysJobController"},
-	// SysJobLogController.java
 	{"GET", "/monitor/jobLog/list", PermMonitorJobList, "SysJobLogController"},
 	{"POST", "/monitor/jobLog/export", PermMonitorJobExport, "SysJobLogController"},
 	{"GET", "/monitor/jobLog/:jobLogId", PermMonitorJobQuery, "SysJobLogController"},
 	{"DELETE", "/monitor/jobLog/:jobLogIds", PermMonitorJobRemove, "SysJobLogController"},
 	{"DELETE", "/monitor/jobLog/clean", PermMonitorJobRemove, "SysJobLogController"},
-	// GenController.java
 	{"GET", "/tool/gen/list", PermToolGenList, "GenController"},
 	{"GET", "/tool/gen/db/list", PermToolGenList, "GenController"},
 	{"GET", "/tool/gen/:tableId", PermToolGenQuery, "GenController"},
@@ -195,20 +189,17 @@ var permRoutes = []RoutePerm{
 	{"GET", "/tool/gen/column/:tableId", PermToolGenList, "GenController"},
 	{"GET", "/tool/gen/download/:tableName", PermToolGenCode, "GenController"},
 	{"GET", "/tool/gen/batchGenCode", PermToolGenCode, "GenController"},
-	// SysIndexController.java（/unlockscreen 需登录态但无权限串，见 router.go 直接注册）
+	// （/unlockscreen 需登录态但无权限串，见 router.go 直接注册）
 	{"POST", "/unlockscreen", "", "SysIndexController"},
-	// SysRegisterController.java（匿名放行，见 router.go 直接注册）
+	// （匿名放行，见 router.go 直接注册）
 	{"POST", "/register", "", "SysRegisterController"},
-	// SysUserOnlineController.java
 	{"GET", "/monitor/online/list", PermMonitorOnlineList, "SysUserOnlineController"},
 	{"DELETE", "/monitor/online/:tokenId", PermMonitorOnlineForceLogout, "SysUserOnlineController"},
-	// SysLogininforController.java
 	{"GET", "/monitor/logininfor/list", PermMonitorLogininforList, "SysLogininforController"},
 	{"POST", "/monitor/logininfor/export", PermMonitorLogininforExport, "SysLogininforController"},
 	{"DELETE", "/monitor/logininfor/:infoIds", PermMonitorLogininforRemove, "SysLogininforController"},
 	{"DELETE", "/monitor/logininfor/clean", PermMonitorLogininforRemove, "SysLogininforController"},
 	{"GET", "/monitor/logininfor/unlock/:userName", PermMonitorLogininforUnlock, "SysLogininforController"},
-	// SysOperlogController.java
 	{"GET", "/monitor/operlog/list", PermMonitorOperlogList, "SysOperlogController"},
 	{"POST", "/monitor/operlog/export", PermMonitorOperlogExport, "SysOperlogController"},
 	{"DELETE", "/monitor/operlog/:operIds", PermMonitorOperlogRemove, "SysOperlogController"},
@@ -266,39 +257,23 @@ var permRoutes = []RoutePerm{
 //   - 未翻入 permRoutes 的条目在 diff 测试里计入「二期延后」，不判失败，
 //     即当前是"不实现也绿"，交接时必须逐条 grep -n "TODO(phase2)" 过一遍。
 var permRoutesPhase2 = []RoutePerm{
-	// CaptchaController.java
-	{"GET", "/captchaImage", "", "CaptchaController"}, // TODO(phase2) CaptchaController.java:31
-	// GenController.java
-	// ServerController.java
-	// SysConfigController.java
-	{"POST", "/system/config/export", PermSystemConfigExport, "SysConfigController"}, // TODO(phase2) SysConfigController.java:49
-	// SysDictDataController.java
-	{"POST", "/system/dict/data/export", PermSystemDictExport, "SysDictDataController"}, // TODO(phase2) SysDictDataController.java:52
-	// SysDictTypeController.java
-	{"POST", "/system/dict/type/export", PermSystemDictExport, "SysDictTypeController"}, // TODO(phase2) SysDictTypeController.java:46
-	// SysIndexController.java
-	// SysLoginController.java
-	{"GET", "getInfo", "", "SysLoginController"},    // TODO(phase2) SysLoginController.java:72
-	{"GET", "getRouters", "", "SysLoginController"}, // TODO(phase2) SysLoginController.java:101
-	{"POST", "/login", "", "SysLoginController"},    // TODO(phase2) SysLoginController.java:35
-	// SysLogininforController.java
-	// SysOperlogController.java
-	// SysPostController.java
-	{"POST", "/system/post/export", PermSystemPostExport, "SysPostController"}, // TODO(phase2) SysPostController.java:49
-	// SysRegisterController.java
-	// SysRoleController.java
-	{"POST", "/system/role/export", PermSystemRoleExport, "SysRoleController"}, // TODO(phase2) SysRoleController.java:65
-	// SysUserController.java
-	{"POST", "/system/user/export", PermSystemUserExport, "SysUserController"},     // TODO(phase2) SysUserController.java:68
-	{"POST", "/system/user/importData", PermSystemUserImport, "SysUserController"}, // TODO(phase2) SysUserController.java:78
-	{"POST", "/system/user/importTemplate", "", "SysUserController"},               // TODO(phase2) SysUserController.java:90
-	// SysUserOnlineController.java
-	// TestController.java
-	{"DELETE", "/test/user/:userId", "", "TestController"}, // TODO(phase2) TestController.java:73
-	{"GET", "/test/user/:userId", "", "TestController"},    // TODO(phase2) TestController.java:46
-	{"GET", "/test/user/list", "", "TestController"},       // TODO(phase2) TestController.java:38
-	{"POST", "/test/user/save", "", "TestController"},      // TODO(phase2) TestController.java:61
-	{"PUT", "/test/user/update", "", "TestController"},     // TODO(phase2) TestController.java:73
+	{"GET", "/captchaImage", "", "CaptchaController"},                                   // TODO(phase2)
+	{"POST", "/system/config/export", PermSystemConfigExport, "SysConfigController"},    // TODO(phase2)
+	{"POST", "/system/dict/data/export", PermSystemDictExport, "SysDictDataController"}, // TODO(phase2)
+	{"POST", "/system/dict/type/export", PermSystemDictExport, "SysDictTypeController"}, // TODO(phase2)
+	{"GET", "getInfo", "", "SysLoginController"},                                        // TODO(phase2)
+	{"GET", "getRouters", "", "SysLoginController"},                                     // TODO(phase2)
+	{"POST", "/login", "", "SysLoginController"},                                        // TODO(phase2)
+	{"POST", "/system/post/export", PermSystemPostExport, "SysPostController"},          // TODO(phase2)
+	{"POST", "/system/role/export", PermSystemRoleExport, "SysRoleController"},          // TODO(phase2)
+	{"POST", "/system/user/export", PermSystemUserExport, "SysUserController"},          // TODO(phase2)
+	{"POST", "/system/user/importData", PermSystemUserImport, "SysUserController"},      // TODO(phase2)
+	{"POST", "/system/user/importTemplate", "", "SysUserController"},                    // TODO(phase2)
+	{"DELETE", "/test/user/:userId", "", "TestController"},                              // TODO(phase2)
+	{"GET", "/test/user/:userId", "", "TestController"},                                 // TODO(phase2)
+	{"GET", "/test/user/list", "", "TestController"},                                    // TODO(phase2)
+	{"POST", "/test/user/save", "", "TestController"},                                   // TODO(phase2)
+	{"PUT", "/test/user/update", "", "TestController"},                                  // TODO(phase2)
 }
 
 // PermOf 按 method + gin 路径查登记的权限串。

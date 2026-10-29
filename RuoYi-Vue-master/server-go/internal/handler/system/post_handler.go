@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// PostHandler 岗位管理，对应 SysPostController.java。
+// PostHandler 岗位管理，对应。
 //
 // 岗位**不在 DataScope 五个落点内**（SysPostServiceImpl.selectPostList 无注解），
 // 因此列表接口不施加数据范围过滤。
@@ -42,7 +42,7 @@ func (PostHandler) List(c *gin.Context) {
 
 // OptionSelect GET /system/post/optionselect
 //
-// 等价 SysPostController.java 的同名接口：返回全部岗位，不带分页。
+// 等价的同名接口：返回全部岗位，不带分页。
 func (PostHandler) OptionSelect(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return

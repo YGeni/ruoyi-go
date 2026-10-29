@@ -6,7 +6,7 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/pkg/redisx"
 )
 
-// ---------- 在线用户：对应 SysUserOnlineServiceImpl.java ----------
+// ---------- 在线用户：对应----------
 
 // SelectOnlineList 在线用户列表，等价 SysUserOnlineController.list(L43-70)。
 //

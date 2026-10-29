@@ -36,7 +36,7 @@ var registry = map[string]TaskFunc{
 		return "执行有参方法：" + args[0], nil
 	},
 	"ryTask.ryMultipleParams": func(args []string) (string, error) {
-		// RyTask.java:19-22 打印的是那五个形参；Go 侧按原样拼回字符串。
+		// 打印的是那五个形参；Go 侧按原样拼回字符串。
 		return fmt.Sprintf("执行多参方法： 字符串类型%s，布尔类型%s，长整型%s，浮点型%s，整形%s",
 			at(args, 0), at(args, 1), at(args, 2), at(args, 3), at(args, 4)), nil
 	},

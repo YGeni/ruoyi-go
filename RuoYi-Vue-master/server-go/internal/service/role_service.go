@@ -11,19 +11,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SelectRoleList 角色列表，等价 SysRoleServiceImpl.java:52-56 的
+// SelectRoleList 角色列表，等价
 //
 //	@DataScope(deptAlias = "d")
 //	public List<SysRole> selectRoleList(SysRole role)
 //
 // **DataScope 五个落点之一**（deptAlias="d"、userAlias 取注解默认空串）。
-// 因此数据范围 5（仅本人）在角色列表里退化成 d.dept_id = 0（DataScopeAspect.java:125），
+// 因此数据范围 5（仅本人）在角色列表里退化成 d.dept_id = 0
 // 与用户列表的 u.user_id = ? 语义不同 —— 单测 TestRoleDataScopeGolden 会分别断言。
 func SelectRoleList(c *gin.Context, lu *entity.LoginUser, q *query.RoleList, p *page.PageDomain) ([]entity.SysRole, int64, error) {
 	return repository.SelectRoleList(q, p, DataScope(c, lu, "d", ""))
 }
 
-// SelectAllocatedList 已分配该角色的用户，等价 SysUserServiceImpl.java:87-91：
+// SelectAllocatedList 已分配该角色的用户，等价
 //
 //	@DataScope(deptAlias = "d", userAlias = "u")
 //	public List<SysUser> selectAllocatedList(SysUser user)
@@ -34,7 +34,7 @@ func SelectAllocatedList(c *gin.Context, lu *entity.LoginUser, roleID int64, q *
 	return repository.SelectAllocatedList(roleID, q, p, DataScope(c, lu, "d", "u"))
 }
 
-// SelectUnallocatedList 未分配该角色的用户，等价 SysUserServiceImpl.java:100-104：
+// SelectUnallocatedList 未分配该角色的用户，等价
 //
 //	@DataScope(deptAlias = "d", userAlias = "u")
 //	public List<SysUser> selectUnallocatedList(SysUser user)

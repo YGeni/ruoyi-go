@@ -17,7 +17,7 @@ type AuthHandler struct{}
 
 // CaptchaImage GET /captchaImage
 //
-// 等价于 CaptchaController.java:45-93：返回 { captchaEnabled, uuid, img }，
+// 等价于：返回 { captchaEnabled, uuid, img }
 // img 为**不含 data URI 前缀**的裸 base64（前端 src/views/login.vue:143-149 自行拼接）。
 func (AuthHandler) CaptchaImage(c *gin.Context) {
 	uuid, img, err := captcha.Generate()
@@ -34,7 +34,7 @@ func (AuthHandler) CaptchaImage(c *gin.Context) {
 
 // Login POST /login
 //
-// 等价 SysLoginController.java:56-65：成功返回 { code:200, msg:"操作成功", token:"xxx" }。
+// 等价：成功返回 { code:200, msg:"操作成功", token:"xxx" }。
 func (AuthHandler) Login(c *gin.Context) {
 	var body service.LoginBody
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -54,10 +54,10 @@ func (AuthHandler) Login(c *gin.Context) {
 
 // Register POST /register
 //
-// 等价 SysRegisterController.java:28-39：先看 sys.account.registerUser 开关，
+// 等价：先看 sys.account.registerUser 开关
 // 关着就直接 error；开了才走 SysRegisterService.register 的校验链。
 //
-// 匿名放行（SecurityConfig.java 的 permitAll），因此**不挂** JWTAuth。
+// 匿名放行的 permitAll），因此**不挂** JWTAuth。
 func (AuthHandler) Register(c *gin.Context) {
 	var body service.RegisterBody
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -73,7 +73,7 @@ func (AuthHandler) Register(c *gin.Context) {
 
 // UnlockScreen POST /unlockscreen
 //
-// 等价 SysIndexController.java:43-63：校验当前登录用户的密码，成功回
+// 等价：校验当前登录用户的密码，成功回
 // success("解锁成功")。
 //
 // 需要登录态（Java 的 SecurityUtils.getUsername() 依赖 SecurityContext），
@@ -99,7 +99,7 @@ func (AuthHandler) UnlockScreen(c *gin.Context) {
 
 // Logout POST /logout
 //
-// 等价 LogoutSuccessHandlerImpl.java:47-51：删除 login_tokens:<uuid> 登录态。
+// 等价：删除 login_tokens:<uuid> 登录态。
 func (AuthHandler) Logout(c *gin.Context) {
 	if err := service.Logout(c.GetHeader(config.C.Token.Header)); err != nil {
 		result.Fail(c, result.Error(err.Error()))
@@ -110,7 +110,7 @@ func (AuthHandler) Logout(c *gin.Context) {
 
 // GetInfo GET /getInfo
 //
-// 等价 SysLoginController.java:72-94：返回 user / roles / permissions /
+// 等价：返回 user / roles / permissions /
 // pwdChrtype / isDefaultModifyPwd / isPasswordExpired 六个字段，
 // 缺任一字段前端 src/store/modules/user.js:24-85 都会异常。
 func (AuthHandler) GetInfo(c *gin.Context) {
@@ -130,7 +130,7 @@ func (AuthHandler) GetInfo(c *gin.Context) {
 		result.Fail(c, result.Error(err.Error()))
 		return
 	}
-	// 权限发生变化时刷新缓存（SysLoginController.java:81-85）
+	// 权限发生变化时刷新缓存
 	if !samePerms(lu.Permissions, permissions) {
 		lu.Permissions = permissions
 		if err := service.RefreshToken(lu); err != nil {
@@ -150,7 +150,7 @@ func (AuthHandler) GetInfo(c *gin.Context) {
 
 // GetRouters GET /getRouters
 //
-// 等价 SysLoginController.java:101-107：返回 { code:200, data:[RouterVo] }，
+// 等价：返回 { code:200, data:[RouterVo] }
 // 结构必须满足前端 src/store/modules/permission.js:59-97 的解析。
 func (AuthHandler) GetRouters(c *gin.Context) {
 	lu, ok := middleware.LoginUser(c)

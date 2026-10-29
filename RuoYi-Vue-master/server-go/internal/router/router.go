@@ -33,7 +33,7 @@ func New() *gin.Engine {
 	auth := handler.AuthHandler{}
 	common := handler.CommonHandler{}
 
-	// 静态资源：等价 ResourcesConfig.java:33-34 的
+	// 静态资源：等价
 	//
 	//	registry.addResourceHandler(Constants.RESOURCE_PREFIX + "/**")
 	//	        .addResourceLocations("file:" + RuoYiConfig.getProfile() + "/");
@@ -42,14 +42,14 @@ func New() *gin.Engine {
 	// 前端 userAvatar.vue:136 拼成 VITE_APP_BASE_API + imgUrl 后直接当 <img src>，
 	// 没有这个映射头像预览会 404（前端不做容错，直接显示破图）。
 	//
-	// 免鉴权：SecurityConfig.java:105 对 GET /profile/** 是 permitAll。
+	// 免鉴权：对 GET /profile/** 是 permitAll。
 	// http.FileServer 自身会清掉 ".."，不存在目录穿越。
 	//
 	// 注意 profile 目录可能还不存在（还没上传过任何文件），
 	// gin.Static 对不存在的根目录不会 panic，只是请求返回 404，与 Java 行为一致。
 	r.Static(config.ResourcePrefix, config.C.RuoYi.Profile)
 
-	// 匿名放行：对齐 SecurityConfig.java:101-108 的 /login、/captchaImage
+	// 匿名放行：对齐的 /login、/captchaImage
 	r.GET("/captchaImage", auth.CaptchaImage)
 	r.POST("/login", auth.Login)
 	r.POST("/register", auth.Register)

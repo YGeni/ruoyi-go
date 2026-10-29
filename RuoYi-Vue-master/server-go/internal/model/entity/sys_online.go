@@ -1,6 +1,6 @@
 package entity
 
-// SysUserOnline 在线用户，等价于 ruoyi-system/.../system/domain/SysUserOnline.java。
+// SysUserOnline 在线用户，等价于 ruoyi-。
 //
 // **不是数据库表**：数据全部来自 Redis 里 login_tokens:<uuid> 的 LoginUser 快照，
 // 由 SysUserOnlineServiceImpl.loginUserToUserOnline(L76-94) 组装。

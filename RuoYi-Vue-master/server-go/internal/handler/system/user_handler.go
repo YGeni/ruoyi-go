@@ -16,12 +16,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UserHandler 用户管理，对应 SysUserController.java。
+// UserHandler 用户管理，对应。
 type UserHandler struct{}
 
 // List GET /system/user/list
-//
-// 等价 SysUserController.java:59-66：
 //
 //	startPage(); List<SysUser> list = userService.selectUserList(user); return getDataTable(list);
 //
@@ -51,8 +49,6 @@ func (UserHandler) List(c *gin.Context) {
 }
 
 // GetInfo GET /system/user/ 与 GET /system/user/:userId
-//
-// 等价 SysUserController.java:100-107：
 //
 //	@GetMapping(value = { "/", "/{userId}" })
 //	public AjaxResult getInfo(@PathVariable(value = "userId", required = false) Long userId)
@@ -86,7 +82,6 @@ func (UserHandler) GetInfo(c *gin.Context) {
 
 // Add POST /system/user
 //
-// 等价 SysUserController.java:122-134：
 // 唯一性校验 -> 密码加密 -> insertUser（含角色关联）。
 func (UserHandler) Add(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -113,7 +108,7 @@ func (UserHandler) Add(c *gin.Context) {
 
 // Edit PUT /system/user
 //
-// 等价 SysUserController.java:149-166：checkUserAllowed + checkUserDataScope + updateUser。
+// 等价：checkUserAllowed + checkUserDataScope + updateUser。
 func (UserHandler) Edit(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -139,8 +134,6 @@ func (UserHandler) Edit(c *gin.Context) {
 }
 
 // Remove DELETE /system/user/:userIds
-//
-// 等价 SysUserController.java:177-190。
 func (UserHandler) Remove(c *gin.Context) {
 	lu, ok := loginUser(c)
 	if !ok {
@@ -159,8 +152,6 @@ func (UserHandler) Remove(c *gin.Context) {
 }
 
 // ResetPwd PUT /system/user/resetPwd
-//
-// 等价 SysUserController.java:192-206。
 func (UserHandler) ResetPwd(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -191,8 +182,6 @@ func (UserHandler) ResetPwd(c *gin.Context) {
 }
 
 // ChangeStatus PUT /system/user/changeStatus
-//
-// 等价 SysUserController.java:207-219。
 func (UserHandler) ChangeStatus(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -219,7 +208,7 @@ func (UserHandler) ChangeStatus(c *gin.Context) {
 
 // AuthRole GET /system/user/authRole/:userId
 //
-// 等价 SysUserController.java:221-229：返回用户详情 + 全部角色 + 已分配角色 ID。
+// 等价：返回用户详情 + 全部角色 + 已分配角色 ID。
 //
 // 返回体：AjaxResult{user, roles, checkedKeys}（Java 用 AjaxResult.put 三次）。
 func (UserHandler) AuthRole(c *gin.Context) {
@@ -257,7 +246,7 @@ func (UserHandler) AuthRole(c *gin.Context) {
 
 // InsertAuthRole PUT /system/user/authRole
 //
-// 等价 SysUserController.java:236-248：insertAuthRole(userId, roleIds)。
+// 等价：insertAuthRole(userId, roleIds)。
 func (UserHandler) InsertAuthRole(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -279,7 +268,7 @@ func (UserHandler) InsertAuthRole(c *gin.Context) {
 
 // DeptTree GET /system/user/deptTree
 //
-// 等价 SysUserController.java:250-257：返回部门树（前端自行组装成 el-tree 结构）。
+// 等价：返回部门树（前端自行组装成 el-tree 结构）。
 // 权限串是 system:user:list（见 perm_table.go 的登记）。
 func (UserHandler) DeptTree(c *gin.Context) {
 	lu, ok := loginUser(c)

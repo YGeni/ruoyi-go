@@ -12,7 +12,7 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/pkg/securityx"
 )
 
-// 本文件对应 SysProfileController.java + SysUserServiceImpl 的 profile 相关分支。
+// 本文件对应+ SysUserServiceImpl 的 profile 相关分支。
 //
 // 三个"必须"来自前端契约：
 //  1. GET  /system/user/profile 返回 user / roleGroup / postGroup（缺键页面空白）
@@ -114,11 +114,11 @@ func UpdatePwd(lu *entity.LoginUser, oldPassword, newPassword string) error {
 	}
 	// **必须回 DB 查，不能用 lu.User.Password**。
 	//
-	// Java 的 SysProfileController.java:99-100 就是这样写的：
+	// Java 的就是这样写的
 	//	SysUser user = userService.selectUserById(userId);
 	//	String  password = user.getPassword();
 	//
-	// 原因是密码带 @JsonProperty(WRITE_ONLY)（SysUser.java:202），
+	// 原因是密码带 @JsonProperty(WRITE_ONLY)
 	// Redis 里的 LoginUser 快照**不含** password（Go 侧是 json:"-"，同义）。
 	// 直接拿 lu.User.Password 比，拿到的是空串 -> 永远 "旧密码错误"。
 	// 实测踩到过：改密接口对正确旧密码也返回"修改密码失败，旧密码错误"。
@@ -152,7 +152,7 @@ func UpdatePwd(lu *entity.LoginUser, oldPassword, newPassword string) error {
 	now := time.Now()
 	lu.User.PwdUpdateDate = &now
 	// lu.User.Password 同样赋值（与 Java L114 一致），但它带 json:"-"
-	// （对应 Java 的 @JsonProperty(WRITE_ONLY)，SysUser.java:202），
+	// （对应 @JsonProperty(WRITE_ONLY)，
 	// **不会**被写进 Redis 快照 —— 密码散列不应出现在缓存里。
 	lu.User.Password = encrypted
 	return RefreshToken(lu)

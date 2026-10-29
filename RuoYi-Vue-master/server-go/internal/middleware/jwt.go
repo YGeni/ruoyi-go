@@ -18,7 +18,7 @@ const (
 	// CtxLoginUser 登录态在 gin.Context 中的键。
 	CtxLoginUser = "loginUser"
 	// CtxPermission 当前接口所需的权限串，等价于 Java 的 PermissionContextHolder
-	// （PermissionService.java:38/70 写入，供 @DataScope 读取）。
+	// /70 写入，供 @DataScope 读取）。
 	//
 	// 真值定义在 service.CtxPermission（internal/service/datascope.go），
 	// 这里做别名以避免两处常量漂移 —— DataScope 的读取方在 service 包内。
@@ -30,7 +30,7 @@ const (
 //  2. 解析 JWT 拿到 uuid，再取 Redis 中的 login_tokens:<uuid>
 //  3. 剩余有效期不足 20 分钟自动刷新
 //
-// 失败响应对齐 AuthenticationEntryPointImpl.java:30-32：code=401。
+// 失败响应对齐：code=401。
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := jwtx.StripBearer(c.GetHeader(config.C.Token.Header))

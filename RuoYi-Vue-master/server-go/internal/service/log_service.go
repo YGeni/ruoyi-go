@@ -8,28 +8,28 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/pkg/securityx"
 )
 
-// ---------- 登录日志：对应 SysLogininforServiceImpl.java ----------
+// ---------- 登录日志：对应----------
 
-// SelectLogininforList 分页查询，等价 SysLogininforServiceImpl.java:30-34。
+// SelectLogininforList 分页查询，等价。
 func SelectLogininforList(q *query.LogininforList, p *page.PageDomain) ([]entity.SysLogininfor, int64, error) {
 	return repository.SelectLogininforList(q, p)
 }
 
-// DeleteLogininforByIDs 批量删除，等价 SysLogininforServiceImpl.java:59-63。
+// DeleteLogininforByIDs 批量删除，等价。
 func DeleteLogininforByIDs(infoIDs []int64) (int64, error) {
 	return repository.DeleteLogininforByIDs(infoIDs)
 }
 
-// CleanLogininfor 清空，等价 SysLogininforServiceImpl.java:71-74。
+// CleanLogininfor 清空，等价。
 func CleanLogininfor() error {
 	return repository.CleanLogininfor()
 }
 
 // UnlockLogininfor 解锁账号，等价 SysUserOnline 侧的
-// SysPasswordService.clearLoginRecordCache（SysPasswordService.java:57-63）：
+// SysPasswordService.clearLoginRecordCache
 // 删掉 Redis 里的 pwd_err_cnt:<username> 失败计数。
 //
-// 注意 SysLogininforController.java:74-81 只调了这一个方法，
+// 注意只调了这一个方法
 // **不动 sys_user.status**（账号停用是另一回事）。
 func UnlockLogininfor(userName string) error {
 	if userName == "" {
@@ -38,19 +38,19 @@ func UnlockLogininfor(userName string) error {
 	return securityx.ClearLoginRecordCache(userName)
 }
 
-// ---------- 操作日志：对应 SysOperLogServiceImpl.java ----------
+// ---------- 操作日志：对应----------
 
-// SelectOperLogList 分页查询，等价 SysOperLogServiceImpl.java:40-44。
+// SelectOperLogList 分页查询，等价。
 func SelectOperLogList(q *query.OperLogList, p *page.PageDomain) ([]entity.SysOperLog, int64, error) {
 	return repository.SelectOperLogList(q, p)
 }
 
-// DeleteOperLogByIDs 批量删除，等价 SysOperLogServiceImpl.java:89-93。
+// DeleteOperLogByIDs 批量删除，等价。
 func DeleteOperLogByIDs(operIDs []int64) (int64, error) {
 	return repository.DeleteOperLogByIDs(operIDs)
 }
 
-// CleanOperLog 清空，等价 SysOperLogServiceImpl.java:101-104。
+// CleanOperLog 清空，等价。
 func CleanOperLog() error {
 	return repository.CleanOperLog()
 }
@@ -59,7 +59,7 @@ func CleanOperLog() error {
 
 // LogininforExportRows 登录日志导出的表头与数据行。
 //
-// 列名与顺序取自 SysLogininfor.java 的 @Excel(name = "...") 注解。
+// 列名与顺序取自的 @Excel(name = "...") 注解。
 func LogininforExportRows(rows []entity.SysLogininfor) ([]string, [][]any) {
 	headers := []string{"序号", "用户账号", "登录状态", "登录地址", "登录地点", "浏览器", "操作系统", "提示消息", "访问时间"}
 	out := make([][]any, 0, len(rows))
@@ -77,7 +77,7 @@ func LogininforExportRows(rows []entity.SysLogininfor) ([]string, [][]any) {
 
 // OperLogExportRows 操作日志导出的表头与数据行。
 //
-// 列名与顺序取自 SysOperLog.java 的 @Excel(name = "...") 注解；
+// 列名与顺序取自的 @Excel(name = "...") 注解；
 // businessType / operatorType / status 的字典翻译同样取自 @Excel 的
 // readConverterExp（"0=其它,1=新增,..."）。
 func OperLogExportRows(rows []entity.SysOperLog) ([]string, [][]any) {

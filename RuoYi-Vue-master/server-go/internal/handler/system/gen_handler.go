@@ -14,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GenHandler 代码生成，对应 ruoyi-generator 的 GenController.java。
+// GenHandler 代码生成，对应 ruoyi-generator 的。
 type GenHandler struct{}
 
 // errGenTableNotFound 业务表不存在。
@@ -22,7 +22,7 @@ var errGenTableNotFound = errors.New("业务表不存在")
 
 // GenList GET /tool/gen/list
 //
-// 等价 GenController.java:58-65：startPage() + getDataTable。
+// 等价：startPage + getDataTable。
 // 前端 src/views/tool/gen/index.vue:203-204 读 response.rows / response.total。
 func (GenHandler) GenList(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -47,7 +47,7 @@ func (GenHandler) GenList(c *gin.Context) {
 
 // GenDbList GET /tool/gen/db/list
 //
-// 等价 GenController.java:87-94：列出 information_schema 里**尚未导入**的表。
+// 等价：列出 information_schema 里**尚未导入**的表。
 func (GenHandler) GenDbList(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
 		return
@@ -70,7 +70,7 @@ func (GenHandler) GenDbList(c *gin.Context) {
 
 // GenGet GET /tool/gen/:tableId
 //
-// 等价 GenController.java:70-82：返回 {info, rows} 两个键
+// 等价：返回 {info, rows} 两个键
 // （前端 editTable.vue 读的就是这两个）。
 func (GenHandler) GenGet(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -107,7 +107,7 @@ func (GenHandler) GenEdit(c *gin.Context) {
 
 // GenImport POST /tool/gen/importTable
 //
-// 等价 GenController.java:113-123：参数是 tables（逗号分隔的表名）与 tplWebType。
+// 等价：参数是 tables（逗号分隔的表名）与 tplWebType。
 func (GenHandler) GenImport(c *gin.Context) {
 	lu, ok := loginUser(c)
 	if !ok {
@@ -130,7 +130,7 @@ func (GenHandler) GenImport(c *gin.Context) {
 
 // GenCreateTable POST /tool/gen/createTable
 //
-// 等价 GenController.java:128-159：直接执行前端提交的建表 SQL，
+// 等价：直接执行前端提交的建表 SQL
 // 失败统一回 error("创建表结构异常")。
 func (GenHandler) GenCreateTable(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -174,7 +174,7 @@ func (GenHandler) GenRemove(c *gin.Context) {
 
 // GenPreview GET /tool/gen/preview/:tableId
 //
-// 等价 GenController.java:190-198：success({输出路径: 代码内容})。
+// 等价：success({输出路径: 代码内容})。
 // 前端 src/views/tool/gen/index.vue:263 直接把 response.data 挂到 preview 上按路径展示。
 func (GenHandler) GenPreview(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -203,7 +203,7 @@ func (GenHandler) GenPreview(c *gin.Context) {
 
 // GenCode GET /tool/gen/genCode/:tableName
 //
-// 等价 GenController.java:215-230：genType='0' 时打成 zip 下载，
+// 等价：genType='0' 时打成 zip 下载
 // genType='1' 时写到 genPath 指定的自定义路径。
 //
 // 响应头必须对：前端用 blob 接收，Content-Type 必须是 zip
@@ -243,7 +243,7 @@ func (GenHandler) GenCode(c *gin.Context) {
 
 // GenColumnList GET /tool/gen/column/:tableId
 //
-// 等价 GenController.java:99-107：返回 {rows, total}，total 恒等于列表长度
+// 等价：返回 {rows, total}，total 恒等于列表长度
 // （与 /monitor/online/list 同理，无 startPage()）。
 //
 // 前端没用到这个端点（src/api/tool/gen.js 里没有），Java 侧有注解就必须登记，
@@ -266,7 +266,7 @@ func (GenHandler) GenColumnList(c *gin.Context) {
 
 // GenDownload GET /tool/gen/download/:tableName
 //
-// 等价 GenController.java:201-208：**始终**下发 zip（不像 genCode 会看 genType）。
+// 等价：**始终**下发 zip（不像 genCode 会看 genType）。
 // 前端也没用到（走的是 batchGenCode），同样是因为 Java 有注解才登记。
 func (GenHandler) GenDownload(c *gin.Context) {
 	if _, ok := loginUser(c); !ok {
@@ -291,7 +291,7 @@ func (GenHandler) GenDownload(c *gin.Context) {
 
 // GenBatchGenCode GET /tool/gen/batchGenCode
 //
-// 等价 GenController.java:241-247：参数 tables 是逗号分隔的表名。
+// 等价：参数 tables 是逗号分隔的表名。
 // 前端 src/views/tool/gen/index.vue:228 正是用
 // `proxy.$download.zip("/tool/gen/batchGenCode?tables=" + tbNames, zipName)`
 // 调它的——**页面上的"生成代码"按钮走的是这里**，不是 genCode。

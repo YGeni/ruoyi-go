@@ -1,9 +1,9 @@
-// 本文件实现 Java 的 @DataScope 数据权限过滤（framework/aspectj/DataScopeAspect.java）。
+// 本文件实现 @DataScope 数据权限过滤。
 //
 // 放在 internal/service 而非 internal/middleware 的原因：它**不是 HTTP 中间件**，
 // 而是 GORM 的 Scope 构造器（func(*gorm.DB) *gorm.DB），挂在 gin 中间件链上是错的。
 //
-// 复刻依据（逐行对齐 DataScopeAspect.java）：
+// 复刻依据（逐行对齐
 //   - L50  admin 直通：currentUser.isAdmin() 时不拼任何条件
 //   - L63  permission 取注解值，为空时回退 PermissionContextHolder.getContext()
 //   - L67  scopeCustomIds：先扫一遍所有 CUSTOM 且 status=正常 且命中 permission 的角色
@@ -35,7 +35,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// 数据范围取值，与 Constants.java:182-202 逐字一致（char(1)，一律 string）。
+// 数据范围取值，与逐字一致（char(1)，一律 string）。
 const (
 	DataScopeAll       = "1" // 全部数据权限
 	DataScopeCustom    = "2" // 自定数据权限
@@ -47,11 +47,11 @@ const (
 // CtxPermission 当前接口所需的权限串在 gin.Context 中的键。
 //
 // 等价于 Java 的 request-scoped PermissionContextHolder
-// （PermissionService.java:38 读取 / :70 由 @PreAuthorize 写入），
+// 读取 / :70 由 @PreAuthorize 写入）
 // 由 middleware.Permi 写入、本文件的 DataScope 读取。
 const CtxPermission = "permission"
 
-// 表别名与字段名，等价于 @DataScope 的注解默认值（DataScope.java:28/32/36）。
+// 表别名与字段名，等价于 @DataScope 的注解默认值/32/36）。
 //
 // 五个落点均未覆盖默认值（SysUserServiceImpl:76/89/102 用 deptAlias="d" userAlias="u"；
 // SysRoleServiceImpl:54 与 SysDeptServiceImpl:45 用 deptAlias="d"），故字段名恒为这两个。
@@ -229,7 +229,7 @@ func DataScopeWithInfo(permission string, u *entity.LoginUser, deptAlias, userAl
 
 	condsCopy := conds
 	// 分组条件**必须**显式用 clause.OrConditions 构造，等价于 Java 的
-	// " AND (" + 条件串 + ")"（DataScopeAspect.java:143）。
+	// " AND (" + 条件串 + ")"。
 	//
 	// DIFF(review): 试过两种更"自然"的写法，都被 gorm v1.25.12 坑了——
 	//   1. tx.Where(func(d *gorm.DB) *gorm.DB{...})：Statement.BuildCondition

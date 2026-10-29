@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ConfigHandler 参数配置，对应 SysConfigController.java。
+// ConfigHandler 参数配置，对应。
 //
 // 参数**不在 DataScope 五个落点内**（SysConfigServiceImpl.selectConfigList 无注解）。
 type ConfigHandler struct{}
@@ -59,7 +59,7 @@ func (ConfigHandler) GetInfo(c *gin.Context) {
 
 // GetByKey GET /system/config/configKey/:configKey
 //
-// 等价 SysConfigController.java:75-82：返回 sys_config 的 config_value 字符串。
+// 等价：返回 sys_config 的 config_value 字符串。
 //
 // 注意路径冲突：/system/config/configKey/:configKey 必须注册在
 // /system/config/:configId **之前**，否则 gin 会把 "configKey" 当成 configId。
@@ -128,8 +128,6 @@ func (ConfigHandler) Remove(c *gin.Context) {
 }
 
 // RefreshCache DELETE /system/config/refreshCache
-//
-// 等价 SysConfigController.java:104-111。
 //
 // 同样要注意注册顺序：必须在 /system/config/:configIds **之前**。
 func (ConfigHandler) RefreshCache(c *gin.Context) {

@@ -18,11 +18,11 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/pkg/page"
 )
 
-// ---------- 代码生成：对应 GenTableServiceImpl.java ----------
+// ---------- 代码生成：对应----------
 
-// 常量照搬 GenConstants.java 与 GenUtils 的默认约定。
+// 常量照搬与 GenUtils 的默认约定。
 const (
-	TPLCrud        = "crud" // GenConstants.java:11
+	TPLCrud        = "crud"
 	TplWebTypeVue  = "vue2" // 前端未使用（vue 模板未移植），仅保留字段
 	QueryEQ        = "EQ"
 	QueryLike      = "LIKE"
@@ -43,12 +43,12 @@ const (
 	TypeBigDecimal = "BigDecimal"
 )
 
-// 不参与编辑/列表/查询的列名（GenConstants.java:51-60）。
+// 不参与编辑/列表/查询的列名。
 var (
 	columnNameNotEdit  = []string{"id", "create_by", "create_time", "del_flag"}
 	columnNameNotList  = []string{"id", "create_by", "create_time", "del_flag", "update_by", "update_time"}
 	columnNameNotQuery = []string{"id", "create_by", "create_time", "del_flag", "update_by", "update_time", "remark"}
-	// baseEntity 里已存在的字段，domain 模板不再重复生成（GenConstants.java:62）。
+	// baseEntity 里已存在的字段，domain 模板不再重复生成。
 	baseEntityFields = []string{"createBy", "createTime", "updateBy", "updateTime", "remark"}
 	// 需要 import 的 Java 类型 -> 包名
 	javaTypeImports = map[string]string{
@@ -219,7 +219,7 @@ func buildColumns(tableID int64, tableName, operator string) ([]entity.GenTableC
 }
 
 // buildColumn 从 information_schema 的一列生成 gen_table_column，
-// 等价 GenUtils.initColumnField（GenUtils.java:139-215）。
+// 等价 GenUtils.initColumnField。
 func buildColumn(tableID int64, dc repository.DbColumn, sort int, operator string) entity.GenTableColumn {
 	now := time.Now()
 	c := entity.GenTableColumn{
@@ -318,7 +318,7 @@ func htmlTypeOf(lowerName, dbType string) string {
 // ---------- 名称转换 ----------
 
 // convertClassName 表名 -> 类名：去掉 sys_ 之类前缀后大驼峰。
-// 等价 GenUtils.convertClassName（GenUtils.java:57-80）。
+// 等价 GenUtils.convertClassName。
 func convertClassName(tableName string) string {
 	// 去掉 "sys_" / "gen_" 之类的前缀（RuoYi 只处理第一个下划线前的短前缀）
 	if i := strings.Index(tableName, "_"); i > 0 && i <= 5 {

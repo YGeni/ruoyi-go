@@ -48,7 +48,7 @@ type SysUser struct {
 	Dept  *SysDept  `gorm:"foreignKey:DeptID;references:DeptID" json:"dept,omitempty"`
 	Roles []SysRole `gorm:"many2many:sys_user_role;foreignKey:UserID;joinForeignKey:UserID;references:RoleID;joinReferences:RoleID" json:"roles,omitempty"`
 
-	// RoleIds 非持久化字段，等价 SysUser.roleIds（SysUser.java:88）：
+	// RoleIds 非持久化字段，等价 SysUser.roleIds
 	// 前端新增/修改用户时用 roleIds 数组提交角色，后端据此重写 sys_user_role。
 	RoleIds []int64 `gorm:"-" json:"roleIds,omitempty"`
 }
@@ -84,7 +84,7 @@ func (u *SysUser) AfterFind(_ *gorm.DB) error {
 
 // LoginUser 登录态，等价于 com.ruoyi.common.core.domain.model.LoginUser。
 //
-// 整体以 JSON 存入 Redis，key = login_tokens:<uuid>（CacheConstants.java:13）。
+// 整体以 JSON 存入 Redis，key = login_tokens:<uuid>。
 type LoginUser struct {
 	UserID        int64    `json:"userId"`
 	DeptID        *int64   `json:"deptId,omitempty"`
@@ -99,7 +99,7 @@ type LoginUser struct {
 	User          *SysUser `json:"user"`
 }
 
-// Username 等价于 LoginUser.getUsername()（LoginUser.java:134-137），
+// Username 等价于 LoginUser.getUsername
 // 即 user.getUserName()。SysUserOnlineServiceImpl 组装在线用户时用的就是这个。
 func (l *LoginUser) Username() string {
 	if l == nil || l.User == nil {
