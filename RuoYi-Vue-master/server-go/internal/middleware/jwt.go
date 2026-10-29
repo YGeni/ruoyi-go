@@ -34,28 +34,47 @@ const (
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := jwtx.StripBearer(c.GetHeader(config.C.Token.Header))
-		if token == "" {
-			unauthorized(c)
+		if !AuthWithToken(c, token) {
 			return
 		}
-		uuidInToken, _, err := jwtx.Parse(token)
-		if err != nil {
-			unauthorized(c)
-			return
-		}
-		loginUser, ok, err := service.GetLoginUser(uuidInToken)
-		if err != nil || !ok || loginUser == nil {
-			unauthorized(c)
-			return
-		}
-		if err := service.VerifyToken(loginUser); err != nil {
-			result.Fail(c, result.Error(err.Error()))
-			c.Abort()
-			return
-		}
-		c.Set(CtxLoginUser, loginUser)
 		c.Next()
 	}
+}
+
+// AuthWithToken 用一个**调用方自行取得**的 token 走 JWTAuth 的第 2-3 步，
+// 成功则写入登录态并返回 true；失败按 AuthenticationEntryPointImpl 返回 401
+// 并 abort，返回 false。
+//
+// 存在的理由：iframe / 新窗口这类请求**发不出 Authorization 头**
+// （浏览器只按 src发 GET，不带自定义头）。典型就是"数据监控"——
+// src/views/monitor/druid/index.vue:11 用 iframe 指到 /druid/login.html，
+// 该地址只能把 token 拼在 query 上，所以不走 JWTAuth 而在 handler 里调这里。
+//
+// 注意：token 出现在 URL 里会被 access log / 浏览器历史记下，
+// 因此**只有**这种"本来就无法带头的只读页面"才用这条路径，
+// 业务接口一律走 JWTAuth() 读 header。
+func AuthWithToken(c *gin.Context, token string) bool {
+	if token == "" {
+		unauthorized(c)
+		return false
+	}
+	uuidInToken, _, err := jwtx.Parse(token)
+	if err != nil {
+		unauthorized(c)
+		return false
+	}
+	loginUser, ok, err := service.GetLoginUser(uuidInToken)
+	if err != nil || !ok || loginUser == nil {
+		unauthorized(c)
+		return false
+	}
+	if err := service.VerifyToken(loginUser); err != nil {
+		result.Fail(c, result.Error(err.Error()))
+		c.Abort()
+		return false
+	}
+	c.Set(CtxLoginUser, loginUser)
+	return true
 }
 
 // LoginUser 从 gin.Context 取登录态。

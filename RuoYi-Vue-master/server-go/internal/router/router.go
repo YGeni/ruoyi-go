@@ -95,6 +95,14 @@ func New() *gin.Engine {
 	perm(r, "GET", "/system/menu/:menuId", menu.GetInfo)
 
 	// ------------------------------------------------------------ 系统监控 - 在线用户
+	// "数据监控"菜单 iframe 的是 ${VITE_APP_BASE_API}/druid/login.html
+	// （src/views/monitor/druid/index.vue:11）。Java 侧这个地址由 druid 的
+	// StatViewServlet 提供，Go 没有 druid，所以这里挂一个自建的对等页面。
+	// 只校验登录态、不挂权限串 —— 与 /unlockscreen 一样直接注册：
+	// Java 的 /druid/* 也不走 Shiro，是 druid 自己的登录页管的。
+	r.GET("/druid/login.html", monitor.DruidPage)
+	r.GET("/druid/index.html", monitor.DruidPage)
+
 	perm(r, "GET", "/monitor/online/list", monitor.OnlineList)
 	perm(r, "DELETE", "/monitor/online/:tokenId", monitor.ForceLogout)
 	perm(r, "GET", "/monitor/logininfor/list", monitor.LogininforList)

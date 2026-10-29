@@ -438,6 +438,12 @@ func TestRegisteredRoutesHavePermEntry(t *testing.T) {
 		// 否则这道护栏会把 HEAD 报成"无归属"。
 		"GET /profile/*filepath":  true,
 		"HEAD /profile/*filepath": true,
+		// druid 页面：Java 侧由 druid 的 StatViewServlet 提供（DruidConfig.java
+		// 注册的 ServletRegistrationBean），**不是** Controller 的 @RequestMapping，
+		// loadJavaEndpoints 扫不到它，因此走白名单而不是 perm_table。
+		// Go 侧在 internal/handler/system/monitor_druid.go 自建对等页面。
+		"GET /druid/login.html": true,
+		"GET /druid/index.html": true,
 	}
 	registered := map[string]bool{}
 	for _, r := range New().Routes() {
