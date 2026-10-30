@@ -34,8 +34,11 @@ const (
 func printGeniusBanner(port int) {
 	fmt.Printf("%s%s%s", colorPurple, geniusBanner, colorReset)
 	fmt.Printf("%s天才管理系统%s  server-go v%s\n", colorPurple, colorReset, config.C.RuoYi.Version)
-	fmt.Printf("  OpenAPI    http://localhost:%d/v3/api-docs\n", port)
-	fmt.Printf("  Swagger    http://localhost:%d/swagger-ui/index.html\n", port)
+	// /v3/api-docs 与 /swagger-ui/* 都校验登录态（见 openapi.go 的 authForIframe），
+	// 直接裸开会 401，所以这里指向后台「系统工具 → 系统接口」菜单地址：
+	// 前端 iframe 会自动把 token 拼上。
+	fmt.Printf("  系统接口    http://localhost/tool/swagger（登录后查看，后端 %d）\n", port)
+	fmt.Printf("  OpenAPI    http://localhost:%d/v3/api-docs?token=<登录 Token>\n", port)
 	fmt.Printf("  健康检查   http://localhost:%d/captchaImage\n", port)
 	fmt.Println()
 }
