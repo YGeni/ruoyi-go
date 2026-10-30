@@ -16,6 +16,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 启动标识：紫色（256 色 141）ASCII 字样的 Genius。
+const (
+	colorPurple = "\033[38;5;141m"
+	colorReset  = "\033[0m"
+
+	geniusBanner = `
+  ____  _____  _   _  ___  _   _  ____
+ / ___|| ____|| \ | ||_ _|| | | / ___|
+| |  _ |  _|  |  \| | | | | | | \___ \
+| |_| || |___ | |\  | | | | |_| |___) |
+ \____||_____||_| \_||___| \___/ |____/
+`
+)
+
+// printGeniusBanner 在依赖就绪、开始监听端口前打印项目标识与常用地址。
+func printGeniusBanner(port int) {
+	fmt.Printf("%s%s%s", colorPurple, geniusBanner, colorReset)
+	fmt.Printf("%s天才管理系统%s  server-go v%s\n", colorPurple, colorReset, config.C.RuoYi.Version)
+	fmt.Printf("  OpenAPI    http://localhost:%d/v3/api-docs\n", port)
+	fmt.Printf("  Swagger    http://localhost:%d/swagger-ui/index.html\n", port)
+	fmt.Printf("  健康检查   http://localhost:%d/captchaImage\n", port)
+	fmt.Println()
+}
+
 func main() {
 	cfgPath := flag.String("c", "config/config.yaml", "配置文件路径")
 	flag.Parse()
@@ -48,6 +72,7 @@ func main() {
 	r := router.New()
 	addr := fmt.Sprintf(":%d", config.C.Server.Port)
 	logger.Sugar.Infof("server-go 启动于 %s（前端 vite 代理目标 http://localhost:%d）", addr, config.C.Server.Port)
+	printGeniusBanner(config.C.Server.Port)
 	if err := r.Run(addr); err != nil {
 		logger.Sugar.Fatalf("服务退出: %v", err)
 	}
