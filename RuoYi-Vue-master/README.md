@@ -2,7 +2,7 @@
 
 后端 **Go + Gin**，前端 **Vue 3 + Vite + Element Plus**。
 
-本项目是把原本的 Spring Boot 后端（RuoYi-Vue）整体用 Go 重写后的结果：
+本项目是把原本的 Spring Boot 后端（RuoYi-Vue）整体用 Go 重构后的结果：
 **Java 模块已删除**，后端只剩 `server-go`。需要对照原实现时，从 git 历史取回即可：
 
 ```bash
@@ -17,7 +17,7 @@ git checkout fe08c90^ -- ruoyi-admin ruoyi-generator ruoyi-quartz
 
 相对原项目所做的修改：
 
-- 后端由 Java 17 / Spring Boot 全量重写为 **Go 1.25 / Gin + GORM + go-redis**；
+- 后端由 Java 17 / Spring Boot 整体重构为 **Go 1.25 / Gin + GORM + go-redis**；
   原 Java 模块（`ruoyi-admin`、`ruoyi-generator`、`ruoyi-quartz` 等）已从仓库移除，可从 git 历史取回
 - 前端（Vue 3 + Vite + Element Plus）基本沿用原实现，仅调整少量接口兼容与文案
 - 数据库表结构（31 张表）保持不变，可与原 Java 端共用同一份库

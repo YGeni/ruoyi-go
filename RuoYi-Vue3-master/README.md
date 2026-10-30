@@ -12,7 +12,7 @@
 ## 平台简介
 
 * 本仓库为前端技术栈 [Vue3](https://v3.cn.vuejs.org) + [Element Plus](https://element-plus.org/zh-CN) + [Vite](https://cn.vitejs.dev) 版本，基本沿用原实现，未做结构性改动。
-* 配套后端为同级的 [RuoYi-Vue-master/server-go](../RuoYi-Vue-master/server-go)：原 Java / Spring Boot 后端已用 **Go + Gin + GORM** 全量重写，接口与返回体保持完全兼容，前端零改动即可对接。
+* 配套后端为同级的 [RuoYi-Vue-master/server-go](../RuoYi-Vue-master/server-go)：原 Java / Spring Boot 后端已用 **Go + Gin + GORM** 整体重构，接口与返回体保持完全兼容，前端零改动即可对接。
 * 本项目基于 [RuoYi-Vue](https://gitee.com/y_project/RuoYi-Vue) 3.9.2 衍生开发，原项目为 MIT 许可证（Copyright (c) 2018 RuoYi），版权声明见 [LICENSE](./LICENSE)，本仓库沿用 MIT。
 
 # 版本对比
