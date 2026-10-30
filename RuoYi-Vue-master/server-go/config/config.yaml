@@ -24,7 +24,7 @@ ruoyi:
   # key 仍叫 ruoyi（config.go 的 mapstructure 与 Java 侧对齐，改名要动代码）；
   # 值是对外显示的品牌名。
   name: 天才管理系统
-  version: 3.9.2
+  version: 4.0.0
   # application.yml: ruoyi.profile（上传根目录）
   # 原值为 Windows 路径 D:/ruoyi/uploadPath；macOS/Linux 下会在工作目录生成 "D:" 目录，
   # 故改为 ${ENV:默认值} 形式：显式设置 RUOYI_PROFILE 时用环境变量，否则用 ./uploadPath。

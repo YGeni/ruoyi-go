@@ -4,7 +4,9 @@
       <el-col :sm="24" :lg="12" style="padding-left: 20px">
         <h2>天才后台管理框架</h2>
         <p>
-          一直想做一款后台管理系统，看了很多优秀的开源项目但是发现没有合适自己的。于是利用空闲休息时间开始自己写一套后台系统。如此有了天才管理系统，她可以用于所有的Web应用程序，如网站管理后台，网站会员中心，CMS，CRM，OA等等，当然，您也可以对她进行深度定制，以做出更强系统。所有前端后台代码封装过后十分精简易上手，出错概率低。同时支持移动客户端访问。系统会陆续更新一些实用功能。
+          看了很多优秀的开源项目，于是利用业余时间把 RuoYi 后台系统的后端用 Go 语言的 Gin 框架完整重写了一遍，天才管理系统由此而来。
+          它保留了 RuoYi 的全部功能与前端交互约定（Vue 3 + Vite + Element Plus 前端零改动），把后端从 Spring Boot 换成了 Go + Gin + GORM + Redis：启动更快、内存占用更低、单二进制即可部署，无需 JVM 与 Tomcat。
+          它可以用于各类 Web 应用的后台：网站管理后台、会员中心、CMS、CRM、OA 等；代码分层清晰（handler / service / repository），封装精简、易上手，也方便按需深度定制出更贴合业务的系统。前端采用响应式布局，移动端浏览器可直接访问。项目仍在持续迭代，后续会陆续补充更多实用功能。
         </p>
         <p>
           <b>当前版本:</b> <span>v{{ version }}</span>
@@ -39,25 +41,34 @@
           <el-col :span="6">
             <h4>后端技术</h4>
             <ul>
-              <li>SpringBoot</li>
-              <li>Spring Security</li>
-              <li>JWT</li>
-              <li>MyBatis</li>
-              <li>Druid</li>
-              <li>Fastjson</li>
-              <li>...</li>
+             <li>Go 1.25（后端语言）</li>
+             <li>Gin 1.10（Web 框架，替代 Spring Boot）</li>
+             <li>GORM 1.25 + MySQL 驱动（ORM，替代 MyBatis）</li>
+             <li>golang-jwt/v5（JWT 认证，Token 存 Redis）</li>
+             <li>go-redis/v9（Redis 缓存：登录态、验证码、字典、参数）</li>
+             <li>Viper（配置管理）＋ zap（日志）</li>
+             <li>base64Captcha（验证码）</li>
+             <li>excelize（Excel 导入导出，替代 POI）</li>
+             <li>gopsutil（服务器监控）</li>
+             <li>golang.org/x/crypto（bcrypt 密码加密，替代 Spring Security 的加密体系）</li>
+             <li>自研 scheduler（Quartz 风格 6 段 cron 定时任务，替代 Quartz）</li>
+             <li>OpenAPI 3.0 + Swagger UI（接口文档，反射自动生成）</li>
+             <li>MySQL 8 + Redis 7（Docker Compose 部署）</li>
             </ul>
           </el-col>
           <el-col :span="6">
             <h4>前端技术</h4>
             <ul>
-              <li>Vue</li>
-              <li>Vuex</li>
-              <li>Element-ui</li>
-              <li>Axios</li>
-              <li>Sass</li>
-              <li>Quill</li>
-              <li>...</li>
+            <li>Vue 3.5（组合式 API）</li>
+            <li>Vite 6（构建工具，dev 端口 80，/dev-api 代理到后端 8080）</li>
+            <li>Element Plus 2.13（UI 组件库，替代 Element-ui）</li>
+            <li>Pinia 3（状态管理，替代 Vuex）</li>
+            <li>Vue Router 4（路由）</li>
+            <li>Axios 1.13（HTTP 请求）</li>
+            <li>Sass（样式预处理）</li>
+            <li>ECharts 5（图表）</li>
+            <li> Quill（富文本编辑器）</li>
+            <li>其他：js-cookie（Token 存储）、jsencrypt（RSA 加密）、vue-cropper（头像裁剪）、file-saver 等</li>
             </ul>
           </el-col>
         </el-row>
@@ -81,26 +92,19 @@
               >
             </p>
             <p>
-              <i class="el-icon-user-solid"></i> QQ群：<s> 满937441 </s> <s> 满887144332 </s>
-              <s> 满180251782 </s> <s> 满104180207 </s> <s> 满186866453 </s> <s> 满201396349 </s>
-              <s> 满101456076 </s> <s> 满101539465 </s> <s> 满264312783 </s> <s> 满167385320 </s> 
-              <s> 满104748341 </s> <s> 满160110482 </s> <s> 满170801498 </s> <s> 满108482800 </s> 
-              <s> 满101046199 </s> <s> 满136919097 </s> <s> 满143961921 </s> <s> 满174951577 </s> 
-              <s> 满161281055 </s> <s> 满138988063 </s> <s> 满151450850 </s> <s> 满224622315 </s>
-              <s> 满287842588 </s> <s> 满187944233 </s> <s> 满228578329 </s> <s> 满191164766 </s>
-              <s> 满174569686 </s> <s> 满127358632 </s> <a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=EQz10zmHf6ga7Zv2U5kWNrpkBlnknJE-&authKey=65C4sdiKSSyJFEtartvUfLEHQiPYoysBoVkNuLP1AxpKdV4nQR%2FEvobGCI9jvDpQ&noverify=0&group_code=113071109" target="_blank">113071109</a>
+              <i class="el-icon-user-solid"></i> QQ群：暂无<a href="" target="_blank"></a>
             </p>
             <p>
               <i class="el-icon-chat-dot-round"></i> 微信：<a
                 href="javascript:;"
-                >/ *天才</a
+                >暂无</a
               >
             </p>
             <p>
               <i class="el-icon-money"></i> 支付宝：<a
                 href="javascript:;"
                 class="支付宝信息"
-                >/ *天才</a
+                >暂无</a
               >
             </p>
           </div>
@@ -114,8 +118,22 @@
             </div>
           </template>
           <el-collapse accordion>
-            <el-collapse-item title="v3.9.2 - 2026-03-26">
+            <el-collapse-item title="v4.0.0 - 2026-10-30">
               <ol>
+                <li>重构整个后端：由 Spring Boot 全量重写为 Go（Gin + GORM + go-redis），前端零改动</li>
+                <li>复刻原 Java 端 147 个接口，已实现 130 个，覆盖登录鉴权、系统管理与系统监控</li>
+                <li>认证改用 golang-jwt，登录态、验证码、字典、参数统一走 Redis 缓存</li>
+                <li>数据权限改为 GORM Scopes 参数化实现，对齐原 @DataScope 五种范围</li>
+                <li>定时任务改用自研调度器，兼容 Quartz 风格 6 段 cron 表达式</li>
+                <li>Excel 导入导出改用 excelize，保留列宽、字典回写与合计行等原有表现</li>
+                <li>新增 OpenAPI 3.0 与内置 Swagger UI，接口文档随结构体反射自动生成</li>
+                <li>单二进制部署，无需 JVM 与 Tomcat，Docker Compose 一键起 MySQL + Redis</li>
+                <li>后端 Go 重构作者 Genius Yang，开发合作联系 yixianshengd@163.com</li>
+              </ol>
+            </el-collapse-item>
+            <el-collapse-item title="v3.9.2 - 2026-03-26（原 Spring Boot 版历史记录）">
+              <ol>
+                <li>本条及更早版本均为原 Java 后端时期的更新记录，其中 spring-boot / druid / fastjson / tomcat / pagehelper 等组件在 v4.0.0 的 Go 版中已不再使用</li>
                 <li>新增锁定屏幕功能</li>
                 <li>首页新增通知公告消息提醒</li>
                 <li>添加持久化标签页开关功能</li>
@@ -1120,7 +1138,7 @@
               style="width:100%"
             />
             <span style="display: inline-block; height: 30px; line-height: 30px"
-              >你可以请作者喝杯咖啡表示鼓励</span
+              >如果这个项目对你有帮助，可以扫码请后端重构作者喝杯咖啡表示鼓励</span
             >
           </div>
         </el-card>
@@ -1130,7 +1148,7 @@
 </template>
 
 <script setup name="Index">
-const version = ref('3.9.2')
+const version = ref('4.0.0')
 
 function goTarget(url) {
   window.open(url, '__blank')

@@ -9,6 +9,22 @@
 git checkout fe08c90^ -- ruoyi-admin ruoyi-generator ruoyi-quartz
 ```
 
+## 开源许可与衍生说明
+
+本项目基于 [RuoYi-Vue](https://gitee.com/y_project/RuoYi-Vue) 3.9.2 衍生开发，
+原项目版权归 RuoYi（2018），采用 **MIT** 许可证，完整条款见 [LICENSE](./LICENSE)，
+本仓库已保留原版权声明，并同样以 MIT 许可证开源。
+
+相对原项目所做的修改：
+
+- 后端由 Java 17 / Spring Boot 全量重写为 **Go 1.25 / Gin + GORM + go-redis**；
+  原 Java 模块（`ruoyi-admin`、`ruoyi-generator`、`ruoyi-quartz` 等）已从仓库移除，可从 git 历史取回
+- 前端（Vue 3 + Vite + Element Plus）基本沿用原实现，仅调整少量接口兼容与文案
+- 数据库表结构（31 张表）保持不变，可与原 Java 端共用同一份库
+- 与原 Java 实现有意不同的地方，在 Go 代码中以 `// DIFF(review)` 注释标注
+
+项目名称「天才管理系统」与原项目名称无关，本项目不宣称官方身份，也不代表 RuoYi 官方立场。
+
 ## 技术栈
 
 | 层 | 选型 |
