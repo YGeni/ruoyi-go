@@ -1215,6 +1215,23 @@ function goTarget(url) {
       margin-inline-end: 0;
       padding-inline-start: 40px;
     }
+
+    // 版本条目多（v1.0.0 一路到 v4.0.0），整个手风琴限高内部滚动，
+    // 避免更新日志卡片把整行撑到几千像素高
+    :deep(.el-collapse) {
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    :deep(.el-collapse::-webkit-scrollbar) {
+      width: 6px;
+    }
+
+    :deep(.el-collapse::-webkit-scrollbar-thumb) {
+      background: #dcdfe6;
+      border-radius: 3px;
+    }
   }
 }
 </style>
