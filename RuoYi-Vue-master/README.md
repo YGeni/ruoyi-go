@@ -75,6 +75,18 @@ npm install && npm run dev
 
 常用：`make build`（编译到 `bin/server`）、`make vet`、`make test`。
 
+## 上线前必改
+
+`server-go/config/config.yaml` 里的这些值是**开发默认值，不要直接用于生产**：
+
+| 配置 | 默认值 | 说明 |
+| --- | --- | --- |
+| `token.secret` | `abcdefghijklmnopqrstuvwxyz` | JWT 签名密钥，泄露即可伪造任意用户登录态 |
+| `datasource.master.password` | `password` | 数据库密码，需与 `docker-compose.yml` 中 MySQL 的密码一致 |
+| `redis.password` | 空 | 若 Redis 启用了密码认证需同步填写 |
+
+同时建议：MySQL / Redis 不要用默认端口直接暴露到公网；`admin` 账号的初始密码 `admin123` 首次登录后立即修改。
+
 ## 接口文档
 
 | 地址 | 说明 |
