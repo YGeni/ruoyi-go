@@ -36,6 +36,12 @@
         <el-tooltip content="消息通知" effect="dark" placement="bottom">
           <header-notice id="header-notice" class="right-menu-item hover-effect" />
         </el-tooltip>
+
+        <el-tooltip content="访问 GitHub" effect="dark" placement="bottom">
+          <div class="right-menu-item hover-effect" @click="gotoGithub">
+            <svg-icon icon-class="github" />
+          </div>
+        </el-tooltip>
       </template>
 
       <el-dropdown @command="handleCommand" class="avatar-container right-menu-item hover-effect" trigger="hover">
@@ -74,8 +80,6 @@ import Hamburger from '@/components/Hamburger'
 import Screenfull from '@/components/Screenfull'
 import SizeSelect from '@/components/SizeSelect'
 import HeaderSearch from '@/components/HeaderSearch'
-import RuoYiGit from '@/components/RuoYi/Git'
-import RuoYiDoc from '@/components/RuoYi/Doc'
 import useAppStore from '@/store/modules/app'
 import useUserStore from '@/store/modules/user'
 import useLockStore from '@/store/modules/lock'
@@ -91,6 +95,10 @@ const settingsStore = useSettingsStore()
 
 function toggleSideBar() {
   appStore.toggleSideBar()
+}
+
+function gotoGithub() {
+  window.open('https://github.com/YGeni/ruoyi-go')
 }
 
 function handleCommand(command) {
