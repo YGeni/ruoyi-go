@@ -121,7 +121,7 @@
             <el-collapse-item title="v4.0.0 - 2026-10-30">
               <ol>
                 <li>重构整个后端：由 Spring Boot 整体重构为 Go（Gin + GORM + go-redis），前端零改动</li>
-                <li>复刻原 Java 端 147 个接口，已实现 130 个，覆盖登录鉴权、系统管理与系统监控</li>
+                <li>对齐原 Java 端 147 个端点，已实现 140 个，覆盖登录鉴权、系统管理与系统监控</li>
                 <li>认证改用 golang-jwt，登录态、验证码、字典、参数统一走 Redis 缓存</li>
                 <li>数据权限改为 GORM Scopes 参数化实现，对齐原 @DataScope 五种范围</li>
                 <li>定时任务改用自研调度器，兼容 Quartz 风格 6 段 cron 表达式</li>

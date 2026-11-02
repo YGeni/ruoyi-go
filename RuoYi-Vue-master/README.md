@@ -3,11 +3,16 @@
 后端 **Go + Gin**，前端 **Vue 3 + Vite + Element Plus**。
 
 本项目是把原本的 Spring Boot 后端（RuoYi-Vue）整体用 Go 重构后的结果：
-**Java 模块已删除**，后端只剩 `server-go`。需要对照原实现时，从 git 历史取回即可：
+**Java 模块已删除**，后端只剩 `server-go`。需要对照原实现时，从 git 历史导出到临时目录即可
+（在**仓库根目录**执行，不会改动当前工作区；历史里的 Java 模块带 `RuoYi-Vue-master/` 前缀）：
 
 ```bash
-git checkout fe08c90^ -- ruoyi-admin ruoyi-generator ruoyi-quartz
+mkdir -p /tmp/ruoyi-java
+git archive 'fe08c90^' RuoYi-Vue-master | tar -x -C /tmp/ruoyi-java
 ```
+
+导出结果在 `/tmp/ruoyi-java/RuoYi-Vue-master/`，含 `ruoyi-admin`、`ruoyi-common`、
+`ruoyi-framework`、`ruoyi-generator`、`ruoyi-quartz`、`ruoyi-system` 六个模块。
 
 ## 项目特点
 
@@ -113,7 +118,8 @@ excelize / gopsutil / zap。
 
 ### 平滑迁移
 
-- 前端零改动，接口路径与返回体兼容，数据库表结构不变，可直接共用同一份库
+- 已实现接口的路径与返回体保持兼容，前端无需改动，数据库表结构不变，可直接共用同一份库；
+  少数接口属二期延后，详见[迁移状态](#迁移状态)
 - OpenAPI 每个端点带 `x-ruoyi-implemented` 标记，`/swagger-ui/progress.html` 可查已实现 / 二期延后
 - 与 Java 实现有意不同的地方在 Go 代码里以 `// DIFF(review)` 标注，权限串由
   `perm_diff_test.go` 与 Java 控制器源码做双向 diff 守护
@@ -183,11 +189,18 @@ npm install && npm run dev
 | `/swagger-ui/index.html` | 真 Swagger UI（静态资源已打进二进制，离线可用），支持 Try it out |
 | `/swagger-ui/progress.html` | 自绘清单，带「已实现 / 二期延后」标记 |
 
-请求体字段说明取自 **MySQL 列注释**、由 Go 结构体反射生成，不是手写维护的。
+以上地址均校验登录态（`authForIframe`）：**裸开会 401**。最省事的方式是登录后从后台
+「系统工具 → 系统接口」菜单进入（前端 iframe 自动把 Token 拼到 URL）；直接访问或导入
+Postman / Apifox 时需在 URL 后加 `?token=<登录 Token>`，Token 可从浏览器
+Local Storage 的 `Admin-Token` 取得。
+
+请求体 schema 采用「注册表 + 反射」：注册表只声明每条路由对应哪个 Go 结构体，
+字段清单、类型与必填由结构体反射得到，字段说明取自 **MySQL 列注释**；
+因此改结构体会自动反映到文档，但新增路由仍需在注册表登记一条，不是零维护。
 
 ## 迁移状态
 
-原 Java 端共 **147 个端点**：已实现 130，二期延后 17（Excel 导入导出等）。
+原 Java 端共 **147 个端点**：已实现 **140**，二期延后 **7**（以进度页为准）。
 
 路由与权限串登记在 `internal/router/perm_table.go`，由 `perm_diff_test.go`
 双向对账（基准快照 `internal/router/testdata/java_endpoints.json`），
