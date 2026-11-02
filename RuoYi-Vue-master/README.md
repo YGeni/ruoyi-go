@@ -49,6 +49,54 @@ git checkout fe08c90^ -- ruoyi-admin ruoyi-generator ruoyi-quartz
 | 前端 | Vue 3 + Vite + Element Plus + Pinia（见 `../RuoYi-Vue3-master`） |
 | 存储 | MySQL 8 + Redis 7（docker compose 起） |
 
+## 对比原 Spring Boot 版
+
+### 运行时与部署
+
+| 维度 | 原 Spring Boot 版 | Go 版 |
+| --- | --- | --- |
+| 运行时 | JDK + 内嵌 Tomcat | 无外部运行时 |
+| 产物 | 86 MB fat jar（另需 JRE） | 46 MB 单二进制（含 Go 运行时与 embed 的 Swagger UI） |
+| 配置 | `application.yml` + `application-druid.yml` | 单个 `config.yaml` |
+| 启动过程 | Spring 上下文扫描、Bean 初始化、JVM 预热 | 初始化 DB/Redis 连接池后直接监听 |
+| 部署 | 装 JDK、挑基础镜像、调 `Xmx`/GC | 拷一个文件 + 起 MySQL/Redis |
+| 并发模型 | 线程池，每请求占一个线程 | goroutine，栈按需增长 |
+
+没有 JVM 这一层，也就没有堆大小、元空间、GC 调优这些运维负担。组件对应关系：
+Spring Security / MyBatis XML / Druid / Quartz / POI / OSHI / logback →
+golang-jwt + 自建中间件 / GORM / `database/sql` 原生池 / 自研调度器（兼容 6 段 cron）/
+excelize / gopsutil / zap。
+
+### 本机实测
+
+同一台机器、同一套 MySQL 8 + Redis 7 容器、同一个 `ry-vue` 库，各自冷启动一次，
+以首个 `/captchaImage` 返回 200 为「可用」：
+
+| 指标 | 原 Spring Boot 4.1.0（JDK 24） | Go 1.25 / Gin |
+| --- | --- | --- |
+| 冷启动到可用 | 16.57 s | 1.73 s |
+| 空闲常驻内存（RSS） | 453.7 MB | 31.1 MB |
+| 30 次请求后 RSS | 454.7 MB | 40.0 MB |
+| 产物体积 | 86.1 MB（不含 JRE） | 46.2 MB（含运行时） |
+
+> 数据说明：单次冷启动、非多轮平均；JVM 使用默认参数（项目 `pom.xml` 声明 Java 17，
+> 实测环境为 JDK 24），加 `-Xmx` 或换 GC 会改变结果；产物体积两者口径不同，不可直接等价。
+> 原 Java 版由 git 历史 `fe08c90^` 还原后重新构建，本机启动时把 logback 写死的
+> `/home/ruoyi/logs` 改为临时目录。数字随硬件、负载与配置变化，仅供参考。
+
+### 平滑迁移
+
+- 前端零改动，接口路径与返回体兼容，数据库表结构不变，可直接共用同一份库
+- OpenAPI 每个端点带 `x-ruoyi-implemented` 标记，`/swagger-ui/progress.html` 可查已实现 / 二期延后
+- 与 Java 实现有意不同的地方在 Go 代码里以 `// DIFF(review)` 标注，权限串由
+  `perm_diff_test.go` 与 Java 控制器源码做双向 diff 守护
+
+### 尚未对齐
+
+- 仍有二期延后接口，以进度页为准，不是 100% 等价替换
+- 数据库目前只适配 MySQL；`config.yaml` 的 `slave` 多数据源路由未实现
+- 本项目是个人衍生项目，没有 RuoYi 官方的持续维护与插件生态
+
 ## 目录
 
 ```
