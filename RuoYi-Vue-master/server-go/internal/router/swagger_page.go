@@ -6,7 +6,8 @@ import "html/template"
 //
 // 与 druid 页面同理：html/template 自动转义（控制器名、路径、权限串都来自
 // 代码里的表，虽然可信，但路径里出现 < > 会让页面串掉）。
-// 不引 Swagger UI 的 CDN 资源 —— 离线就白屏，这里自绘只读列表 + 关键字过滤。
+// 本页（progress.html）是自绘只读清单，不引外部 CDN，离线也能用。
+// 真 Swagger UI 在 swagger_ui_page.go，静态资源已 go:embed，支持 Try it out。
 var swaggerTpl = template.Must(template.New("swagger").Parse(`<!DOCTYPE html>
 <html lang="zh-CN">
 <head>

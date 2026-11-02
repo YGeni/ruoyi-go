@@ -12,28 +12,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 本文件对应 Java 侧 springdoc-openapi 提供的两个地址：
+// 本文件对应 Java 侧 springdoc-openapi 提供的地址，Go 侧自行实现：
 //
-//	GET /v3/api-docs            OpenAPI 3.0 描述文档
-//	GET /swagger-ui/index.html  Swagger UI 页面
+//	GET /v3/api-docs               OpenAPI 3.0 描述文档
+//	GET /swagger-ui/index.html      真 Swagger UI（swagger-ui-dist，资源 go:embed）
+//	GET /swagger-ui/progress.html   迁移进度清单（自绘只读）
 //
-// 前端 src/views/tool/swagger/index.vue:11 用 iframe 指到
-// ${VITE_APP_BASE_API}/swagger-ui/index.html，不打这两个地址，
-// 点"系统接口"菜单就一定是 404。
+// 前端 src/views/tool/swagger/index.vue 用 iframe 指到 index.html；
+// iframe 发不出 Authorization 头，token 走 ?token= 由 authForIframe 兜底。
 //
-// DIFF(review) —— 这是**有意的功能替换**，不是等价移植：
-//   - Java 的描述文档是 springdoc 扫 @Operation / @Parameter / @Schema 注解
-//     **从代码生成**的，含请求体/响应体的完整 schema 和 try-it-out；
-//     Go 侧没有这套注解，也没有为 147 个端点逐个写 schema。
-//   - 这里的数据源是 internal/router/perm_table.go —— 那张与 Java 控制器
-//     **逐个注解对齐、并由 perm_diff_test.go 双向 diff 守护**的路由表。
-//     因此路径、方法、权限串、所属控制器都是准的；
-//     **请求体的字段级 schema 没有**（页面上明确标注）。
-//   - Swagger UI 是 springdoc 的 webjar 提供的静态资源；Go 侧不引外部 CDN
-//     （离线就白屏），改成自绘的 HTML 页面，只读展示 + 关键字过滤。
-//
-// 顺带一个额外价值：表里区分了「已实现」与「二期延后」，
-// 这个页面同时就是迁移进度视图。
+// DIFF(review) —— 与 Java 侧 springdoc 的差别（有意的功能替换，非等价移植）：
+//   - 数据源是 internal/router/perm_table.go —— 与 Java 控制器逐个注解对齐、
+//     由 perm_diff_test.go 双向 diff 守护的路由表，路径/方法/权限串/控制器准确。
+//   - Java 的 schema 由 springdoc 扫 @Schema / @RequestBody 注解生成；
+//     Go 侧没有注解，改由 apischema.go 的「注册表 + 结构体反射」补上高频接口的
+//     请求体、查询参数与响应体 schema（字段说明取 MySQL 列注释），
+//     未登记的接口只有路径和权限串，没有字段级 schema。
+//   - 页面分两套：index.html 是内嵌静态资源的真 Swagger UI，支持 Try it out，
+//     requestInterceptor 把登录态注入每个请求；progress.html 是自绘只读清单，
+//     额外标注「已实现 / 二期延后」，同时充当迁移进度视图。
 
 // registered 记录 New() 实际注册到 gin 上的路由，用于标注「已实现」。
 // New() 会被测试多次调用，所以每次整体重建而不是累加。
@@ -225,10 +222,10 @@ func buildSwaggerData() swaggerData {
 	}
 	return swaggerData{
 		Title: "系统接口",
-		Note: "本页由 Go 后端生成，非 springdoc / Swagger UI。" +
-			"路径、方法、权限串、所属控制器来自与 Java 控制器逐个注解对齐的路由表" +
-			"（internal/router/perm_table.go，由 perm_diff_test.go 双向 diff 守护）；" +
-			"**请求体与响应体的字段级 schema 没有提供**，也没有 try-it-out。",
+		Note: "本页是迁移进度清单，只读展示路由表：路径、方法、权限串、所属控制器" +
+			"来自与 Java 控制器逐个注解对齐的 internal/router/perm_table.go" +
+			"（由 perm_diff_test.go 双向 diff 守护）。字段级 schema 与 Try it out " +
+			"请在 /swagger-ui/index.html（真 Swagger UI）查看。",
 		Total:       len(all),
 		Implemented: implemented,
 		Pending:     len(all) - implemented,
@@ -292,8 +289,8 @@ func buildOpenAPI() map[string]any {
 			"title":   "天才管理系统 API",
 			"version": "1.0.0",
 			"description": "由 Go 后端从路由表生成。路径/方法/权限串与 Java 控制器注解对齐；" +
-				"增删改查接口的请求体 schema 从 Go 结构体反射而来，字段说明取自 MySQL 列注释" +
-				"（见 apischema.go）。未登记的接口没有字段级 schema。",
+				"高频接口的请求体、查询参数与响应体 schema 由「注册表 + Go 结构体反射」生成，" +
+				"字段说明取自 MySQL 列注释（见 apischema.go）；未登记的接口没有字段级 schema。",
 		},
 		"components": components,
 		"paths":      paths,

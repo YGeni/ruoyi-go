@@ -6,10 +6,11 @@ package router
 // 本文件（常量 + permRoutes 表）由 internal/router/perm_diff_test.go 与 Java 控制器源码
 // 做**双向 diff** 守护：Java 侧增删注解、或本表写错字面量，测试即失败（可作 CI 断言）。
 //
-// 全量：Java 控制器共 148 个端点、其中 116 个带权限注解、去重后 71 个权限串。
-// 1b 落地范围（permRoutes）覆盖 system/{user,role,dept,post,dict,config,notice,profile}
-// 与 common/*，共 75 个端点；其余（monitor/*、tool/*、system:menu:*、Excel 导入导出）
-// 属二期，只登记常量不绑定路由，由 diff 测试归入「二期延后」清单。
+// 现状以 java_endpoints.json 与 go test ./internal/router 生成的报告为准：
+// Java 基准快照共 147 个端点；permRoutes 登记 138 条并绑定路由，
+// permRoutesPhase2 列 9 条交接清单，不参与路由绑定。
+// 「已实现 / 二期延后」由实际注册路由与 OpenAPI 的 x-ruoyi-implemented 计算，
+// 见 /swagger-ui/progress.html，别在注释里写死数字。
 
 // Go 常量名生成规则：Perm + 各段首字母大写（system:user:resetPwd -> PermSystemUserResetPwd）。
 const (
