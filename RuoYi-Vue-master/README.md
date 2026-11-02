@@ -9,6 +9,19 @@
 git checkout fe08c90^ -- ruoyi-admin ruoyi-generator ruoyi-quartz
 ```
 
+## 项目特点
+
+将若依原 Spring Boot 后端整体重构为 **Go + Gin + GORM + Redis**，编译生成独立单二进制，
+消除对 JVM、Tomcat 的依赖，具备启动迅速、内存占用低、部署简单的特点。
+
+- **鉴权链路**：基于 golang-jwt 签发 Token，登录态、验证码、字典与参数统一缓存到 Redis
+- **行级数据权限**：通过 GORM `Scopes` 参数化拼装，对齐原 Java 端 `@DataScope` 的五种范围
+- **数据一致性**：多表写入（通知、部门、代码生成等）使用 GORM 事务保证
+- **数据库**：当前为 MySQL 8；GORM 的 Dialector 可替换，但尚未适配 Oracle 等方言
+
+可作为 MES 等系统的配套信息化底座，适合厂区多节点轻量服务部署；
+工单、台账等具体业务模块需在此基础上自行扩展。
+
 ## 开源许可与衍生说明
 
 本项目基于 [RuoYi-Vue](https://gitee.com/y_project/RuoYi-Vue) 3.9.2 衍生开发，
