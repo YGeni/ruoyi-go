@@ -403,11 +403,14 @@ role/dept/post/dict/config/notice 模块 CRUD + notice 3.9 五个新端点 + `pk
 注意 role/dept 两个落点只写 `deptAlias="d"`、`userAlias` 为空 → 分支 5 在这两处走 `d.dept_id = 0`（返回 0 行），
 不是 `u.user_id = ?`，照抄 selectUserList 的别名必错。
 
-**二期交接（唯一事实来源）**：`perm_table.go` 的 `permRoutesPhase2` 共 **72 条 `// TODO(phase2)`**
-（monitor 26 / system:menu 5 / tool:gen 13 / quartz 17 / Excel 导入导出 8 / 其他 3）。
+**二期交接（唯一事实来源）**：`perm_table.go` 的 `permRoutesPhase2` 现有 **9 条 `// TODO(phase2)`**，
+其中 `captchaImage`、`/login`、`getInfo`、`getRouters` 实际已注册路由（Go 侧真实已实现 142 个端点），
+剩余 5 条是 Java 的 `/test/user/*` 演示控制器，未注册。
 每落地一个 controller，就把对应文件加进 `perm_diff_test.go` 的 `scopeFiles`，
 该 controller 下的端点自动从「二期延后」转为「范围内」并要求绑定路由，否则 diff 测试会红。
-这 64 条目前只登记常量不绑路由，**不实现测试也是绿的**，别误以为已覆盖。
+未翻入 `permRoutes` 的条目计入「二期延后」，**不实现测试也是绿的**，别误以为已覆盖。
+进度页 `/swagger-ui/progress.html` 与 `go test ./internal/router/` 生成的报告是实时口径，以此为准。
 
-**未做 / 遗留**：`monitor/*`、`tool/gen`、Excel 导入导出、XSS/Referer/OpLog 中间件、动态数据源、
-CORS（dev 走 vite proxy 同源，暂不需要）、异步日志 worker 池；前端实机联调尚未做。
+**未做 / 遗留**：操作日志写入（只有查询/删除/导出）、Excel 导出的样式与字典回写、
+XSS/Referer 中间件（配置仅为占位且 `enabled: false`）、动态数据源、`sub`/`tree` 代码生成模板、
+cron 的 `L`/`W`/`#` 字段；前端实机联调尚未做。详见 `README.md` 的「尚未对齐」。

@@ -167,8 +167,10 @@
                            <el-tooltip placement="top">
                               <template #content>
                                  <div>
-                                    Bean调用示例：ryTask.ryParams('ry')
-                                    <br />Class类调用示例：com.ruoyi.quartz.task.RyTask.ryParams('ry')
+                                    仅支持内置任务：ryTask.ryNoParams / ryTask.ryParams('ry') /
+                                   ryTask.ryMultipleParams('ry', true, 2000L, 3.14, 100)
+                                    <br />Go 版没有 Spring 容器与反射，不再支持全限定类名调用；
+                                    填写注册表之外的方法会在保存时被白名单拒绝
                                     <br />参数说明：支持字符串，布尔类型，长整型，浮点型，整型
                                  </div>
                               </template>

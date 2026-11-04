@@ -139,6 +139,7 @@ type apiGroup struct {
 
 type swaggerData struct {
 	Title       string
+	AppName     string
 	Note        string
 	Total       int
 	Implemented int
@@ -147,18 +148,35 @@ type swaggerData struct {
 	APIDocsURL  string
 }
 
+// normalizeEntryPath 给路径补上前导斜杠。
+//
+// Java 源码解析出的基准快照里，SysLoginController 的 getInfo / getRouters
+// 两条注解没有前导斜杠（见 testdata/java_endpoints.json），permRoutesPhase2
+// 照抄了它们。但 Go 侧实际注册的是 /getInfo、/getRouters：不规范化会导致
+// 这两条已实现的端点被误标为「二期延后」，且 OpenAPI 里产出 "getInfo"
+// 这种非法 path（规范要求以 / 开头）。
+//
+// 快照与交接清单保持 Java 原样（它们是 diff 基准），只在对外展示/匹配时规范化。
+func normalizeEntryPath(p string) string {
+	if p != "" && !strings.HasPrefix(p, "/") {
+		return "/" + p
+	}
+	return p
+}
+
 // allEntries permRoutes（已实现/在册）+ permRoutesPhase2（二期延后）合成一份清单，
 // 按 controller 分组、组内按 path 排序。
 func allEntries() []apiEntry {
 	var all []apiEntry
 	add := func(list []RoutePerm) {
 		for _, rp := range list {
+			path := normalizeEntryPath(rp.Path)
 			e := apiEntry{
 				Method:      rp.Method,
-				Path:        rp.Path,
-				OpenAPIPath: toOpenAPIPath(rp.Path),
+				Path:        path,
+				OpenAPIPath: toOpenAPIPath(path),
 				Perm:        rp.Perm,
-				Implemented: registered[rp.Method+" "+rp.Path],
+				Implemented: registered[rp.Method+" "+path],
 			}
 			if rp.Perm == "" {
 				e.PermText = "（仅需登录）"
@@ -221,7 +239,8 @@ func buildSwaggerData() swaggerData {
 		}
 	}
 	return swaggerData{
-		Title: "系统接口",
+		Title:   "系统接口",
+		AppName: config.C.RuoYi.Name,
 		Note: "本页是迁移进度清单，只读展示路由表：路径、方法、权限串、所属控制器" +
 			"来自与 Java 控制器逐个注解对齐的 internal/router/perm_table.go" +
 			"（由 perm_diff_test.go 双向 diff 守护）。字段级 schema 与 Try it out " +
@@ -286,7 +305,7 @@ func buildOpenAPI() map[string]any {
 	return map[string]any{
 		"openapi": "3.0.3",
 		"info": map[string]any{
-			"title":   "天才管理系统 API",
+			"title":   config.C.RuoYi.Name + " API",
 			"version": "1.0.0",
 			"description": "由 Go 后端从路由表生成。路径/方法/权限串与 Java 控制器注解对齐；" +
 				"高频接口的请求体、查询参数与响应体 schema 由「注册表 + Go 结构体反射」生成，" +

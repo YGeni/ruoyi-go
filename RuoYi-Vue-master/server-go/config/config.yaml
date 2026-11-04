@@ -52,6 +52,8 @@ datasource:
     # 原 JDBC url 参数：useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
     params: charset=utf8mb4&parseTime=True&loc=Local&timeout=30s&readTimeout=60s&writeTimeout=60s
     # application-druid.yml: initialSize / minIdle / maxActive / maxWait
+    # 实际生效的是 minIdle / maxActive（见 pkg/db/db.go）；initialSize / maxWait
+    # 在 Go 的 database/sql 里没有对应语义，仅为对齐原配置保留，不产生效果。
     initialSize: 5
     minIdle: 10
     maxActive: 20
@@ -82,11 +84,12 @@ token:
 log:
   level: debug
 
-# application.yml: xss.* / referer.*（1a 未启用对应中间件，配置先对齐占位）
+# application.yml: xss.* / referer.*（Go 侧未提供对应中间件，配置为对齐占位、不生效）
+# enabled 一律保持 false：改成 true 也不会启用任何过滤，反而容易被误读为已防护。
 xss:
-  enabled: true
+  enabled: false
   excludes: /system/notice
   urlPatterns: /system/*,/monitor/*,/tool/*
 referer:
   enabled: false
-  allowedDomains: localhost,127.0.0.1,ruoyi.vip,www.ruoyi.vip
+  allowedDomains: localhost,127.0.0.1

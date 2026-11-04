@@ -85,27 +85,21 @@
           </template>
           <div class="body">
             <p>
-              <i class="el-icon-s-promotion"></i> 官网：<el-link
+              <i class="el-icon-s-promotion"></i> 项目仓库：<el-link
                 href="https://github.com/YGeni/ruoyi-go"
                 target="_blank"
                 >https://github.com/YGeni/ruoyi-go</el-link
               >
             </p>
             <p>
-              <i class="el-icon-user-solid"></i> QQ群：暂无<a href="" target="_blank"></a>
-            </p>
-            <p>
-              <i class="el-icon-chat-dot-round"></i> 微信：<a
-                href="javascript:;"
-                >暂无</a
+              <i class="el-icon-chat-dot-round"></i> 问题反馈：<el-link
+                href="https://github.com/YGeni/ruoyi-go/issues"
+                target="_blank"
+                >GitHub Issues</el-link
               >
             </p>
             <p>
-              <i class="el-icon-money"></i> 支付宝：<a
-                href="javascript:;"
-                class="支付宝信息"
-                >暂无</a
-              >
+              <i class="el-icon-message"></i> 开发合作：yixianshengd@163.com
             </p>
           </div>
         </el-card>
@@ -117,16 +111,21 @@
               <span>更新日志</span>
             </div>
           </template>
+          <p class="update-log-note">
+            v4.0.0 起为本项目（Go 后端重构）的更新记录；v3.9.2 及更早条目为上游
+            RuoYi-Vue 原项目的发版历史，仅作版本溯源保留，其中 spring-boot / druid /
+            fastjson / tomcat / pagehelper 等 Java 组件在 Go 版中已不再使用。
+          </p>
           <el-collapse accordion>
             <el-collapse-item title="v4.0.0 - 2026-10-30">
               <ol>
                 <li>重构整个后端：由 Spring Boot 整体重构为 Go（Gin + GORM + go-redis），前端零改动</li>
-                <li>对齐原 Java 端 147 个端点，已实现 140 个，覆盖登录鉴权、系统管理与系统监控</li>
+                <li>对齐原 Java 端 147 个端点，已实现 142 个（其余 5 条为 Java 演示控制器），覆盖登录鉴权、系统管理与系统监控</li>
                 <li>认证改用 golang-jwt，登录态、验证码、字典、参数统一走 Redis 缓存</li>
                 <li>数据权限改为 GORM Scopes 参数化实现，对齐原 @DataScope 五种范围</li>
                 <li>定时任务改用自研调度器，兼容 Quartz 风格 6 段 cron 表达式</li>
-                <li>Excel 导入导出改用 excelize，保留列宽、字典回写与合计行等原有表现</li>
-                <li>新增 OpenAPI 3.0 与内置 Swagger UI，接口文档随结构体反射自动生成</li>
+                <li>Excel 导入导出改用 excelize；当前导出为表头 + 数据行，列宽、字典回写、合计行等样式尚未移植</li>
+                <li>新增 OpenAPI 3.0 与内置 Swagger UI；高频接口由注册表 + Go 结构体反射生成字段级 schema，未登记的接口只有路径与权限串</li>
                 <li>单二进制部署，无需 JVM 与 Tomcat，Docker Compose 一键起 MySQL + Redis</li>
                 <li>后端 Go 重构作者 Genius Yang，开发合作联系 yixianshengd@163.com</li>
               </ol>
@@ -1206,6 +1205,16 @@ function goTarget(url) {
   }
 
   .update-log {
+    .update-log-note {
+      margin: 0 0 10px;
+      padding: 8px 10px;
+      border-left: 3px solid #909399;
+      background: #f4f4f5;
+      color: #606266;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
     ol {
       display: block;
       list-style-type: decimal;

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/YGeni/ruoyi-go/server-go/assets"
+	"github.com/YGeni/ruoyi-go/server-go/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,7 +31,7 @@ const swaggerUIIndex = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>系统接口 - 天才管理系统</title>
+<title>系统接口 - __APP_NAME__</title>
 <link rel="stylesheet" href="./swagger-ui.css">
 <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16">
@@ -99,7 +100,8 @@ func serveSwaggerUI(c *gin.Context) {
 	if !authForIframe(c) {
 		return
 	}
-	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(swaggerUIIndex))
+	page := strings.Replace(swaggerUIIndex, "__APP_NAME__", config.C.RuoYi.Name, 1)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(page))
 }
 
 // serveSwaggerAsset 静态资源（css/js/png）。

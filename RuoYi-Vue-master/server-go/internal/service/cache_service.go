@@ -30,13 +30,17 @@ type SysCache struct {
 
 // cacheNames Java 的实例初始化块
 // 七类缓存的 key 前缀与中文名。顺序照抄，前端表格就是这个顺序。
+//
+// 其中「防重提交」「限流处理」两类在 Go 侧没有对应的写入方（未提供
+// repeatable / ratelimit 中间件），页面上会显示为空；保留条目是为了与
+// Java 的缓存清单对齐，备注里注明现状，避免被误读为功能已启用。
 var cacheNames = []SysCache{
 	{CacheName: config.LoginTokenKey, Remark: "用户信息"},
 	{CacheName: config.SysConfigKey, Remark: "配置信息"},
 	{CacheName: config.SysDictKey, Remark: "数据字典"},
 	{CacheName: config.CaptchaCodeKey, Remark: "验证码"},
-	{CacheName: config.RepeatSubmitKey, Remark: "防重提交"},
-	{CacheName: config.RateLimitKey, Remark: "限流处理"},
+	{CacheName: config.RepeatSubmitKey, Remark: "防重提交（Go 版未启用）"},
+	{CacheName: config.RateLimitKey, Remark: "限流处理（Go 版未启用）"},
 	{CacheName: config.PwdErrCntKey, Remark: "密码错误次数"},
 }
 

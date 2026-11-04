@@ -19,7 +19,15 @@ type AuthHandler struct{}
 //
 // 等价于：返回 { captchaEnabled, uuid, img }
 // img 为**不含 data URI 前缀**的裸 base64（前端 src/views/login.vue:143-149 自行拼接）。
+//
+// 开关取自 sys_config 的 sys.account.captchaEnabled，与登录校验同一个来源，
+// 这样在「参数设置」里关闭后，页面不再显示验证码、服务端也不再校验。
+// 关闭时只回显开关、不生成验证码，与 Java CaptchaController 一致。
 func (AuthHandler) CaptchaImage(c *gin.Context) {
+	if !service.CaptchaEnabled() {
+		result.OK(c, result.Success().Put("captchaEnabled", false))
+		return
+	}
 	uuid, img, err := captcha.Generate()
 	if err != nil {
 		result.Fail(c, result.Error(err.Error()))

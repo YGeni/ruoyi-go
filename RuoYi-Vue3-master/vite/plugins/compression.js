@@ -6,7 +6,7 @@ export default function createCompression(env) {
   if (VITE_BUILD_COMPRESS) {
     const compressList = VITE_BUILD_COMPRESS.split(',')
     if (compressList.includes('gzip')) {
-      // http://doc.ruoyi.vip/ruoyi-vue/other/faq.html#使用gzip解压缩静态文件
+      // gzip 产物需由 Nginx 等静态服务器配置对应的解压缩/回源规则
       plugin.push(
         compression({
           ext: '.gz',

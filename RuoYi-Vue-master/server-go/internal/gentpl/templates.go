@@ -342,9 +342,12 @@ func ({{.ClassName}}Handler) Remove(c *gin.Context) {
 4) 执行同批生成的 sql/{{.TableName}}.sql，把菜单与按钮权限插进 sys_menu
    （admin 角色默认全通过，其它角色要在"角色管理"里勾选）。
 
-注意：加完 1)+2) 后跑 go test ./internal/router/ —— perm_diff_test.go 会检查
-Go 侧登记的路由是否与原 Java 一致。生成的模块 Java 侧没有对应控制器，
-所以要把新条目加进测试的"仅 Go 侧"白名单（whitelist），否则会被判成"多余"。
+注意：生成模块的路由不要加进 internal/router/perm_table.go 的 permRoutes。
+TestPermTableBidirectionalDiff 拿原 Java 控制器注解做双向 diff，那边没有对应
+控制器，新登记会被判成"多余（Go 独有）"而测试失败；上面 1) 的 routes.txt
+是直接挂 gin 路由的，用自己的权限串常量即可。
+
+改完跑 go test ./internal/router/ 确认原有 147 条对齐没被破坏。
 `,
 
 	"sql.sql": `-- 菜单 SQL

@@ -110,7 +110,8 @@ type RoutePerm struct {
 	Java   string // 来源，便于 diff 定位
 }
 
-// permRoutes 1b 范围内的全量绑定表（75 条）。
+// permRoutes 全量绑定表（138 条）。
+// 数量随迁移推进变化，以 go test ./internal/router 生成的报告为准。
 //
 // router.go 注册路由时通过 PermOf(method, path) 取权限串并挂 middleware.Permi。
 var permRoutes = []RoutePerm{

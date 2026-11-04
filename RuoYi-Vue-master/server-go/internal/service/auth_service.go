@@ -212,7 +212,22 @@ func captchaEnabled() (bool, error) {
 		// 无该配置项时默认开启，与 SysConfigServiceImpl.selectCaptchaEnabled 的默认行为一致
 		return true, nil
 	}
-	return strings.EqualFold(strings.TrimSpace(v), "true"), nil
+	// 兼容历史缓存：早期写入可能把值 JSON 序列化成 "\"true\""（带引号），
+	// 直接比对会误判成关闭，导致登录跳过验证码校验。两种格式都接受。
+	v = strings.Trim(strings.TrimSpace(v), `"`)
+	return strings.EqualFold(v, "true"), nil
+}
+
+// CaptchaEnabled 供 /captchaImage 回显开关状态。
+//
+// 登录校验走上面的 captchaEnabled()（出错会中断登录）；这里读不到配置时
+// 回退为 true，让前端继续展示验证码，避免出现「服务端要校验但页面不显示」的死锁。
+func CaptchaEnabled() bool {
+	enabled, err := captchaEnabled()
+	if err != nil {
+		return true
+	}
+	return enabled
 }
 
 // recordLogin 同步写入 sys_logininfor，等价 AsyncFactory.recordLogininfor

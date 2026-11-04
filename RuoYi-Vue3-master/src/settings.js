@@ -62,6 +62,6 @@ export default {
   /**
    * 底部版权文本内容
    */
-  footerContent: 'Copyright © 2018-2026 RuoYi. All Rights Reserved.'
+  footerContent: 'Copyright © 2026 天才管理系统 · 基于 RuoYi-Vue (MIT) 衍生开发'
 }
 

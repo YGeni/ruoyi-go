@@ -124,10 +124,27 @@ excelize / gopsutil / zap。
 - 与 Java 实现有意不同的地方在 Go 代码里以 `// DIFF(review)` 标注，权限串由
   `perm_diff_test.go` 与 Java 控制器源码做双向 diff 守护
 
-### 尚未对齐
+### 尚未对齐（如实清单）
 
-- 仍有二期延后接口，以进度页为准，不是 100% 等价替换
-- 数据库目前只适配 MySQL；`config.yaml` 的 `slave` 多数据源路由未实现
+本项目不是 100% 等价替换。下面这些是**当前确实没做或只做了一半**的地方，
+页面上看得到入口，但行为与原 Java 版不完全一致：
+
+| 位置 | 现状 |
+| --- | --- |
+| 日志管理 → 操作日志 | 只有查询/删除/导出，**没有写入路径**：Go 侧未提供 `@Log` 对应的操作日志中间件，页面数据不会新增 |
+| 各列表的导出 | 导出的是表头 + 裸数据行的 xlsx，**没有**列宽、字典回写、合计行、65536 行拆表；导入按固定列序，不含 601 错误聚合 |
+| 缓存监控 | 「防重提交」「限流处理」两类缓存没有写入方（无对应中间件），页面显示为空，备注已标注 |
+| 代码生成 | 只支持 `crud`；`sub` / `tree` 按 crud 渲染，Vue 模板未移植，生成物需按 `routes.txt` 的指引手工接线 |
+| 定时任务 | 只支持内置注册表里的 `ryTask.*`；无 Spring 反射，cron 不支持 `L` / `W` / `#` / 年 字段 |
+| 数据监控 | 自建对等页，无 druid 的 SQL 防火墙、慢 SQL 阈值、SELECT 读取行数统计 |
+| 参数设置 → 验证码开关 | 已与登录校验共用同一个配置源，关闭后前后端都不再要求验证码 |
+| 二期延后接口 | 5 条 `/test/user/*` 是 Java 演示控制器，未注册；Swagger UI 的 Try it out 点到它们会 404，请用进度页区分 |
+| `config.yaml` | `slave` 多数据源未实现；`xss` / `referer` 中间件未提供，配置项仅为对齐占位且 `enabled: false`；`initialSize` / `maxWait` 在 `database/sql` 下无对应语义 |
+| 前端「表单构建」 | 原版即纯前端页面，本来就没有后端接口 |
+
+其余有意差异在 Go 代码里以 `// DIFF(review)` 标注。另外：
+
+- 数据库目前只适配 MySQL
 - 本项目是个人衍生项目，没有 RuoYi 官方的持续维护与插件生态
 
 ## 目录
@@ -178,8 +195,12 @@ npm install && npm run dev
 | `token.secret` | `abcdefghijklmnopqrstuvwxyz` | JWT 签名密钥，泄露即可伪造任意用户登录态 |
 | `datasource.master.password` | `password` | 数据库密码，需与 `docker-compose.yml` 中 MySQL 的密码一致 |
 | `redis.password` | 空 | 若 Redis 启用了密码认证需同步填写 |
+| `sql/ry_20260417.sql` 的 `sys_user` | `admin` / `admin123`、`ry` 两个种子账号 | 密码哈希是 RuoYi 公开默认值，上线前删除 `ry` 并修改 `admin` 密码 |
+| `sys.user.initPassword` | `123456` | 新建/重置用户的初始密码，建议一并调整并强制首次修改 |
+| 前端 `src/utils/jsencrypt.js` | RuoYi 原版公开的 RSA 公钥/私钥对 | 私钥随前端打包，「记住密码」的本地加密不具备机密性；生产应改为后端下发公钥或去掉本地加解密 |
 
 同时建议：MySQL / Redis 不要用默认端口直接暴露到公网；`admin` 账号的初始密码 `admin123` 首次登录后立即修改。
+前端登录页的默认账号密码已改为**仅开发模式**（`import.meta.env.DEV`）预填，不会进生产构建。
 
 ## 接口文档
 
@@ -200,7 +221,10 @@ Local Storage 的 `Admin-Token` 取得。
 
 ## 迁移状态
 
-原 Java 端共 **147 个端点**：已实现 **140**，二期延后 **7**（以进度页为准）。
+原 Java 端共 **147 个端点**：已实现 **142**，二期延后 **5**（以进度页为准）。
+其中 `getInfo` / `getRouters` 在 Java 注解里没有前导斜杠，Go 侧注册的是 `/getInfo`、
+`/getRouters`；生成文档时会规范化路径，避免这两条已实现的端点被误标为二期。
+剩余 5 条是 Java 的 `/test/user/*` 演示控制器，Go 侧未注册。
 
 路由与权限串登记在 `internal/router/perm_table.go`，由 `perm_diff_test.go`
 双向对账（基准快照 `internal/router/testdata/java_endpoints.json`），

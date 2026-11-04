@@ -78,9 +78,11 @@ const route = useRoute()
 const router = useRouter()
 const { proxy } = getCurrentInstance()
 
+// 默认凭据只在本机开发时预填，避免把 admin/admin123 带进生产构建。
+// 生产环境请先创建账号并修改默认密码，见后端 README「上线前必改」。
 const loginForm = ref({
-  username: "admin",
-  password: "admin123",
+  username: import.meta.env.DEV ? "admin" : "",
+  password: import.meta.env.DEV ? "admin123" : "",
   rememberMe: false,
   code: "",
   uuid: ""

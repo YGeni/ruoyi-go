@@ -33,7 +33,7 @@ const (
 // printGeniusBanner 在依赖就绪、开始监听端口前打印项目标识与常用地址。
 func printGeniusBanner(port int) {
 	fmt.Printf("%s%s%s", colorPurple, geniusBanner, colorReset)
-	fmt.Printf("%s天才管理系统%s  server-go v%s\n", colorPurple, colorReset, config.C.RuoYi.Version)
+	fmt.Printf("%s%s%s  server-go v%s\n", colorPurple, config.C.RuoYi.Name, colorReset, config.C.RuoYi.Version)
 	// /v3/api-docs 与 /swagger-ui/* 都校验登录态（见 openapi.go 的 authForIframe），
 	// 直接裸开会 401，所以这里指向后台「系统工具 → 系统接口」菜单地址：
 	// 前端 iframe 会自动把 token 拼上。

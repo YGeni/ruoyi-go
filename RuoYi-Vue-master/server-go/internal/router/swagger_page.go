@@ -12,7 +12,7 @@ var swaggerTpl = template.Must(template.New("swagger").Parse(`<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>{{.Title}} - 天才管理系统</title>
+<title>{{.Title}} - {{.AppName}}</title>
 <style>
   body{margin:0;padding:24px;font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fa;color:#303133}
   h1{font-size:20px;margin:0 0 4px;display:inline-block}

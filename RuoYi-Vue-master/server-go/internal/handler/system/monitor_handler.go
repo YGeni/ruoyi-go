@@ -7,6 +7,7 @@ import (
 	"github.com/YGeni/ruoyi-go/server-go/internal/model/query"
 	"github.com/YGeni/ruoyi-go/server-go/internal/service"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/excelx"
+	"github.com/YGeni/ruoyi-go/server-go/pkg/filex"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/osx"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/page"
 	"github.com/YGeni/ruoyi-go/server-go/pkg/result"
@@ -230,11 +231,11 @@ func (MonitorHandler) OperLogClean(c *gin.Context) {
 //
 // 响应头对不上就白导：前端 download 用 responseType: 'blob' 接收，
 // blobValidate（ruoyi.js:226-228）的判定是 type !== 'application/json'，
-// 所以 Content-Type 必须是 xlsx；文件名由调用方（页面）自己拼，
-// 这里只给一个 Content-Disposition 兜底。
+// 所以 Content-Type 必须是 xlsx。文件名同时给 Content-Disposition 与
+// download-filename，并暴露这两个头，前端 download 才能取到文件名。
 func writeXlsx(c *gin.Context, sheet string, headers []string, rows [][]any) {
 	c.Header("Content-Type", excelx.ContentType)
-	c.Header("Content-Disposition", "attachment; filename=export.xlsx")
+	filex.SetAttachmentResponseHeader(c.Header, "export.xlsx")
 	if err := excelx.Write(c.Writer, sheet, headers, rows); err != nil {
 		fail(c, err)
 		return

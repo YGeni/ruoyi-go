@@ -27,7 +27,7 @@
         <el-form-item prop="packageName">
           <template #label>
             生成包路径
-            <el-tooltip content="生成在哪个java包下，例如 com.ruoyi.system" placement="top">
+            <el-tooltip content="生成代码的输出包路径（沿用原字段，Go 版会据此生成 internal 下的目录与 package 名），例如 com.ruoyi.system" placement="top">
               <el-icon><question-filled /></el-icon>
             </el-tooltip>
           </template>
